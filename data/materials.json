@@ -4,9 +4,9 @@
     "level": "Đơn giản",
     "name": "MAT_PIECEWISE_LINEAR_PLASTICITY",
     "mat": "*MAT_024",
-    "desc": "Material model dẻo tuyến tính từng đoạn, phù hợp cho hầu hết kim loại với quan hệ ứng suất–biến dạng đa đoạn.",
+    "desc": "Material model dẻo tuyến tính từng đoạn, phù hợp cho hầu hết kim loại.",
     "tags": ["Strain rate"],
-    "url": "../library/mat_024.html",
+    "url": "/library/",
     "popularity": 95
   },
   {
@@ -14,69 +14,29 @@
     "level": "Trung bình",
     "name": "MAT_JOHNSON_COOK",
     "mat": "*MAT_015",
-    "desc": "Johnson–Cook cho kim loại ở tốc độ biến dạng cao và/hoặc nhiệt độ cao (thường dùng cho impact/penetration).",
+    "desc": "Johnson–Cook cho kim loại ở tốc độ biến dạng cao và/hoặc nhiệt độ cao.",
     "tags": ["Strain rate", "Temperature"],
-    "url": "#",
+    "url": "/library/",
     "popularity": 90
-  },
-  {
-    "category": "metals",
-    "level": "Đơn giản",
-    "name": "MAT_PLASTIC_KINEMATIC",
-    "mat": "*MAT_003",
-    "desc": "Model dẻo với kinematic hardening, hay dùng cho bài toán cyclic / forming mức cơ bản.",
-    "tags": ["Strain rate"],
-    "url": "#",
-    "popularity": 88
   },
   {
     "category": "concrete",
     "level": "Phức tạp",
     "name": "MAT_CSCM (Continuous Surface Cap Model)",
     "mat": "*MAT_159",
-    "desc": "Model bê tông tiên tiến (nén/kéo/softening), phù hợp cho RC, blast, impact với hiệu ứng hư hỏng.",
-    "tags": ["Strain rate", "Damage"],
-    "url": "#",
+    "desc": "Model bê tông tiên tiến (nén/kéo/softening), phù hợp blast/impact.",
+    "tags": ["Damage", "Strain rate"],
+    "url": "/library/",
     "popularity": 92
-  },
-  {
-    "category": "concrete",
-    "level": "Trung bình",
-    "name": "MAT_CONCRETE_DAMAGE_REL3",
-    "mat": "*MAT_072R3",
-    "desc": "Concrete damage (REL3) cho bài toán bê tông có hư hỏng theo mô hình cải tiến.",
-    "tags": ["Damage"],
-    "url": "#",
-    "popularity": 80
   },
   {
     "category": "rubber",
     "level": "Trung bình",
     "name": "MAT_HYPERELASTIC_RUBBER (Mooney-Rivlin)",
     "mat": "*MAT_077H",
-    "desc": "Hyperelastic cho cao su/elastomer theo Mooney–Rivlin. Hay dùng cho seal, tire, pad.",
+    "desc": "Hyperelastic cho cao su/elastomer theo Mooney–Rivlin.",
     "tags": ["Hyperelastic"],
-    "url": "#",
+    "url": "/library/",
     "popularity": 85
-  },
-  {
-    "category": "foam",
-    "level": "Đơn giản",
-    "name": "MAT_LOW_DENSITY_FOAM",
-    "mat": "*MAT_057",
-    "desc": "Foam mật độ thấp cho mô phỏng hấp thụ năng lượng, crush cơ bản.",
-    "tags": ["Crush"],
-    "url": "#",
-    "popularity": 70
-  },
-  {
-    "category": "composites",
-    "level": "Trung bình",
-    "name": "MAT_COMPOSITE_DAMAGE",
-    "mat": "*MAT_054",
-    "desc": "Composite có damage (cơ bản) cho laminate với tiêu chuẩn hư hỏng điển hình.",
-    "tags": ["Damage", "Orthotropic"],
-    "url": "#",
-    "popularity": 60
   }
 ]
