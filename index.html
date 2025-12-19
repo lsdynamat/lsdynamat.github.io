@@ -8,10 +8,11 @@
 </head>
 
 <body class="bg-slate-50 text-slate-900">
+  <!-- Top bar -->
   <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="./" class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
+        <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
         <div class="leading-tight">
           <div class="font-semibold">LS-DYNA Hub</div>
           <div class="text-xs text-slate-500">Material Models</div>
@@ -23,21 +24,23 @@
         <a class="text-slate-700 hover:text-slate-900" href="./library/">Thư viện Vật Liệu</a>
       </nav>
 
-      <a href="./library/" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">
+      <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
         Mở thư viện →
       </a>
     </div>
   </header>
 
+  <!-- Hero -->
   <section class="relative overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-br from-indigo-700 via-blue-700 to-indigo-900"></div>
     <div class="absolute inset-0 opacity-20"
          style="background-image: radial-gradient(#ffffff55 1px, transparent 1px); background-size: 22px 22px;"></div>
 
     <div class="relative max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-2 gap-10 items-center text-white">
+      <!-- Left -->
       <div>
         <span class="inline-flex items-center gap-2 text-xs bg-white/15 border border-white/20 rounded-full px-3 py-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Phiên bản tĩnh
+          <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Phiên bản tĩnh (GitHub Pages)
         </span>
 
         <h1 class="mt-5 text-4xl md:text-5xl font-extrabold leading-tight">
@@ -45,42 +48,50 @@
         </h1>
 
         <p class="mt-4 text-white/80 max-w-xl">
-          Thư viện material models đơn giản, dễ tìm kiếm, deploy bằng GitHub Pages.
+          Thư viện material models đơn giản, dễ tìm kiếm. Nội dung quản lý bằng JSON + HTML/CSS/JS.
         </p>
 
-        <div class="mt-7 flex gap-3">
+        <div class="mt-7 flex flex-wrap gap-3">
           <a href="./library/"
-             class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white text-indigo-700 font-semibold shadow">
+             class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white text-indigo-700 font-semibold shadow">
             Xem thư viện
           </a>
-          <a href="./library/"
-             class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white/10 border border-white/25 font-semibold">
-            Bắt đầu ngay
+          <a href="#popular"
+             class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white/10 border border-white/25 font-semibold">
+            Danh mục phổ biến
           </a>
+        </div>
+
+        <div class="mt-6 text-xs text-white/70">
+          *Không login, không backend. Chỉ static site.
         </div>
       </div>
 
+      <!-- Right: stats -->
       <div class="grid gap-4">
-        <div class="bg-white/10 border border-white/20 rounded-2xl p-6 flex items-center justify-between">
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
           <div>
             <div class="text-sm text-white/70">Material Models</div>
-            <div class="text-4xl font-extrabold mt-1">—</div>
+            <div id="statModels" class="text-4xl font-extrabold mt-1">—</div>
+            <div class="text-xs text-white/60 mt-1" id="statModelsSub">Đang tải dữ liệu…</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
 
-        <div class="bg-white/10 border border-white/20 rounded-2xl p-6 flex items-center justify-between">
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
           <div>
-            <div class="text-sm text-white/70">Tìm kiếm / Lọc</div>
-            <div class="text-4xl font-extrabold mt-1">✔</div>
+            <div class="text-sm text-white/70">Loại vật liệu</div>
+            <div id="statCats" class="text-4xl font-extrabold mt-1">—</div>
+            <div class="text-xs text-white/60 mt-1" id="statCatsSub">Đếm theo category</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
 
-        <div class="bg-white/10 border border-white/20 rounded-2xl p-6 flex items-center justify-between">
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
           <div>
             <div class="text-sm text-white/70">GitHub Pages</div>
             <div class="text-4xl font-extrabold mt-1">Static</div>
+            <div class="text-xs text-white/60 mt-1">Deploy nhanh, nhẹ, rẻ</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
@@ -88,15 +99,70 @@
     </div>
   </section>
 
-  <section class="max-w-6xl mx-auto px-4 -mt-8 pb-16">
-    <div class="bg-white rounded-2xl shadow p-6">
-      <div class="font-semibold mb-2">Đi thẳng tới thư viện</div>
-      <p class="text-sm text-slate-600 mb-4">Không đăng nhập, không backend. Chỉ JSON + HTML/CSS/JS.</p>
-      <a class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50"
-         href="./library/">
+  <!-- Popular categories -->
+  <section id="popular" class="max-w-6xl mx-auto px-4 -mt-8 pb-16">
+    <div class="bg-white rounded-3xl shadow border p-6">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <div class="text-lg font-extrabold">Danh mục phổ biến</div>
+          <div class="text-sm text-slate-500" id="popularSub">Top theo số lượng models trong thư viện</div>
+        </div>
+        <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
+          Duyệt tất cả →
+        </a>
+      </div>
+
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-3" id="popularGrid">
+        <!-- filled by JS -->
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="max-w-6xl mx-auto px-4 pb-16">
+    <div class="bg-white rounded-3xl border shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="font-extrabold text-lg">Đi thẳng tới thư viện</div>
+        <div class="text-sm text-slate-600">Search / filter / sort — tất cả chạy tĩnh bằng JavaScript.</div>
+      </div>
+      <a href="./library/" class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-blue-600 text-white font-semibold hover:bg-blue-700">
         Mở “Material Models” →
       </a>
     </div>
   </section>
-</body>
-</html>
+
+  <script>
+    // Map category -> tên tiếng Việt
+    const CAT_LABEL = {
+      metals: "Kim loại",
+      concrete: "Bê tông",
+      rubber: "Cao su",
+      polymers: "Polyme",
+      polymer: "Polyme",
+      foam: "Foam",
+      composites: "Composite",
+      composite: "Composite",
+      wood: "Gỗ",
+      glass: "Thủy tinh",
+      ceramics: "Gốm",
+      soil: "Đất"
+    };
+
+    // màu “nhẹ” theo category (tùy bạn thêm tiếp)
+    const CAT_BG = {
+      metals: "bg-slate-100",
+      concrete: "bg-stone-100",
+      rubber: "bg-pink-100",
+      polymers: "bg-sky-100",
+      foam: "bg-cyan-100",
+      composites: "bg-purple-100",
+      wood: "bg-amber-100"
+    };
+
+    function niceCat(c){
+      i
