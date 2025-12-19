@@ -5,20 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Material Models | LS-DYNA Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-
   <style>
-    /* line clamp nhẹ (không cần plugin Tailwind) */
-    .clamp-3{
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:3;
-      overflow:hidden;
-    }
+    .clamp-3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
   </style>
 </head>
 
 <body class="bg-slate-50 text-slate-900">
-  <!-- Top bar -->
   <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="../" class="flex items-center gap-3">
@@ -34,19 +26,15 @@
         <a class="font-semibold text-blue-600" href="./">Thư viện Vật Liệu</a>
       </nav>
 
-      <a href="../" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">
-        ← Về trang chủ
-      </a>
+      <a href="../" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">← Về trang chủ</a>
     </div>
   </header>
 
-  <!-- Page header -->
   <section class="max-w-6xl mx-auto px-4 pt-8 pb-4">
     <h1 class="text-2xl md:text-3xl font-extrabold">Material Models</h1>
     <p class="text-sm text-slate-500 mt-1" id="countText">Đang tải…</p>
   </section>
 
-  <!-- Controls -->
   <section class="max-w-6xl mx-auto px-4 pb-6">
     <div class="bg-white rounded-2xl border shadow-sm p-4 md:p-5">
       <div class="grid md:grid-cols-12 gap-3 items-end">
@@ -89,7 +77,6 @@
     </div>
   </section>
 
-  <!-- Grid (ở dưới hiện tất cả mô hình) -->
   <section class="max-w-6xl mx-auto px-4 pb-16">
     <div id="modelsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
   </section>
@@ -107,11 +94,7 @@
     let allModels = [];
 
     function norm(s){ return (s || "").toString().toLowerCase().trim(); }
-    function matNumber(matStr){
-      // "*MAT_024" -> 24
-      const m = (matStr || "").match(/(\d+)/);
-      return m ? parseInt(m[1], 10) : 0;
-    }
+    function matNumber(matStr){ const m = (matStr || "").match(/(\d+)/); return m ? parseInt(m[1],10) : 0; }
 
     function badge(text, cls) {
       return `<span class="px-2 py-1 text-xs rounded-full border ${cls}">${text}</span>`;
@@ -125,8 +108,8 @@
 
     function card(m) {
       const tags = (m.tags || []).slice(0, 3).map(t => badge(t, "bg-white")).join("");
-      const category = badge(m.category, "bg-slate-50");
-      const lvl = levelBadge(m.level);
+      const category = badge(m.category || "other", "bg-slate-50");
+      const lvl = levelBadge(m.level || "Trung bình");
 
       return `
         <article class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3">
@@ -136,8 +119,8 @@
           </div>
 
           <div>
-            <h3 class="font-extrabold text-lg leading-snug">${m.name}</h3>
-            <div class="text-sm text-slate-500">${m.mat}</div>
+            <h3 class="font-extrabold text-lg leading-snug">${m.name || ""}</h3>
+            <div class="text-sm text-slate-500">${m.mat || ""}</div>
           </div>
 
           <p class="text-sm text-slate-600 clamp-3">${m.desc || ""}</p>
@@ -160,8 +143,7 @@
     }
 
     function populateFilters(models){
-      // categories
-      const cats = Array.from(new Set(models.map(m => m.category))).sort();
+      const cats = Array.from(new Set(models.map(m => m.category || "other"))).sort();
       cats.forEach(c => {
         const opt = document.createElement("option");
         opt.value = c;
@@ -169,12 +151,9 @@
         catEl.appendChild(opt);
       });
 
-      // levels
-      const levels = Array.from(new Set(models.map(m => m.level))).sort((a,b)=>{
-        const order = {"Đơn giản":1,"Trung bình":2,"Phức tạp":3};
-        return (order[a]||99) - (order[b]||99);
-      });
-      levels.forEach(l => {
+      const levels = Array.from(new Set(models.map(m => m.level || "Trung bình")));
+      const order = {"Đơn giản":1,"Trung bình":2,"Phức tạp":3};
+      levels.sort((a,b)=> (order[a]||99)-(order[b]||99)).forEach(l => {
         const opt = document.createElement("option");
         opt.value = l;
         opt.textContent = l;
@@ -190,15 +169,12 @@
 
       let list = allModels.slice();
 
-      if (cat) list = list.filter(m => m.category === cat);
-      if (lvl) list = list.filter(m => m.level === lvl);
+      if (cat) list = list.filter(m => (m.category || "other") === cat);
+      if (lvl) list = list.filter(m => (m.level || "Trung bình") === lvl);
 
       if (q){
         list = list.filter(m => {
-          const hay = [
-            m.name, m.mat, m.desc,
-            (m.tags || []).join(" ")
-          ].map(norm).join(" | ");
+          const hay = [m.name, m.mat, m.desc, (m.tags||[]).join(" ")].map(norm).join(" | ");
           return hay.includes(q);
         });
       }
@@ -208,7 +184,6 @@
       } else if (sort === "mat"){
         list.sort((a,b) => matNumber(a.mat) - matNumber(b.mat));
       } else {
-        // popular (score desc)
         list.sort((a,b) => (b.popularity||0) - (a.popularity||0));
       }
 
@@ -221,27 +196,36 @@
       levelEl.value = "";
       sortEl.value = "popular";
       apply();
+      history.replaceState(null, "", location.pathname);
+    }
+
+    function applyFromQuery(){
+      const sp = new URLSearchParams(location.search);
+      const cat = sp.get("cat");
+      const q = sp.get("q");
+      if (cat) catEl.value = cat;
+      if (q) qEl.value = q;
+      apply();
     }
 
     async function init() {
-      const res = await fetch("../data/materials.json");
+      const url = new URL("../data/materials.json", document.baseURI);
+      const res = await fetch(url, { cache: "no-store" });
       allModels = await res.json();
 
       populateFilters(allModels);
 
-      // yêu cầu của bạn: “ở dưới hiện tất cả mô hình”
-      render(allModels);
-
-      // bật filter/search
       qEl.addEventListener("input", apply);
       catEl.addEventListener("change", apply);
       levelEl.addEventListener("change", apply);
       sortEl.addEventListener("change", apply);
       clearBtn.addEventListener("click", clearAll);
+
+      applyFromQuery(); // <-- nhận ?cat= từ Trang chủ
     }
 
     init().catch(() => {
-      countText.textContent = "Không tải được dữ liệu materials.json (kiểm tra đường dẫn).";
+      countText.textContent = "Không tải được ../data/materials.json (kiểm tra đường dẫn & JSON).";
     });
   </script>
 </body>
