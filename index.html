@@ -54,4 +54,146 @@
             Xem thư viện
           </a>
           <a href="#popular"
-             class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white/10 border border-white/25 font-semib
+             class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white/10 border border-white/25 font-semibold">
+            Danh mục phổ biến
+          </a>
+        </div>
+
+        <div class="mt-6 text-xs text-white/70">
+          *Không login, không backend. Chỉ static site.
+        </div>
+      </div>
+
+      <div class="grid gap-4">
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
+          <div>
+            <div class="text-sm text-white/70">Material Models</div>
+            <div id="statModels" class="text-4xl font-extrabold mt-1">—</div>
+            <div class="text-xs text-white/60 mt-1" id="statModelsSub">Đang tải dữ liệu…</div>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
+        </div>
+
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
+          <div>
+            <div class="text-sm text-white/70">Loại vật liệu</div>
+            <div id="statCats" class="text-4xl font-extrabold mt-1">—</div>
+            <div class="text-xs text-white/60 mt-1">Đếm theo category</div>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
+        </div>
+
+        <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
+          <div>
+            <div class="text-sm text-white/70">GitHub Pages</div>
+            <div class="text-4xl font-extrabold mt-1">Static</div>
+            <div class="text-xs text-white/60 mt-1">Deploy nhanh, nhẹ</div>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="popular" class="max-w-6xl mx-auto px-4 -mt-8 pb-16">
+    <div class="bg-white rounded-3xl shadow border p-6">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <div class="text-lg font-extrabold">Danh mục phổ biến</div>
+          <div class="text-sm text-slate-500">Top theo số lượng models</div>
+        </div>
+        <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
+          Duyệt tất cả →
+        </a>
+      </div>
+
+      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-3" id="popularGrid">
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const CAT_LABEL = {
+      metals: "Kim loại",
+      concrete: "Bê tông",
+      rubber: "Cao su",
+      polymers: "Polyme",
+      polymer: "Polyme",
+      foam: "Foam",
+      composites: "Composite",
+      composite: "Composite",
+      wood: "Gỗ"
+    };
+
+    const CAT_BG = {
+      metals: "bg-slate-100",
+      concrete: "bg-stone-100",
+      rubber: "bg-pink-100",
+      polymers: "bg-sky-100",
+      polymer: "bg-sky-100",
+      foam: "bg-cyan-100",
+      composites: "bg-purple-100",
+      composite: "bg-purple-100",
+      wood: "bg-amber-100"
+    };
+
+    function niceCat(c){
+      if (!c) return "Khác";
+      return CAT_LABEL[c] || (c.charAt(0).toUpperCase() + c.slice(1));
+    }
+    function bgCat(c){ return CAT_BG[c] || "bg-slate-100"; }
+
+    function countBy(arr, keyFn){
+      const map = new Map();
+      for (const x of arr){
+        const k = keyFn(x);
+        map.set(k, (map.get(k) || 0) + 1);
+      }
+      return map;
+    }
+
+    async function initHomeStats(){
+      const statModels = document.getElementById("statModels");
+      const statCats = document.getElementById("statCats");
+      const statModelsSub = document.getElementById("statModelsSub");
+      const popularGrid = document.getElementById("popularGrid");
+
+      try{
+        const url = new URL("./data/materials.json", document.baseURI);
+        const res = await fetch(url, { cache: "no-store" });
+        const models = await res.json();
+
+        statModels.textContent = String(models.length);
+        statModelsSub.textContent = "Tổng số models hiện có";
+
+        const catMap = countBy(models, m => m.category || "other");
+        statCats.textContent = String(catMap.size);
+
+        const top = Array.from(catMap.entries())
+          .sort((a,b) => b[1]-a[1])
+          .slice(0,5);
+
+        popularGrid.innerHTML = top.map(([cat, n]) => `
+          <a href="./library/?cat=${encodeURIComponent(cat)}"
+             class="block rounded-2xl p-4 border hover:shadow-sm transition ${bgCat(cat)}">
+            <div class="font-extrabold">${niceCat(cat)}</div>
+            <div class="text-xs text-slate-600 mt-1">${n} models</div>
+          </a>
+        `).join("");
+      } catch(e){
+        statModels.textContent = "—";
+        statCats.textContent = "—";
+        statModelsSub.textContent = "Không tải được data/materials.json (kiểm tra path & JSON)";
+        popularGrid.innerHTML = `<div class="rounded-2xl bg-slate-100 p-4 border">Chưa có dữ liệu</div>`;
+      }
+    }
+
+    initHomeStats();
+  </script>
+</body>
+</html>
