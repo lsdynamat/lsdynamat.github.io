@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LS-DYNA Material Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5EWJGRS5S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B5EWJGRS5S');
+  </script>
 </head>
 
 <body class="bg-slate-50 text-slate-900">
@@ -75,8 +84,9 @@
 
         <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
           <div>
-            <div class="text-sm text-white/70">Platform</div>
-            <div class="text-4xl font-extrabold mt-1">Static</div>
+            <div class="text-sm text-white/70">Visits</div>
+            <div id="statVisits" class="text-4xl font-extrabold mt-1">—</div>
+            <div class="text-xs text-white/60 mt-1">This browser</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
@@ -146,10 +156,20 @@
       return map;
     }
 
+    function bumpVisits(){
+      const el = document.getElementById("statVisits");
+      const key = "ldmh_visits";
+      const n = (parseInt(localStorage.getItem(key) || "0", 10) || 0) + 1;
+      localStorage.setItem(key, String(n));
+      if (el) el.textContent = String(n);
+    }
+
     async function initHome(){
       const statModels = document.getElementById("statModels");
       const statCats = document.getElementById("statCats");
       const popularGrid = document.getElementById("popularGrid");
+
+      bumpVisits();
 
       try{
         const url = new URL("./data/materials.json", document.baseURI);
