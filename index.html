@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -13,18 +13,18 @@
       <a href="./" class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
         <div class="leading-tight">
-          <div class="font-semibold">LS-DYNA Hub</div>
-          <div class="text-xs text-slate-500">Material Models</div>
+          <div class="font-semibold">LS-DYNA Material Hub</div>
+          <div class="text-xs text-slate-500">Material Models Library</div>
         </div>
       </a>
 
       <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a class="font-semibold text-blue-600" href="./">Trang chủ</a>
-        <a class="text-slate-700 hover:text-slate-900" href="./library/">Thư viện Vật Liệu</a>
+        <a class="font-semibold text-blue-600" href="./">Home</a>
+        <a class="text-slate-700 hover:text-slate-900" href="./library/">Material Library</a>
       </nav>
 
       <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
-        Mở thư viện →
+        Open library →
       </a>
     </div>
   </header>
@@ -37,7 +37,7 @@
     <div class="relative max-w-6xl mx-auto px-4 py-14 grid lg:grid-cols-2 gap-10 items-center text-white">
       <div>
         <span class="inline-flex items-center gap-2 text-xs bg-white/15 border border-white/20 rounded-full px-3 py-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Phiên bản tĩnh (GitHub Pages)
+          <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Static (GitHub Pages)
         </span>
 
         <h1 class="mt-5 text-4xl md:text-5xl font-extrabold leading-tight">
@@ -45,22 +45,23 @@
         </h1>
 
         <p class="mt-4 text-white/80 max-w-xl">
-          Thư viện material models đơn giản, dễ tìm kiếm. Nội dung quản lý bằng JSON + HTML/CSS/JS.
+          A lightweight, searchable material model library powered by JSON + HTML/CSS/JS.
+          No login. No backend.
         </p>
 
         <div class="mt-7 flex flex-wrap gap-3">
           <a href="./library/"
              class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white text-indigo-700 font-semibold shadow">
-            Xem thư viện
+            Browse library
           </a>
           <a href="#popular"
              class="inline-flex items-center justify-center px-5 py-3 rounded-2xl bg-white/10 border border-white/25 font-semibold">
-            Danh mục phổ biến
+            Popular categories
           </a>
         </div>
 
         <div class="mt-6 text-xs text-white/70">
-          *Không login, không backend. Chỉ static site.
+          *Static site only — perfect for GitHub Pages.
         </div>
       </div>
 
@@ -69,16 +70,16 @@
           <div>
             <div class="text-sm text-white/70">Material Models</div>
             <div id="statModels" class="text-4xl font-extrabold mt-1">—</div>
-            <div class="text-xs text-white/60 mt-1" id="statModelsSub">Đang tải dữ liệu…</div>
+            <div class="text-xs text-white/60 mt-1" id="statModelsSub">Loading…</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
 
         <div class="rounded-3xl p-6 border border-white/20 bg-white/10 backdrop-blur flex items-center justify-between">
           <div>
-            <div class="text-sm text-white/70">Loại vật liệu</div>
+            <div class="text-sm text-white/70">Material Types</div>
             <div id="statCats" class="text-4xl font-extrabold mt-1">—</div>
-            <div class="text-xs text-white/60 mt-1">Đếm theo category</div>
+            <div class="text-xs text-white/60 mt-1">Unique categories</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
@@ -87,7 +88,7 @@
           <div>
             <div class="text-sm text-white/70">GitHub Pages</div>
             <div class="text-4xl font-extrabold mt-1">Static</div>
-            <div class="text-xs text-white/60 mt-1">Deploy nhanh, nhẹ</div>
+            <div class="text-xs text-white/60 mt-1">Fast, lightweight, simple</div>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-white/15 border border-white/20"></div>
         </div>
@@ -99,11 +100,11 @@
     <div class="bg-white rounded-3xl shadow border p-6">
       <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <div class="text-lg font-extrabold">Danh mục phổ biến</div>
-          <div class="text-sm text-slate-500">Top theo số lượng models</div>
+          <div class="text-lg font-extrabold">Popular Categories</div>
+          <div class="text-sm text-slate-500">Top categories by number of models</div>
         </div>
         <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
-          Duyệt tất cả →
+          View all →
         </a>
       </div>
 
@@ -118,18 +119,20 @@
   </section>
 
   <script>
+    // Category labels (display names)
     const CAT_LABEL = {
-      metals: "Kim loại",
-      concrete: "Bê tông",
-      rubber: "Cao su",
-      polymers: "Polyme",
-      polymer: "Polyme",
-      foam: "Foam",
-      composites: "Composite",
-      composite: "Composite",
-      wood: "Gỗ"
+      metals: "Metals",
+      concrete: "Concrete",
+      rubber: "Rubber",
+      polymers: "Polymers",
+      polymer: "Polymers",
+      foam: "Foams",
+      composites: "Composites",
+      composite: "Composites",
+      wood: "Wood"
     };
 
+    // Soft background accents by category
     const CAT_BG = {
       metals: "bg-slate-100",
       concrete: "bg-stone-100",
@@ -143,7 +146,7 @@
     };
 
     function niceCat(c){
-      if (!c) return "Khác";
+      if (!c) return "Other";
       return CAT_LABEL[c] || (c.charAt(0).toUpperCase() + c.slice(1));
     }
     function bgCat(c){ return CAT_BG[c] || "bg-slate-100"; }
@@ -169,7 +172,7 @@
         const models = await res.json();
 
         statModels.textContent = String(models.length);
-        statModelsSub.textContent = "Tổng số models hiện có";
+        statModelsSub.textContent = "Total models available";
 
         const catMap = countBy(models, m => m.category || "other");
         statCats.textContent = String(catMap.size);
@@ -188,8 +191,8 @@
       } catch(e){
         statModels.textContent = "—";
         statCats.textContent = "—";
-        statModelsSub.textContent = "Không tải được data/materials.json (kiểm tra path & JSON)";
-        popularGrid.innerHTML = `<div class="rounded-2xl bg-slate-100 p-4 border">Chưa có dữ liệu</div>`;
+        statModelsSub.textContent = "Could not load data/materials.json (check path & JSON).";
+        popularGrid.innerHTML = `<div class="rounded-2xl bg-slate-100 p-4 border">No data</div>`;
       }
     }
 
