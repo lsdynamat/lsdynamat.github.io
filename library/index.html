@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Material Models | LS-DYNA Hub</title>
+  <title>Material Library | LS-DYNA Material Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .clamp-3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
@@ -16,61 +16,61 @@
       <a href="../" class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
         <div class="leading-tight">
-          <div class="font-semibold">LS-DYNA Hub</div>
-          <div class="text-xs text-slate-500">Material Models</div>
+          <div class="font-semibold">LS-DYNA Material Hub</div>
+          <div class="text-xs text-slate-500">Material Models Library</div>
         </div>
       </a>
 
       <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a class="text-slate-700 hover:text-slate-900" href="../">Trang chủ</a>
-        <a class="font-semibold text-blue-600" href="./">Thư viện Vật Liệu</a>
+        <a class="text-slate-700 hover:text-slate-900" href="../">Home</a>
+        <a class="font-semibold text-blue-600" href="./">Material Library</a>
       </nav>
 
-      <a href="../" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">← Về trang chủ</a>
+      <a href="../" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">← Back</a>
     </div>
   </header>
 
   <section class="max-w-6xl mx-auto px-4 pt-8 pb-4">
     <h1 class="text-2xl md:text-3xl font-extrabold">Material Models</h1>
-    <p class="text-sm text-slate-500 mt-1" id="countText">Đang tải…</p>
+    <p class="text-sm text-slate-500 mt-1" id="countText">Loading…</p>
   </section>
 
   <section class="max-w-6xl mx-auto px-4 pb-6">
     <div class="bg-white rounded-2xl border shadow-sm p-4 md:p-5">
       <div class="grid md:grid-cols-12 gap-3 items-end">
         <div class="md:col-span-5">
-          <label class="text-xs font-semibold text-slate-600">Tìm kiếm</label>
+          <label class="text-xs font-semibold text-slate-600">Search</label>
           <input id="q" type="text"
-                 placeholder="Tên, MAT number, mô tả, tag…"
+                 placeholder="Name, MAT number, description, tags…"
                  class="mt-1 w-full px-4 py-3 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-200">
         </div>
 
         <div class="md:col-span-2">
-          <label class="text-xs font-semibold text-slate-600">Loại vật liệu</label>
+          <label class="text-xs font-semibold text-slate-600">Category</label>
           <select id="cat" class="mt-1 w-full px-3 py-3 rounded-xl border bg-white">
-            <option value="">Tất cả</option>
+            <option value="">All</option>
           </select>
         </div>
 
         <div class="md:col-span-2">
-          <label class="text-xs font-semibold text-slate-600">Độ phức tạp</label>
+          <label class="text-xs font-semibold text-slate-600">Complexity</label>
           <select id="level" class="mt-1 w-full px-3 py-3 rounded-xl border bg-white">
-            <option value="">Tất cả</option>
+            <option value="">All</option>
           </select>
         </div>
 
         <div class="md:col-span-2">
-          <label class="text-xs font-semibold text-slate-600">Sắp xếp</label>
+          <label class="text-xs font-semibold text-slate-600">Sort</label>
           <select id="sort" class="mt-1 w-full px-3 py-3 rounded-xl border bg-white">
-            <option value="popular">Phổ biến nhất</option>
-            <option value="name">Tên (A→Z)</option>
-            <option value="mat">MAT (tăng dần)</option>
+            <option value="popular">Most popular</option>
+            <option value="name">Name (A→Z)</option>
+            <option value="mat">MAT (ascending)</option>
           </select>
         </div>
 
         <div class="md:col-span-1 flex md:justify-end">
           <button id="clearBtn" class="w-full md:w-auto px-3 py-3 rounded-xl border bg-white hover:bg-slate-50 text-sm">
-            Xóa lọc
+            Clear
           </button>
         </div>
       </div>
@@ -101,15 +101,15 @@
     }
 
     function levelBadge(level){
-      if (level === "Đơn giản") return badge(level, "bg-green-50 border-green-200 text-green-700");
-      if (level === "Trung bình") return badge(level, "bg-yellow-50 border-yellow-200 text-yellow-700");
+      if (level === "Simple") return badge(level, "bg-green-50 border-green-200 text-green-700");
+      if (level === "Intermediate") return badge(level, "bg-yellow-50 border-yellow-200 text-yellow-700");
       return badge(level, "bg-red-50 border-red-200 text-red-700");
     }
 
     function card(m) {
       const tags = (m.tags || []).slice(0, 3).map(t => badge(t, "bg-white")).join("");
       const category = badge(m.category || "other", "bg-slate-50");
-      const lvl = levelBadge(m.level || "Trung bình");
+      const lvl = levelBadge(m.level || "Intermediate");
 
       return `
         <article class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3">
@@ -130,7 +130,7 @@
           <div class="mt-auto pt-1">
             <a class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50"
                href="${m.url || "#"}">
-              Xem chi tiết →
+              View details →
             </a>
           </div>
         </article>
@@ -139,7 +139,7 @@
 
     function render(list) {
       grid.innerHTML = list.map(card).join("");
-      countText.textContent = `Hiển thị ${list.length} trên ${allModels.length} models`;
+      countText.textContent = `Showing ${list.length} of ${allModels.length} models`;
     }
 
     function populateFilters(models){
@@ -151,8 +151,8 @@
         catEl.appendChild(opt);
       });
 
-      const levels = Array.from(new Set(models.map(m => m.level || "Trung bình")));
-      const order = {"Đơn giản":1,"Trung bình":2,"Phức tạp":3};
+      const levels = Array.from(new Set(models.map(m => m.level || "Intermediate")));
+      const order = {"Simple":1,"Intermediate":2,"Advanced":3};
       levels.sort((a,b)=> (order[a]||99)-(order[b]||99)).forEach(l => {
         const opt = document.createElement("option");
         opt.value = l;
@@ -170,7 +170,7 @@
       let list = allModels.slice();
 
       if (cat) list = list.filter(m => (m.category || "other") === cat);
-      if (lvl) list = list.filter(m => (m.level || "Trung bình") === lvl);
+      if (lvl) list = list.filter(m => (m.level || "Intermediate") === lvl);
 
       if (q){
         list = list.filter(m => {
@@ -221,11 +221,11 @@
       sortEl.addEventListener("change", apply);
       clearBtn.addEventListener("click", clearAll);
 
-      applyFromQuery(); // <-- nhận ?cat= từ Trang chủ
+      applyFromQuery();
     }
 
     init().catch(() => {
-      countText.textContent = "Không tải được ../data/materials.json (kiểm tra đường dẫn & JSON).";
+      countText.textContent = "Could not load ../data/materials.json (check path & JSON).";
     });
   </script>
 </body>
