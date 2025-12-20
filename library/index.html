@@ -17,7 +17,7 @@
         <div class="w-9 h-9 rounded-xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
         <div class="leading-tight">
           <div class="font-semibold">LS-DYNA Material Hub</div>
-          <div class="text-xs text-slate-500">Material Models Library</div>
+          <div class="text-xs text-slate-500">Material Models</div>
         </div>
       </a>
 
@@ -106,10 +106,17 @@
       return badge(level, "bg-red-50 border-red-200 text-red-700");
     }
 
+    function resolveHref(raw){
+      if (!raw) return "#";
+      try { return new URL(raw, document.baseURI).href; }
+      catch { return raw; }
+    }
+
     function card(m) {
       const tags = (m.tags || []).slice(0, 3).map(t => badge(t, "bg-white")).join("");
       const category = badge(m.category || "other", "bg-slate-50");
       const lvl = levelBadge(m.level || "Intermediate");
+      const href = resolveHref(m.url);
 
       return `
         <article class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3">
@@ -129,7 +136,7 @@
 
           <div class="mt-auto pt-1">
             <a class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50"
-               href="${m.url || "#"}">
+               href="${href}">
               View details →
             </a>
           </div>
@@ -225,7 +232,7 @@
     }
 
     init().catch(() => {
-      countText.textContent = "Could not load ../data/materials.json (check path & JSON).";
+      countText.textContent = "Could not load ../data/materials.json";
     });
   </script>
 </body>
