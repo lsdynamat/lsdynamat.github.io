@@ -1,40 +1,40 @@
 [
   {
     "category": "metals",
-    "level": "Đơn giản",
+    "level": "Simple",
     "name": "MAT_PIECEWISE_LINEAR_PLASTICITY",
     "mat": "*MAT_024",
-    "desc": "Material model dẻo tuyến tính từng đoạn, phù hợp cho hầu hết kim loại.",
+    "desc": "Piecewise linear plasticity model commonly used for metals with multi-segment stress–strain curves.",
     "tags": ["Strain rate"],
     "url": "/library/",
     "popularity": 95
   },
   {
     "category": "metals",
-    "level": "Trung bình",
+    "level": "Intermediate",
     "name": "MAT_JOHNSON_COOK",
     "mat": "*MAT_015",
-    "desc": "Johnson–Cook cho kim loại ở tốc độ biến dạng cao và/hoặc nhiệt độ cao.",
+    "desc": "Johnson–Cook model for metals at high strain rate and/or elevated temperature (impact/penetration).",
     "tags": ["Strain rate", "Temperature"],
     "url": "/library/",
     "popularity": 90
   },
   {
     "category": "concrete",
-    "level": "Phức tạp",
+    "level": "Advanced",
     "name": "MAT_CSCM (Continuous Surface Cap Model)",
     "mat": "*MAT_159",
-    "desc": "Model bê tông tiên tiến (nén/kéo/softening), phù hợp blast/impact.",
+    "desc": "Advanced concrete model with damage and rate effects; widely used for RC, blast, and impact simulations.",
     "tags": ["Damage", "Strain rate"],
     "url": "/library/",
     "popularity": 92
   },
   {
     "category": "rubber",
-    "level": "Trung bình",
+    "level": "Intermediate",
     "name": "MAT_HYPERELASTIC_RUBBER (Mooney-Rivlin)",
     "mat": "*MAT_077H",
-    "desc": "Hyperelastic cho cao su/elastomer theo Mooney–Rivlin.",
+    "desc": "Hyperelastic rubber/elastomer model based on Mooney–Rivlin; common for seals, tires, and pads.",
     "tags": ["Hyperelastic"],
     "url": "/library/",
     "popularity": 85
