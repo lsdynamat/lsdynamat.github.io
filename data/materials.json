@@ -6,7 +6,7 @@
     "mat": "*MAT_024",
     "desc": "Piecewise linear plasticity model commonly used for metals with multi-segment stress–strain curves.",
     "tags": ["Strain rate"],
-    "url": "/library/",
+    "url": "mat_024.html",
     "popularity": 95
   },
   {
@@ -16,7 +16,7 @@
     "mat": "*MAT_015",
     "desc": "Johnson–Cook model for metals at high strain rate and/or elevated temperature (impact/penetration).",
     "tags": ["Strain rate", "Temperature"],
-    "url": "/library/",
+    "url": "#",
     "popularity": 90
   },
   {
@@ -26,7 +26,7 @@
     "mat": "*MAT_159",
     "desc": "Advanced concrete model with damage and rate effects; widely used for RC, blast, and impact simulations.",
     "tags": ["Damage", "Strain rate"],
-    "url": "/library/",
+    "url": "#",
     "popularity": 92
   },
   {
@@ -36,7 +36,7 @@
     "mat": "*MAT_077H",
     "desc": "Hyperelastic rubber/elastomer model based on Mooney–Rivlin; common for seals, tires, and pads.",
     "tags": ["Hyperelastic"],
-    "url": "/library/",
+    "url": "#",
     "popularity": 85
   }
 ]
