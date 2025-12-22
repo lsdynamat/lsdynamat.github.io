@@ -1,0 +1,12 @@
+{
+  "id": "mat_159",
+  "title": "*MAT_159 | CSCM (Concrete)",
+  "fileName": "MAT_CSCM_generated.k",
+  "generator": "cscm",
+  "fields": [
+    { "key": "MID",  "label": "Material ID (MID)", "type": "int", "default": 159, "required": true },
+    { "key": "RO",   "label": "Density (RO)", "type": "number", "default": 0.0023, "required": true },
+    { "key": "FC",   "label": "Compressive strength fc (MPa)", "type": "number", "default": 40, "required": true },
+    { "key": "DMAX", "label": "Max aggregate size dmax (mm)", "type": "number", "default": 16, "required": true }
+  ]
+}
