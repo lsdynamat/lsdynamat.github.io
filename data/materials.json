@@ -40,16 +40,18 @@
     "mat": "*MAT_159",
     "name": "MAT_CSCM (Continuous Surface Cap Model)",
     "category": "concrete",
-    "summary": "Advanced concrete model with damage and rate effects; widely used for RC, blast, and impact simulations.",
-    "tags": ["damage", "strain rate"],
-    "keywords": ["*MAT_CSCM", "*MAT_159"],
-    "useCases": ["rc", "blast", "impact"],
+    "summary": "CSCM concrete model for damage, strain-rate effects, and confinement-dependent behavior.",
+    "tags": ["cscm", "concrete", "damage", "strain rate"],
+    "keywords": ["*MAT_159", "*MAT_CSCM_TITLE"],
+    "useCases": ["rc", "impact", "blast"],
     "params": [],
     "example": "",
     "refs": [],
-    "popularity": 92,
-    "updatedAt": "2025-12-22"
+    "popularity": 95,
+    "updatedAt": "2025-12-22",
+    "generatorId": "mat_159"
   },
+
   {
     "id": "mat_077h",
     "mat": "*MAT_077H",
