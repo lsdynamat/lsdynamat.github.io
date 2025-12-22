@@ -11,12 +11,6 @@ function pill(text){
   return `<span class="px-2 py-1 text-xs rounded-full border bg-slate-50">${escapeHtml(text)}</span>`;
 }
 
-function cxPill(cx){
-  if (cx === "Simple") return `<span class="px-2 py-1 text-xs rounded-full border bg-green-50 border-green-200 text-green-700">${cx}</span>`;
-  if (cx === "Intermediate") return `<span class="px-2 py-1 text-xs rounded-full border bg-yellow-50 border-yellow-200 text-yellow-700">${cx}</span>`;
-  return `<span class="px-2 py-1 text-xs rounded-full border bg-red-50 border-red-200 text-red-700">${cx || "Advanced"}</span>`;
-}
-
 function getId(){
   const sp = new URLSearchParams(location.search);
   return sp.get("id");
@@ -27,7 +21,7 @@ async function initModel(){
   const id = getId();
 
   if (!id){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Missing id.</div>`;
+    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Missing id</div>`;
     return;
   }
 
@@ -38,7 +32,7 @@ async function initModel(){
 
     const m = models.find(x => x.id === id);
     if (!m){
-      container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Model not found: <span class="font-mono">${escapeHtml(id)}</span></div>`;
+      container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Not found: <span class="font-mono">${escapeHtml(id)}</span></div>`;
       return;
     }
 
@@ -68,7 +62,6 @@ async function initModel(){
       <div class="bg-white border rounded-2xl p-6 shadow-sm">
         <div class="flex flex-wrap gap-2 mb-4">
           ${pill(m.category || "other")}
-          ${cxPill(m.complexity)}
           ${tags}
         </div>
 
@@ -117,7 +110,7 @@ async function initModel(){
                   Copy
                 </button>
               </div>
-              <pre class="mt-3 text-sm bg-slate-950 text-slate-100 rounded-xl p-4 overflow-auto"><code id="codeBlock">${example}</code></pre>
+              <pre class="mt-3 text-sm bg-slate-950 text-slate-100 rounded-xl p-4 overflow-auto"><code>${example}</code></pre>
             </section>
           ` : ""}
 
@@ -127,8 +120,6 @@ async function initModel(){
               <ul class="list-disc pl-5">${refs}</ul>
             </section>
           ` : ""}
-
-          ${m.updatedAt ? `<div class="text-xs text-slate-500">Updated: ${escapeHtml(m.updatedAt)}</div>` : ""}
         </div>
       </div>
     `;
@@ -136,13 +127,13 @@ async function initModel(){
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn){
       copyBtn.addEventListener("click", async () => {
-        const text = (m.example || "");
-        try { await navigator.clipboard.writeText(text); copyBtn.textContent = "Copied"; setTimeout(()=>copyBtn.textContent="Copy", 1200); }
-        catch { copyBtn.textContent = "Copy failed"; setTimeout(()=>copyBtn.textContent="Copy", 1200); }
+        try { await navigator.clipboard.writeText(m.example || ""); copyBtn.textContent = "Copied"; }
+        catch { copyBtn.textContent = "Copy failed"; }
+        setTimeout(()=>copyBtn.textContent="Copy", 1200);
       });
     }
   } catch(e){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Could not load data.</div>`;
+    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Could not load data</div>`;
   }
 }
 
