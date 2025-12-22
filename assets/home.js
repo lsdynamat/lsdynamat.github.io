@@ -35,20 +35,10 @@ function countBy(arr, keyFn){
   return map;
 }
 
-function bumpVisits(){
-  const el = document.getElementById("statVisits");
-  const key = "ldmh_visits";
-  const n = (parseInt(localStorage.getItem(key) || "0", 10) || 0) + 1;
-  localStorage.setItem(key, String(n));
-  if (el) el.textContent = String(n);
-}
-
 async function initHome(){
   const statModels = document.getElementById("statModels");
   const statCats = document.getElementById("statCats");
   const popularGrid = document.getElementById("popularGrid");
-
-  bumpVisits();
 
   try{
     const url = new URL("./data/materials.json", document.baseURI);
@@ -68,7 +58,7 @@ async function initHome(){
       <a href="./library/?cat=${encodeURIComponent(cat)}"
          class="block rounded-2xl p-4 border hover:shadow-sm transition ${bgCat(cat)}">
         <div class="font-extrabold">${niceCat(cat)}</div>
-        <div class="text-xs text-slate-600 mt-1">${n} models</div>
+        <div class="text-xs text-slate-600 mt-1">${n}</div>
       </a>
     `).join("");
   } catch(e){
