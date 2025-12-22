@@ -5,9 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Material Library | LS-DYNA Material Hub</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .clamp-3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
-  </style>
+  <link rel="stylesheet" href="../assets/site.css" />
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5EWJGRS5S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B5EWJGRS5S');
+  </script>
 </head>
 
 <body class="bg-slate-50 text-slate-900">
@@ -41,7 +47,7 @@
         <div class="md:col-span-5">
           <label class="text-xs font-semibold text-slate-600">Search</label>
           <input id="q" type="text"
-                 placeholder="Name, MAT number, description, tags…"
+                 placeholder="Name, MAT number, summary, tags…"
                  class="mt-1 w-full px-4 py-3 rounded-xl border bg-white outline-none focus:ring-2 focus:ring-blue-200">
         </div>
 
@@ -54,7 +60,7 @@
 
         <div class="md:col-span-2">
           <label class="text-xs font-semibold text-slate-600">Complexity</label>
-          <select id="level" class="mt-1 w-full px-3 py-3 rounded-xl border bg-white">
+          <select id="complexity" class="mt-1 w-full px-3 py-3 rounded-xl border bg-white">
             <option value="">All</option>
           </select>
         </div>
@@ -81,159 +87,6 @@
     <div id="modelsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
   </section>
 
-  <script>
-    const grid = document.getElementById("modelsGrid");
-    const countText = document.getElementById("countText");
-
-    const qEl = document.getElementById("q");
-    const catEl = document.getElementById("cat");
-    const levelEl = document.getElementById("level");
-    const sortEl = document.getElementById("sort");
-    const clearBtn = document.getElementById("clearBtn");
-
-    let allModels = [];
-
-    function norm(s){ return (s || "").toString().toLowerCase().trim(); }
-    function matNumber(matStr){ const m = (matStr || "").match(/(\d+)/); return m ? parseInt(m[1],10) : 0; }
-
-    function badge(text, cls) {
-      return `<span class="px-2 py-1 text-xs rounded-full border ${cls}">${text}</span>`;
-    }
-
-    function levelBadge(level){
-      if (level === "Simple") return badge(level, "bg-green-50 border-green-200 text-green-700");
-      if (level === "Intermediate") return badge(level, "bg-yellow-50 border-yellow-200 text-yellow-700");
-      return badge(level, "bg-red-50 border-red-200 text-red-700");
-    }
-
-    function resolveHref(raw){
-      if (!raw) return "#";
-      try { return new URL(raw, document.baseURI).href; }
-      catch { return raw; }
-    }
-
-    function card(m) {
-      const tags = (m.tags || []).slice(0, 3).map(t => badge(t, "bg-white")).join("");
-      const category = badge(m.category || "other", "bg-slate-50");
-      const lvl = levelBadge(m.level || "Intermediate");
-      const href = resolveHref(m.url);
-
-      return `
-        <article class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col gap-3">
-          <div class="flex flex-wrap gap-2">
-            ${category}
-            ${lvl}
-          </div>
-
-          <div>
-            <h3 class="font-extrabold text-lg leading-snug">${m.name || ""}</h3>
-            <div class="text-sm text-slate-500">${m.mat || ""}</div>
-          </div>
-
-          <p class="text-sm text-slate-600 clamp-3">${m.desc || ""}</p>
-
-          <div class="flex flex-wrap gap-2">${tags}</div>
-
-          <div class="mt-auto pt-1">
-            <a class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border bg-white hover:bg-slate-50"
-               href="${href}">
-              View details →
-            </a>
-          </div>
-        </article>
-      `;
-    }
-
-    function render(list) {
-      grid.innerHTML = list.map(card).join("");
-      countText.textContent = `Showing ${list.length} of ${allModels.length} models`;
-    }
-
-    function populateFilters(models){
-      const cats = Array.from(new Set(models.map(m => m.category || "other"))).sort();
-      cats.forEach(c => {
-        const opt = document.createElement("option");
-        opt.value = c;
-        opt.textContent = c;
-        catEl.appendChild(opt);
-      });
-
-      const levels = Array.from(new Set(models.map(m => m.level || "Intermediate")));
-      const order = {"Simple":1,"Intermediate":2,"Advanced":3};
-      levels.sort((a,b)=> (order[a]||99)-(order[b]||99)).forEach(l => {
-        const opt = document.createElement("option");
-        opt.value = l;
-        opt.textContent = l;
-        levelEl.appendChild(opt);
-      });
-    }
-
-    function apply(){
-      const q = norm(qEl.value);
-      const cat = catEl.value;
-      const lvl = levelEl.value;
-      const sort = sortEl.value;
-
-      let list = allModels.slice();
-
-      if (cat) list = list.filter(m => (m.category || "other") === cat);
-      if (lvl) list = list.filter(m => (m.level || "Intermediate") === lvl);
-
-      if (q){
-        list = list.filter(m => {
-          const hay = [m.name, m.mat, m.desc, (m.tags||[]).join(" ")].map(norm).join(" | ");
-          return hay.includes(q);
-        });
-      }
-
-      if (sort === "name"){
-        list.sort((a,b) => norm(a.name).localeCompare(norm(b.name)));
-      } else if (sort === "mat"){
-        list.sort((a,b) => matNumber(a.mat) - matNumber(b.mat));
-      } else {
-        list.sort((a,b) => (b.popularity||0) - (a.popularity||0));
-      }
-
-      render(list);
-    }
-
-    function clearAll(){
-      qEl.value = "";
-      catEl.value = "";
-      levelEl.value = "";
-      sortEl.value = "popular";
-      apply();
-      history.replaceState(null, "", location.pathname);
-    }
-
-    function applyFromQuery(){
-      const sp = new URLSearchParams(location.search);
-      const cat = sp.get("cat");
-      const q = sp.get("q");
-      if (cat) catEl.value = cat;
-      if (q) qEl.value = q;
-      apply();
-    }
-
-    async function init() {
-      const url = new URL("../data/materials.json", document.baseURI);
-      const res = await fetch(url, { cache: "no-store" });
-      allModels = await res.json();
-
-      populateFilters(allModels);
-
-      qEl.addEventListener("input", apply);
-      catEl.addEventListener("change", apply);
-      levelEl.addEventListener("change", apply);
-      sortEl.addEventListener("change", apply);
-      clearBtn.addEventListener("click", clearAll);
-
-      applyFromQuery();
-    }
-
-    init().catch(() => {
-      countText.textContent = "Could not load ../data/materials.json";
-    });
-  </script>
+  <script src="../assets/library.js"></script>
 </body>
 </html>
