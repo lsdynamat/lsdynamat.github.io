@@ -8,6 +8,10 @@
 │  ├─ home.js
 │  ├─ library.js
 │  └─ model.js
-└─ library/
-   ├─ index.html
-   └─ model.html
+├─ library/
+│  ├─ index.html
+│  └─ model.html
+└─ pages/
+   ├─ about.html
+   ├─ contact.html
+   └─ contribute.html
