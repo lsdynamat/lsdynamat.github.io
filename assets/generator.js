@@ -1,0 +1,322 @@
+function esc(s){ return (s ?? "").toString(); }
+function getQuery(){ const sp = new URLSearchParams(location.search); const o={}; for (const [k,v] of sp.entries()) o[k]=v; return o; }
+
+function downloadText(filename, text){
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+function padLeft(str, width){ str = esc(str); return str.length >= width ? str : " ".repeat(width - str.length) + str; }
+function fmtInt(x, width=10){ return padLeft(String(Math.trunc(Number(x))), width); }
+function fmtNum(x, decimals, width=10){
+  const n = Number(x);
+  const s = Number.isFinite(n) ? n.toFixed(decimals) : "";
+  return padLeft(s, width);
+}
+
+function applyPlaceholders(render, values){
+  let out = render;
+  for (const [k,v] of Object.entries(values)){
+    out = out.replaceAll(`{{${k}}}`, esc(v));
+  }
+  return out;
+}
+
+function setFieldValue(formWrap, key, value){
+  const el = formWrap.querySelector(`[data-key="${CSS.escape(key)}"]`);
+  if (el) el.value = value;
+}
+
+/* ---------- CSCM (ported from your Python) ---------- */
+function cscm_fracture_energy(fc, dmax=16){
+  const delta_f = 8;
+  const fcm = fc + delta_f;
+  const fcm0 = 10;
+  const GF0 = 0.021 + 5.357e-4 * dmax;
+  const GF  = GF0 * Math.pow((fcm / fcm0), 0.7);
+  return { GF0, GF };
+}
+
+function cscm_modulus(fc){
+  const Ec0 = 21.5e3;
+  const delta_f = 8;
+  const fcm = fc + delta_f;
+  const fcm0 = 10;
+  const nu = 0.2;
+
+  // matches your python exactly:
+  const E = Ec0 * Math.pow(((fcm + delta_f) / fcm0), 1/3);
+
+  const G = E / (2 * (1 + nu));
+  const K = E / (3 * (1 - 2 * nu));
+  return { G, K };
+}
+
+function cscm_alpha_beta(fc){
+  const alpha = 13.9846 * Math.exp(fc / 68.8756) - 13.8981;
+  const theta = 0.3533 - 3.3294e-4 * fc - 3.8182e-6 * (fc**2);
+  const lamda = 3.6657 * Math.exp(fc / 39.9363) - 4.7092;
+  const beta  = 18.17791 * (fc ** (-1.7163));
+
+  const alpha1 = 0.82, theta1 = 0.0, lamda1 = 0.24, beta1 = 0.33565 * (fc ** (-0.95383));
+  const alpha2 = 0.76, theta2 = 0.0, lamda2 = 0.26, beta2 = 0.285   * (fc ** (-0.94843));
+
+  return { alpha, theta, lamda, beta, alpha1, theta1, lamda1, beta1, alpha2, theta2, lamda2, beta2 };
+}
+
+function cscm_r_xd(fc){
+  const R  = 4.45994 * Math.exp(-fc / 11.51679) + 1.95358;
+  const XD = 17.087 + 1.892 * fc;
+  return { R, XD };
+}
+
+function cscm_additional(fc){
+  const fpsi = fc * 145.038;
+  const eta0c = (1.2772337e-11 * (fpsi ** 2) - 1.0613722e-7 * fpsi + 3.203497e-4);
+  const nc = 0.78;
+
+  const eta0t = (8.0614774e-13 * (fc ** 2) - 9.77736719e-10 * fc + 5.0752351e-5);
+  const nt = 0.48;
+
+  const overc = 1.309663e-2 * (fc ** 2) - 0.3927659 * fc + 21.45;
+  const overt = 1.309663e-2 * (fc ** 2) - 0.3927659 * fc + 21.45;
+
+  return { eta0c, nc, eta0t, nt, overc, overt, srate:1.0, repow:1.0 };
+}
+
+function generateCSCM(values){
+  const MID  = Number(values.MID);
+  const RO   = Number(values.RO);
+  const fc   = Number(values.FC);
+  const dmax = Number(values.DMAX);
+
+  const { GF } = cscm_fracture_energy(fc, dmax);
+  const { G, K } = cscm_modulus(fc);
+  const ab = cscm_alpha_beta(fc);
+  const { R, XD } = cscm_r_xd(fc);
+  const ad = cscm_additional(fc);
+
+  const GFC = 100 * GF, GFT = GF, GFS = GF;
+  const B=100, D=0.1, PWRC=5, PWRT=1, PMOD=0;
+  const W=0.065, D1=0.000611, D2=0.000002;
+
+  const lines = [];
+  lines.push("*KEYWORD");
+  lines.push("*MAT_CSCM_TITLE");
+  lines.push(`MAT_CSCM_${fc}MPa`);
+
+  lines.push(
+    fmtInt(MID) +
+    fmtNum(RO, 4) +
+    fmtInt(1) +
+    padLeft("0.0", 10) +
+    fmtInt(0) +
+    padLeft("1.05", 10) +
+    padLeft("0.0", 10) +
+    fmtInt(0)
+  );
+
+  lines.push(fmtNum(0.0, 1));
+
+  lines.push(
+    fmtNum(G, 1) +
+    fmtNum(K, 1) +
+    fmtNum(ab.alpha, 4) +
+    fmtNum(ab.theta, 7) +
+    fmtNum(ab.lamda, 5) +
+    fmtNum(ab.beta, 7) +
+    fmtNum(0.0, 1) +
+    fmtNum(0.0, 1)
+  );
+
+  lines.push(
+    fmtNum(ab.alpha1, 2) +
+    fmtNum(ab.theta1, 1) +
+    fmtNum(ab.lamda1, 2) +
+    fmtNum(ab.beta1, 6) +
+    fmtNum(ab.alpha2, 2) +
+    fmtNum(ab.theta2, 1) +
+    fmtNum(ab.lamda2, 2) +
+    fmtNum(ab.beta2, 7)
+  );
+
+  lines.push(
+    fmtNum(R, 5) +
+    fmtNum(XD, 3) +
+    fmtNum(W, 3) +
+    fmtNum(D1, 6) +
+    fmtNum(D2, 6)
+  );
+
+  lines.push(
+    fmtNum(B, 1) +
+    fmtNum(GFC, 1) +
+    fmtNum(D, 1) +
+    fmtNum(GFT, 2) +
+    fmtNum(GFS, 2) +
+    fmtNum(PWRC, 1) +
+    fmtNum(PWRT, 1) +
+    fmtNum(PMOD, 1)
+  );
+
+  lines.push(
+    fmtNum(ad.eta0c, 7) +
+    fmtNum(ad.nc, 2) +
+    fmtNum(ad.eta0t, 7) +
+    fmtNum(ad.nt, 2) +
+    fmtNum(ad.overc, 5) +
+    fmtNum(ad.overt, 5) +
+    fmtNum(ad.srate, 1) +
+    fmtNum(ad.repow, 1)
+  );
+
+  lines.push("*END");
+
+  return { text: lines.join("\n") + "\n", fileName: `MAT_CSCM_${fc}MPa.k` };
+}
+
+async function init(){
+  const modelSel = document.getElementById("modelSel");
+  const formWrap = document.getElementById("formWrap");
+  const preview = document.getElementById("preview");
+  const dlBtn = document.getElementById("downloadBtn");
+  const copyBtn = document.getElementById("copyBtn");
+  const presetNormal = document.getElementById("presetNormal");
+  const presetHigh = document.getElementById("presetHigh");
+
+  const unitRibbon = document.getElementById("unitRibbon");
+  const unitText = document.getElementById("unitText");
+  const inputHint = document.getElementById("inputHint");
+  const fileNameText = document.getElementById("fileNameText");
+
+  const templates = await (await fetch(new URL("../data/templates.json", document.baseURI), { cache:"no-store" })).json();
+  for (const t of templates){
+    const opt = document.createElement("option");
+    opt.value = t.id;
+    opt.textContent = t.title;
+    modelSel.appendChild(opt);
+  }
+
+  const query = getQuery();
+  modelSel.value = query.id || templates[0]?.id;
+
+  let current = null;
+
+  function collectValues(){
+    const values = {};
+    for (const f of (current.fields || [])){
+      const el = formWrap.querySelector(`[data-key="${CSS.escape(f.key)}"]`);
+      values[f.key] = el ? el.value : "";
+    }
+    return values;
+  }
+
+  function compute(values){
+    if (current.generator === "cscm") return generateCSCM(values);
+    if (current.render) return { text: applyPlaceholders(current.render, values), fileName: current.fileName || `${current.id}.k` };
+    return { text:"", fileName:`${current.id}.k` };
+  }
+
+  function update(){
+    const out = compute(collectValues());
+    preview.textContent = out.text;
+    fileNameText.textContent = out.fileName || "";
+  }
+
+  function renderUnits(){
+    const u = current.unitSystem;
+    if (u && (u.name || u.note)){
+      unitRibbon.classList.remove("hidden");
+      unitText.textContent = u.note ? `${u.name} · ${u.note}` : `${u.name}`;
+    } else {
+      unitRibbon.classList.add("hidden");
+      unitText.textContent = "";
+    }
+  }
+
+  function renderForm(){
+    current = templates.find(x => x.id === modelSel.value);
+    if (!current) return;
+
+    renderUnits();
+    inputHint.textContent = (current.generator === "cscm") ? "Minimal inputs → auto parameters" : "";
+
+    formWrap.innerHTML = (current.fields || []).map(f => {
+      const val = (query[f.key] ?? f.default ?? "");
+      const inputType = (f.type === "int" || f.type === "number") ? "number" : "text";
+      const step = (f.type === "int") ? "1" : "any";
+      const unit = f.unit ? `<span class="text-xs px-2 py-1 rounded-lg border bg-slate-50 text-slate-600">${esc(f.unit)}</span>` : "";
+
+      return `
+        <div class="rounded-2xl border p-4 bg-white">
+          <div class="flex items-start justify-between gap-2">
+            <label class="text-sm font-semibold text-slate-800">${esc(f.label)}</label>
+            ${unit}
+          </div>
+          <input
+            class="mt-3 w-full px-3 py-2 rounded-xl border outline-none focus:ring-2 focus:ring-blue-200"
+            data-key="${esc(f.key)}"
+            name="${esc(f.key)}"
+            type="${inputType}"
+            step="${step}"
+            value="${esc(val)}"
+            ${f.required ? "required" : ""}
+          />
+        </div>
+      `;
+    }).join("");
+
+    update();
+  }
+
+  modelSel.addEventListener("change", () => {
+    history.replaceState(null, "", location.pathname + "?id=" + encodeURIComponent(modelSel.value));
+    renderForm();
+  });
+
+  formWrap.addEventListener("input", update);
+
+  dlBtn.addEventListener("click", () => {
+    const out = compute(collectValues());
+    downloadText(out.fileName, out.text);
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(preview.textContent || "");
+      copyBtn.textContent = "Copied";
+      setTimeout(()=>copyBtn.textContent="Copy", 1000);
+    } catch {
+      copyBtn.textContent = "Copy failed";
+      setTimeout(()=>copyBtn.textContent="Copy", 1200);
+    }
+  });
+
+  // Presets (only meaningful for CSCM)
+  presetNormal.addEventListener("click", () => {
+    setFieldValue(formWrap, "FC", 30);
+    setFieldValue(formWrap, "DMAX", 16);
+    setFieldValue(formWrap, "RO", 0.0023);
+    update();
+  });
+
+  presetHigh.addEventListener("click", () => {
+    setFieldValue(formWrap, "FC", 80);
+    setFieldValue(formWrap, "DMAX", 16);
+    setFieldValue(formWrap, "RO", 0.0024);
+    update();
+  });
+
+  renderForm();
+}
+
+init().catch(() => {
+  const preview = document.getElementById("preview");
+  if (preview) preview.textContent = "Could not load templates.json";
+});
