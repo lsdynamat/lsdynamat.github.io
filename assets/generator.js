@@ -1,5 +1,10 @@
 function esc(s){ return (s ?? "").toString(); }
-function getQuery(){ const sp = new URLSearchParams(location.search); const o={}; for (const [k,v] of sp.entries()) o[k]=v; return o; }
+function getQuery(){
+  const sp = new URLSearchParams(location.search);
+  const o = {};
+  for (const [k,v] of sp.entries()) o[k] = v;
+  return o;
+}
 
 function downloadText(filename, text){
   const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
@@ -12,8 +17,14 @@ function downloadText(filename, text){
   URL.revokeObjectURL(a.href);
 }
 
-function padLeft(str, width){ str = esc(str); return str.length >= width ? str : " ".repeat(width - str.length) + str; }
-function fmtInt(x, width=10){ return padLeft(String(Math.trunc(Number(x))), width); }
+function padLeft(str, width){
+  str = esc(str);
+  return str.length >= width ? str : " ".repeat(width - str.length) + str;
+}
+function fmtInt(x, width=10){
+  const n = Number(x);
+  return padLeft(String(Number.isFinite(n) ? Math.trunc(n) : 0), width);
+}
 function fmtNum(x, decimals, width=10){
   const n = Number(x);
   const s = Number.isFinite(n) ? n.toFixed(decimals) : "";
@@ -31,6 +42,11 @@ function applyPlaceholders(render, values){
 function setFieldValue(formWrap, key, value){
   const el = formWrap.querySelector(`[data-key="${CSS.escape(key)}"]`);
   if (el) el.value = value;
+}
+
+function toNumber(v, fallback){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
 }
 
 /* ---------- CSCM (ported from your Python) ---------- */
@@ -91,10 +107,11 @@ function cscm_additional(fc){
 }
 
 function generateCSCM(values){
-  const MID  = Number(values.MID);
-  const RO   = Number(values.RO);
-  const fc   = Number(values.FC);
-  const dmax = Number(values.DMAX);
+  // Inputs (unit system: mm-ms-g-N-MPa)
+  const MID  = toNumber(values.MID, 159);
+  const RO   = toNumber(values.RO, 0.0024); // g/mm^3
+  const fc   = toNumber(values.FC, 40);     // MPa
+  const dmax = toNumber(values.DMAX, 16);   // mm
 
   const { GF } = cscm_fracture_energy(fc, dmax);
   const { G, K } = cscm_modulus(fc);
@@ -108,11 +125,11 @@ function generateCSCM(values){
 
   const lines = [];
 
-  // ---- Header comments----//
+  // ---- Keyword deck (ONLY ONCE) ----
   lines.push("*KEYWORD");
   lines.push("*MAT_CSCM_TITLE");
 
-  // Comment lines LS-PrePost tends to show in COMMENT box
+  // Comments (LS-PrePost COMMENT box friendly)
   lines.push(`$ Name: Concrete, f_c = ${fc} MPa, agg.size = ${dmax} mm`);
   lines.push("$ Units: mm-ms-g-N-MPa");
   lines.push("$ Model: Continuous Surface Cap Model (CSCM) - MAT_159");
@@ -124,12 +141,7 @@ function generateCSCM(values){
   // Title line
   lines.push(`Concrete, f_c = ${fc} MPa, agg.size = ${dmax} mm`);
 
-
-  // ---- Keyword deck ----
-  lines.push("*KEYWORD");
-  lines.push("*MAT_CSCM_TITLE");
-  lines.push(`Concrete, f_c = ${fc} MPa, agg.size = ${dmax} mm`);
-
+  // Data lines
   lines.push(
     fmtInt(MID) +
     fmtNum(RO, 4) +
@@ -200,7 +212,7 @@ function generateCSCM(values){
   return { text: lines.join("\n") + "\n", fileName: `MAT_CSCM_${fc}MPa.k` };
 }
 
-
+/* ---------- App init (unchanged logic) ---------- */
 async function init(){
   const modelSel = document.getElementById("modelSel");
   const formWrap = document.getElementById("formWrap");
@@ -318,18 +330,17 @@ async function init(){
     }
   });
 
-  // Presets (only meaningful for CSCM)
   presetNormal.addEventListener("click", () => {
     setFieldValue(formWrap, "FC", 30);
     setFieldValue(formWrap, "DMAX", 16);
-    setFieldValue(formWrap, "RO", 0.0023);
+    setFieldValue(formWrap, "RO", 0.0023); // g/mm^3
     update();
   });
 
   presetHigh.addEventListener("click", () => {
     setFieldValue(formWrap, "FC", 80);
     setFieldValue(formWrap, "DMAX", 16);
-    setFieldValue(formWrap, "RO", 0.0024);
+    setFieldValue(formWrap, "RO", 0.0024); // g/mm^3
     update();
   });
 
