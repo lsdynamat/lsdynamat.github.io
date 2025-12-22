@@ -1,152 +1,90 @@
-function escapeHtml(s){
-  return (s || "").toString()
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generator | LS-DYNA Material Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-function pill(text){
-  return `<span class="px-2 py-1 text-xs rounded-full border bg-slate-50">${escapeHtml(text)}</span>`;
-}
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5EWJGRS5S"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B5EWJGRS5S');
+  </script>
+</head>
 
-function getId(){
-  const sp = new URLSearchParams(location.search);
-  return sp.get("id");
-}
-
-async function initModel(){
-  const container = document.getElementById("modelContainer");
-  const id = getId();
-
-  if (!id){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Missing id</div>`;
-    return;
-  }
-
-  try{
-    const url = new URL("../data/materials.json", document.baseURI);
-    const res = await fetch(url, { cache: "no-store" });
-    const models = await res.json();
-
-    const m = models.find(x => x.id === id);
-    if (!m){
-      container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Not found: <span class="font-mono">${escapeHtml(id)}</span></div>`;
-      return;
-    }
-
-    document.title = `${m.mat || m.id} | LS-DYNA Material Hub`;
-
-    const tags = (m.tags || []).map(pill).join(" ");
-    const keywords = (m.keywords || []).map(k => `<li class="font-mono text-sm">${escapeHtml(k)}</li>`).join("");
-    const useCases = (m.useCases || []).map(u => `<li class="text-sm text-slate-700">${escapeHtml(u)}</li>`).join("");
-    const params = (m.params || []).map(p => `
-      <tr class="border-t">
-        <td class="py-2 pr-4 font-mono text-sm">${escapeHtml(p.key || "")}</td>
-        <td class="py-2 text-sm text-slate-700">${escapeHtml(p.desc || "")}</td>
-      </tr>
-    `).join("");
-
-    const refs = (m.refs || []).map(r => `
-      <li class="text-sm">
-        <a class="text-blue-700 hover:underline" href="${escapeHtml(r.url || "#")}" target="_blank" rel="noreferrer">
-          ${escapeHtml(r.label || r.url || "")}
-        </a>
-      </li>
-    `).join("");
-
-    const example = m.example ? escapeHtml(m.example) : "";
-
-    const genId = m.generatorId || "";
-    const genBtn = genId ? `
-      <a class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm"
-         href="../generator/?id=${encodeURIComponent(genId)}" target="_blank" rel="noreferrer">
-        Open in Generator →
+<body class="bg-slate-50 text-slate-900">
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="../" class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
+        <div class="leading-tight">
+          <div class="font-semibold">LS-DYNA Material Hub</div>
+          <div class="text-xs text-slate-500">Keyword Generator</div>
+        </div>
       </a>
-    ` : "";
 
-    container.innerHTML = `
-      <div class="bg-white border rounded-2xl p-6 shadow-sm">
-        <div class="flex items-center justify-end mb-4">
-          ${genBtn}
-        </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a class="text-slate-700 hover:text-slate-900" href="../">Home</a>
+        <a class="text-slate-700 hover:text-slate-900" href="../library/">Material Library</a>
+        <a class="font-semibold text-blue-600" href="./">Generator</a>
+        <a class="text-slate-700 hover:text-slate-900" href="../pages/about.html">About</a>
+        <a class="text-slate-700 hover:text-slate-900" href="../pages/contact.html">Contact</a>
+      </nav>
 
-        <div class="flex flex-wrap gap-2 mb-4">
-          ${pill(m.category || "other")}
-          ${tags}
-        </div>
+      <a href="../library/" class="px-4 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm font-semibold">
+        Browse library →
+      </a>
+    </div>
+  </header>
 
-        <h1 class="text-2xl font-extrabold">${escapeHtml(m.name || "")}</h1>
-        <div class="text-slate-500 mt-1">${escapeHtml(m.mat || "")}</div>
-
-        ${m.summary ? `<p class="mt-4 text-slate-700">${escapeHtml(m.summary)}</p>` : ""}
-
-        <div class="mt-8 grid gap-6">
-          ${(m.useCases && m.useCases.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Use cases</h2>
-              <ul class="list-disc pl-5">${useCases}</ul>
-            </section>
-          ` : ""}
-
-          ${(m.keywords && m.keywords.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Keywords</h2>
-              <ul class="list-disc pl-5">${keywords}</ul>
-            </section>
-          ` : ""}
-
-          ${(m.params && m.params.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Key parameters</h2>
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <thead>
-                    <tr class="text-left text-xs uppercase tracking-wide text-slate-500">
-                      <th class="py-2 pr-4">Param</th>
-                      <th class="py-2">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>${params}</tbody>
-                </table>
-              </div>
-            </section>
-          ` : ""}
-
-          ${example ? `
-            <section>
-              <div class="flex items-center justify-between gap-3 flex-wrap">
-                <h2 class="font-extrabold">Example</h2>
-                <button id="copyBtn" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm">
-                  Copy
-                </button>
-              </div>
-              <pre class="mt-3 text-sm bg-slate-950 text-slate-100 rounded-xl p-4 overflow-auto"><code>${example}</code></pre>
-            </section>
-          ` : ""}
-
-          ${(m.refs && m.refs.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">References</h2>
-              <ul class="list-disc pl-5">${refs}</ul>
-            </section>
-          ` : ""}
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold">Keyword Generator</h1>
+        <div id="unitRibbon" class="mt-3 hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl border bg-white">
+          <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">Units</span>
+          <span id="unitText" class="text-sm font-semibold"></span>
         </div>
       </div>
-    `;
 
-    const copyBtn = document.getElementById("copyBtn");
-    if (copyBtn){
-      copyBtn.addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(m.example || ""); copyBtn.textContent = "Copied"; }
-        catch { copyBtn.textContent = "Copy failed"; }
-        setTimeout(()=>copyBtn.textContent="Copy", 1200);
-      });
-    }
-  } catch(e){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Could not load data</div>`;
-  }
-}
+      <div class="flex flex-wrap gap-2">
+        <button id="presetNormal" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm">Preset: Normal</button>
+        <button id="presetHigh" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm">Preset: High-strength</button>
+        <button id="copyBtn" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm">Copy</button>
+        <button id="downloadBtn" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 font-semibold">Download .k</button>
+      </div>
+    </div>
 
-initModel();
+    <div class="mt-6 bg-white border rounded-2xl p-4">
+      <label class="text-sm font-semibold text-slate-700">Model</label>
+      <select id="modelSel" class="mt-2 w-full px-3 py-2 rounded-xl border bg-white"></select>
+    </div>
+
+    <div class="mt-6 grid lg:grid-cols-2 gap-6 items-start">
+      <section class="bg-white border rounded-2xl p-5">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div class="font-extrabold">Inputs</div>
+          <div class="text-xs text-slate-500" id="inputHint"></div>
+        </div>
+        <div class="mt-4 grid md:grid-cols-2 gap-4" id="formWrap"></div>
+      </section>
+
+      <section class="bg-white border rounded-2xl overflow-hidden shadow-sm">
+        <div class="px-5 py-3 border-b bg-slate-50 flex items-center justify-between">
+          <div class="font-extrabold">Preview</div>
+          <div class="text-xs text-slate-500" id="fileNameText"></div>
+        </div>
+        <div class="p-4">
+          <pre class="text-sm bg-slate-950 text-slate-100 rounded-xl p-4 overflow-auto">
+<code id="preview" class="font-mono"></code></pre>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="../assets/generator.js"></script>
+</body>
+</html>
