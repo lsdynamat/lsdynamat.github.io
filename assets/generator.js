@@ -278,7 +278,7 @@ async function init(){
     if (!current) return;
 
     renderUnits();
-    inputHint.textContent = (current.generator === "cscm") ? "Minimal inputs → auto parameters" : "";
+    inputHint.textContent = (current.generator === "cscm") ? "Auto-calculated from f'c and dmax" : "";
 
     formWrap.innerHTML = (current.fields || []).map(f => {
       const val = (query[f.key] ?? f.default ?? "");
