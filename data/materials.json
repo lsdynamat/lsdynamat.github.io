@@ -1,42 +1,72 @@
 [
   {
-    "category": "metals",
-    "level": "Simple",
-    "name": "MAT_PIECEWISE_LINEAR_PLASTICITY",
+    "id": "mat_024",
     "mat": "*MAT_024",
-    "desc": "Piecewise linear plasticity model commonly used for metals with multi-segment stress–strain curves.",
-    "tags": ["Strain rate"],
-    "url": "mat_024.html",
-    "popularity": 95
-  },
-  {
+    "name": "MAT_PIECEWISE_LINEAR_PLASTICITY",
     "category": "metals",
-    "level": "Intermediate",
-    "name": "MAT_JOHNSON_COOK",
+    "complexity": "Simple",
+    "summary": "Piecewise linear plasticity model commonly used for metals with multi-segment stress–strain curves.",
+    "tags": ["strain rate", "plasticity"],
+    "keywords": ["*MAT_PIECEWISE_LINEAR_PLASTICITY", "*MAT_024"],
+    "useCases": ["metals", "general plasticity", "impact (basic)"],
+    "params": [
+      { "key": "RO", "desc": "Density" },
+      { "key": "E", "desc": "Young's modulus" },
+      { "key": "PR", "desc": "Poisson's ratio" }
+    ],
+    "example": "*MAT_PIECEWISE_LINEAR_PLASTICITY\n$ MID RO E PR SIGY ETAN ...\n24 7.85e-9 210000 0.30 250 1000 ...",
+    "refs": [
+      { "label": "LS-DYNA Keyword Manual", "url": "https://www.lstc.com/" }
+    ],
+    "popularity": 95,
+    "updatedAt": "2025-12-22"
+  },
+  {
+    "id": "mat_015",
     "mat": "*MAT_015",
-    "desc": "Johnson–Cook model for metals at high strain rate and/or elevated temperature (impact/penetration).",
-    "tags": ["Strain rate", "Temperature"],
-    "url": "#",
-    "popularity": 90
+    "name": "MAT_JOHNSON_COOK",
+    "category": "metals",
+    "complexity": "Intermediate",
+    "summary": "Johnson–Cook model for metals at high strain rate and/or elevated temperature.",
+    "tags": ["strain rate", "temperature"],
+    "keywords": ["*MAT_JOHNSON_COOK", "*MAT_015"],
+    "useCases": ["impact", "penetration"],
+    "params": [],
+    "example": "",
+    "refs": [],
+    "popularity": 90,
+    "updatedAt": "2025-12-22"
   },
   {
-    "category": "concrete",
-    "level": "Advanced",
-    "name": "MAT_CSCM (Continuous Surface Cap Model)",
+    "id": "mat_159",
     "mat": "*MAT_159",
-    "desc": "Advanced concrete model with damage and rate effects; widely used for RC, blast, and impact simulations.",
-    "tags": ["Damage", "Strain rate"],
-    "url": "#",
-    "popularity": 92
+    "name": "MAT_CSCM (Continuous Surface Cap Model)",
+    "category": "concrete",
+    "complexity": "Advanced",
+    "summary": "Advanced concrete model with damage and rate effects; widely used for RC, blast, and impact simulations.",
+    "tags": ["damage", "strain rate"],
+    "keywords": ["*MAT_CSCM", "*MAT_159"],
+    "useCases": ["rc", "blast", "impact"],
+    "params": [],
+    "example": "",
+    "refs": [],
+    "popularity": 92,
+    "updatedAt": "2025-12-22"
   },
   {
-    "category": "rubber",
-    "level": "Intermediate",
-    "name": "MAT_HYPERELASTIC_RUBBER (Mooney-Rivlin)",
+    "id": "mat_077h",
     "mat": "*MAT_077H",
-    "desc": "Hyperelastic rubber/elastomer model based on Mooney–Rivlin; common for seals, tires, and pads.",
-    "tags": ["Hyperelastic"],
-    "url": "#",
-    "popularity": 85
+    "name": "MAT_HYPERELASTIC_RUBBER (Mooney-Rivlin)",
+    "category": "rubber",
+    "complexity": "Intermediate",
+    "summary": "Hyperelastic rubber/elastomer model based on Mooney–Rivlin.",
+    "tags": ["hyperelastic"],
+    "keywords": ["*MAT_HYPERELASTIC_RUBBER", "*MAT_077H"],
+    "useCases": ["seals", "pads"],
+    "params": [],
+    "example": "",
+    "refs": [],
+    "popularity": 85,
+    "updatedAt": "2025-12-22"
   }
 ]
