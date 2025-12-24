@@ -1,71 +1,53 @@
-const CAT_LABEL = {
-  metals: "Metals",
-  concrete: "Concrete",
-  rubber: "Rubber",
-  polymers: "Polymers",
-  foam: "Foams",
-  composites: "Composites",
-  wood: "Wood",
-  other: "Other"
-};
-
-const CAT_BG = {
-  metals: "bg-slate-100",
-  concrete: "bg-stone-100",
-  rubber: "bg-pink-100",
-  polymers: "bg-sky-100",
-  foam: "bg-cyan-100",
-  composites: "bg-purple-100",
-  wood: "bg-amber-100",
-  other: "bg-slate-100"
-};
-
-function niceCat(c){
-  if (!c) return "Other";
-  return CAT_LABEL[c] || (c.charAt(0).toUpperCase() + c.slice(1));
+async function loadJson(url){
+  const res = await fetch(url, { cache:"no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.url}`);
+  return res.json();
 }
-function bgCat(c){ return CAT_BG[c] || "bg-slate-100"; }
+
+function $(id){ return document.getElementById(id); }
 
 function countBy(arr, keyFn){
-  const map = new Map();
+  const m = new Map();
   for (const x of arr){
     const k = keyFn(x);
-    map.set(k, (map.get(k) || 0) + 1);
+    m.set(k, (m.get(k) || 0) + 1);
   }
-  return map;
+  return m;
 }
 
-async function initHome(){
-  const statModels = document.getElementById("statModels");
-  const statCats = document.getElementById("statCats");
-  const popularGrid = document.getElementById("popularGrid");
+async function init(){
+  const year = $("year");
+  if (year) year.textContent = new Date().getFullYear();
 
-  try{
-    const url = new URL("./data/materials.json", document.baseURI);
-    const res = await fetch(url, { cache: "no-store" });
-    const models = await res.json();
+  const models = await loadJson(new URL("./data/materials.json", document.baseURI));
 
-    statModels.textContent = String(models.length);
+  // Stats
+  $("statModels").textContent = String(models.length);
 
-    const catMap = countBy(models, m => m.category || "other");
-    statCats.textContent = String(catMap.size);
+  const types = new Set(models.map(m => (m.category || "other").toLowerCase()));
+  $("statTypes").textContent = String(types.size);
 
-    const top = Array.from(catMap.entries())
-      .sort((a,b) => b[1]-a[1])
-      .slice(0,5);
+  // Popular categories (top 6)
+  const byCat = countBy(models, m => (m.category || "other").toLowerCase());
+  const cats = [...byCat.entries()].sort((a,b) => b[1]-a[1]).slice(0, 6);
 
-    popularGrid.innerHTML = top.map(([cat, n]) => `
-      <a href="./library/?cat=${encodeURIComponent(cat)}"
-         class="block rounded-2xl p-4 border hover:shadow-sm transition ${bgCat(cat)}">
-        <div class="font-extrabold">${niceCat(cat)}</div>
-        <div class="text-xs text-slate-600 mt-1">${n}</div>
-      </a>
-    `).join("");
-  } catch(e){
-    statModels.textContent = "—";
-    statCats.textContent = "—";
-    popularGrid.innerHTML = `<div class="rounded-2xl bg-slate-100 p-4 border">No data</div>`;
-  }
+  const grid = $("popularGrid");
+  grid.innerHTML = cats.map(([cat, n]) => `
+    <div class="card">
+      <div class="pills">
+        <span class="pill">${cat}</span>
+      </div>
+      <h3>${cat[0].toUpperCase() + cat.slice(1)}</h3>
+      <div class="muted">${n} models</div>
+      <div class="actions">
+        <a class="btn btn-primary" href="./library/?cat=${encodeURIComponent(cat)}">Browse</a>
+      </div>
+    </div>
+  `).join("");
 }
 
-initHome();
+init().catch((e) => {
+  console.error(e);
+  const grid = document.getElementById("popularGrid");
+  if (grid) grid.innerHTML = `<div class="card">Could not load materials.json</div>`;
+});
