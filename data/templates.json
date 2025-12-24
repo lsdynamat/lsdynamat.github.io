@@ -1,31 +1,5 @@
 [
   {
-    "id": "mat_024",
-    "title": "*MAT_024 | Piecewise Linear Plasticity",
-    "fileName": "MAT024_generated.k",
-    "render": "*KEYWORD\n*MAT_PIECEWISE_LINEAR_PLASTICITY\n$ MID       RO          E         PR        SIGY       ETAN\n{{MID}}   {{RO}}     {{E}}      {{PR}}     {{SIGY}}    {{ETAN}}\n*END\n",
-    "fields": [
-      { "key": "MID",  "label": "Material ID (MID)", "type": "int", "default": 24, "required": true, "unit": "" },
-      { "key": "RO",   "label": "Density (RO)", "type": "number", "default": 7.85e-9, "required": true, "unit": "tonne/mm³" },
-      { "key": "E",    "label": "Young’s modulus (E)", "type": "number", "default": 210000, "required": true, "unit": "MPa" },
-      { "key": "PR",   "label": "Poisson’s ratio (PR)", "type": "number", "default": 0.30, "required": true, "unit": "" },
-      { "key": "SIGY", "label": "Yield stress (SIGY)", "type": "number", "default": 250, "required": true, "unit": "MPa" },
-      { "key": "ETAN", "label": "Tangent modulus (ETAN)", "type": "number", "default": 1000, "required": true, "unit": "MPa" }
-    ],
-    "unitSystem": { "name": "mm-s-tonne-N-MPa", "note": "MPa for stress/pressure, tonne/mm³ for density" }
-  },
-  {
-      "id": "mat_084_085",
-      "title": "*MAT_084/085 | Winfrith Concrete",
-      "fileName": "MAT_WINFRITH_CONCRETE.k",
-      "generator": "winfrith",
-      "unitSystem": {
-        "name": "mm-ms-g-N-MPa",
-        "note": "MPa for stress/pressure (density in g/mm³)"
-      },
-
- 
-  {
     "id": "mat_159",
     "title": "*MAT_159 | CSCM (Concrete)",
     "fileName": "MAT_CSCM_generated.k",
@@ -36,6 +10,22 @@
     },
     "fields": [
       { "key": "MID",  "label": "Material ID (MID)", "type": "int", "default": 159, "required": true, "unit": "" },
+      { "key": "FC",   "label": "Uniaxial compressive strength f'c", "type": "number", "default": 40, "required": true, "unit": "MPa" },
+      { "key": "DMAX", "label": "Maximum aggregate size dmax", "type": "number", "default": 16, "required": true, "unit": "mm" },
+      { "key": "RO",   "label": "Density ρ", "type": "number", "default": 0.0023, "required": true, "unit": "g/mm³" }
+    ]
+  },
+  {
+    "id": "mat_084_085",
+    "title": "*MAT_084/085 | Winfrith Concrete",
+    "fileName": "MAT_WINFRITH_generated.k",
+    "generator": "winfrith",
+    "unitSystem": {
+      "name": "mm-ms-g-N-MPa",
+      "note": "MPa for stress/pressure (density in g/mm³)"
+    },
+    "fields": [
+      { "key": "MID",  "label": "Material ID (MID)", "type": "int", "default": 84, "required": true, "unit": "" },
       { "key": "FC",   "label": "Uniaxial compressive strength f'c", "type": "number", "default": 40, "required": true, "unit": "MPa" },
       { "key": "DMAX", "label": "Maximum aggregate size dmax", "type": "number", "default": 16, "required": true, "unit": "mm" },
       { "key": "RO",   "label": "Density ρ", "type": "number", "default": 0.0023, "required": true, "unit": "g/mm³" }
