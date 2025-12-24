@@ -37,10 +37,17 @@ function setQuery(params){
   history.replaceState(null, "", location.pathname + (qs ? "?" + qs : ""));
 }
 
+/* ---- improved loader: shows HTTP status + JSON parse errors ---- */
 async function loadJson(url){
   const res = await fetch(url, { cache:"no-store" });
-  if (!res.ok) throw new Error("Fetch failed");
-  return res.json();
+  if (!res.ok){
+    throw new Error(`HTTP ${res.status} when fetching: ${res.url}`);
+  }
+  try{
+    return await res.json();
+  } catch (e){
+    throw new Error(`Invalid JSON in ${res.url}: ${e.message}`);
+  }
 }
 
 function parseMatNumber(m){
@@ -48,6 +55,7 @@ function parseMatNumber(m){
   const id = (m.id || "").toString();
   const match = id.match(/mat_(\d+)/i);
   if (match) return Number(match[1]);
+
   // fallback: try from mat field "*MAT_024"
   const mat = (m.mat || "").toString();
   const match2 = mat.match(/(\d+)/);
@@ -100,7 +108,12 @@ async function init(){
   const catEl = document.getElementById("cat");
   const sortEl = document.getElementById("sort");
 
-  const models = await loadJson(new URL("../data/materials.json", document.baseURI));
+  if (!grid || !countText || !qEl || !catEl || !sortEl){
+    throw new Error("Missing required DOM elements in library page");
+  }
+
+  const dataUrl = new URL("../data/materials.json", document.baseURI);
+  const models = await loadJson(dataUrl);
 
   // populate categories
   const cats = Array.from(
@@ -171,7 +184,10 @@ async function init(){
   render();
 }
 
-init().catch(() => {
+init().catch((e) => {
+  console.error(e);
   const countText = document.getElementById("countText");
-  if (countText) countText.textContent = "Could not load materials.json";
+  if (countText){
+    countText.textContent = e?.message || "Could not load materials.json";
+  }
 });
