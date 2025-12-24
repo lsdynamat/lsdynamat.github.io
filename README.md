@@ -1,17 +1,25 @@
-lsdyna-material-hub/
-├─ index.html
-├─ library/
-│  └─ index.html
-├─ model/
-│  └─ index.html
-├─ generator/
-│  └─ index.html
-├─ assets/
-│  ├─ styles.css
-│  ├─ home.js
-│  ├─ library.js
-│  ├─ model.js
-│  └─ generator.js
-└─ data/
-   ├─ materials.json
-   └─ templates.json
+/
+  index.html
+  library.html
+  keyword.html
+  about.html
+  contact.html
+
+  /assets
+    /css
+      styles.css
+    /data
+      materials.json
+      changelog.json
+    /js
+      format.js
+      storage.js
+      registry.js
+      app-common.js
+      app-home.js
+      app-library.js
+      app-keyword.js
+      app-contact.js
+      /generators
+        cscm.js
+        kcc_rel3.js
