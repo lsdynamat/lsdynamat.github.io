@@ -1,17 +1,17 @@
-/
+lsdyna-material-hub/
 ├─ index.html
-├─ 404.html
-├─ data/
-│  └─ materials.json
+├─ library/
+│  └─ index.html
+├─ model/
+│  └─ index.html
+├─ generator/
+│  └─ index.html
 ├─ assets/
-│  ├─ site.css
+│  ├─ styles.css
 │  ├─ home.js
 │  ├─ library.js
-│  └─ model.js
-├─ library/
-│  ├─ index.html
-│  └─ model.html
-└─ pages/
-   ├─ about.html
-   ├─ contact.html
-   └─ contribute.html
+│  ├─ model.js
+│  └─ generator.js
+└─ data/
+   ├─ materials.json
+   └─ templates.json
