@@ -58,19 +58,22 @@ async function initModel(){
 
     const example = m.example ? escapeHtml(m.example) : "";
 
-    const genId = m.generatorId || "";
+    // ---- generatorId (consistent) ----
+    const genId = (m.generatorId || "").toString().trim();
     const genBtn = genId ? `
       <a class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm"
-         href="../generator/?id=${encodeURIComponent(genId)}" target="_blank" rel="noreferrer">
+         href="../generator/?id=${encodeURIComponent(genId)}" rel="noreferrer">
         Open in Generator →
       </a>
     ` : "";
 
     container.innerHTML = `
       <div class="bg-white border rounded-2xl p-6 shadow-sm">
-        <div class="flex items-center justify-end mb-4">
-          ${genBtn}
-        </div>
+        ${genBtn ? `
+          <div class="flex items-center justify-end mb-4">
+            ${genBtn}
+          </div>
+        ` : ""}
 
         <div class="flex flex-wrap gap-2 mb-4">
           ${pill(m.category || "other")}
@@ -144,6 +147,7 @@ async function initModel(){
         setTimeout(()=>copyBtn.textContent="Copy", 1200);
       });
     }
+
   } catch(e){
     container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Could not load data</div>`;
   }
