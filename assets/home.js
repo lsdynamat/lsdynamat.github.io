@@ -15,6 +15,13 @@ function countBy(arr, keyFn){
   return m;
 }
 
+function titleCase(s){
+  return (s || "")
+    .split(/[\s_-]+/)
+    .map(w => w ? (w[0].toUpperCase() + w.slice(1)) : "")
+    .join(" ");
+}
+
 async function init(){
   const year = $("year");
   if (year) year.textContent = new Date().getFullYear();
@@ -22,9 +29,8 @@ async function init(){
   const models = await loadJson(new URL("./data/materials.json", document.baseURI));
 
   // Stats
-  $("statModels").textContent = String(models.length);
-
   const types = new Set(models.map(m => (m.category || "other").toLowerCase()));
+  $("statModels").textContent = String(models.length);
   $("statTypes").textContent = String(types.size);
 
   // Popular categories (top 6)
@@ -37,8 +43,10 @@ async function init(){
       <div class="pills">
         <span class="pill">${cat}</span>
       </div>
-      <h3>${cat[0].toUpperCase() + cat.slice(1)}</h3>
+
+      <h3>${titleCase(cat)}</h3>
       <div class="muted">${n} models</div>
+
       <div class="actions">
         <a class="btn btn-primary" href="./library/?cat=${encodeURIComponent(cat)}">Browse</a>
       </div>
@@ -50,4 +58,8 @@ init().catch((e) => {
   console.error(e);
   const grid = document.getElementById("popularGrid");
   if (grid) grid.innerHTML = `<div class="card">Could not load materials.json</div>`;
+  const s1 = document.getElementById("statModels");
+  const s2 = document.getElementById("statTypes");
+  if (s1) s1.textContent = "—";
+  if (s2) s2.textContent = "—";
 });
