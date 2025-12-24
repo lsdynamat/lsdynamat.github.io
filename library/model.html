@@ -2,35 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Model | LS-DYNA Material Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../assets/site.css" />
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5EWJGRS5S"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B5EWJGRS5S');
-  </script>
+  <link rel="stylesheet" href="../assets/styles.css" />
 </head>
-
-<body class="bg-slate-50 text-slate-900">
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="./" class="text-sm px-3 py-2 rounded-lg border bg-white hover:bg-slate-50">← Library</a>
-      <nav class="hidden md:flex items-center gap-5 text-sm">
-        <a class="text-slate-700 hover:text-slate-900" href="../">Home</a>
-        <a class="text-slate-700 hover:text-slate-900" href="../pages/about.html">About</a>
-        <a class="text-slate-700 hover:text-slate-900" href="../pages/contact.html">Contact</a>
-        <a class="text-slate-700 hover:text-slate-900" href="../pages/contribute.html">Contribute</a>
-      </nav>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">
+      <div class="logo">LS</div>
+      <div>
+        <div class="brand-title">LS-DYNA Material Hub</div>
+        <div class="brand-sub">Material Models</div>
+      </div>
+    </a>
+    <nav class="nav">
+      <a class="nav-link" href="../">Home</a>
+      <a class="nav-link" href="../library/">Material Library</a>
+      <a class="nav-link" href="../generator/">Keyword Generator</a>
+    </nav>
+    <div class="cta">
+      <a class="btn" href="../library/">Back to library →</a>
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 py-8">
+  <main class="page">
     <div id="modelContainer"></div>
+    <div class="footer">© <span id="year"></span> LS-DYNA Material Hub</div>
   </main>
 
   <script src="../assets/model.js"></script>
