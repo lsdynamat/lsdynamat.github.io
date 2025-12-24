@@ -2,97 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LS-DYNA Material Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./assets/site.css" />
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B5EWJGRS5S"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B5EWJGRS5S');
-  </script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Keyword Generator | LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
 </head>
-
-<body class="bg-slate-50 text-slate-900">
-  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur border-b">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="./" class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold">LS</div>
-        <div class="leading-tight">
-          <div class="font-semibold">LS-DYNA Material Hub</div>
-          <div class="text-xs text-slate-500">Material Models</div>
-        </div>
-      </a>
-
-      <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a class="font-semibold text-blue-600" href="./">Home</a>
-        <a class="text-slate-700 hover:text-slate-900" href="./library/">Library</a>
-        <a class="text-slate-700 hover:text-slate-900" href="./pages/about.html">About</a>
-        <a class="text-slate-700 hover:text-slate-900" href="./pages/contact.html">Contact</a>
-        <a class="text-slate-700 hover:text-slate-900" href="./pages/contribute.html">Contribute</a>
-      </nav>
-
-      <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
-        Open library →
-      </a>
-    </div>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">
+      <div class="logo">LS</div>
+      <div>
+        <div class="brand-title">LS-DYNA Material Hub</div>
+        <div class="brand-sub">Material Models</div>
+      </div>
+    </a>
+    <nav class="nav">
+      <a class="nav-link" href="../">Home</a>
+      <a class="nav-link" href="../library/">Material Library</a>
+      <a class="nav-link active" href="./">Keyword Generator</a>
+    </nav>
   </header>
 
-  <section class="bg-slate-950 text-white border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-12 grid lg:grid-cols-2 gap-10 items-start">
+  <main class="page">
+    <div class="page-head">
       <div>
-        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
-          LS-DYNA<br><span class="text-slate-300">Material Hub</span>
-        </h1>
-
-        <div class="mt-7 flex flex-wrap gap-3">
-          <a href="./library/"
-             class="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-white text-slate-950 font-semibold hover:bg-slate-100">
-            Browse library
-          </a>
-          <a href="#popular"
-             class="inline-flex items-center justify-center px-5 py-3 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 font-semibold">
-            Popular categories
-          </a>
-        </div>
+        <h1>Keyword Generator</h1>
+        <p class="sub">Fill inputs → generate keyword file.</p>
       </div>
-
-      <div class="grid gap-3">
-        <div class="bg-white text-slate-900 rounded-2xl border border-slate-200 p-5">
-          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Material Models</div>
-          <div id="statModels" class="text-3xl font-extrabold mt-1">—</div>
-        </div>
-
-        <div class="bg-white text-slate-900 rounded-2xl border border-slate-200 p-5">
-          <div class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Material Types</div>
-          <div id="statCats" class="text-3xl font-extrabold mt-1">—</div>
-        </div>
+      <div class="tools">
+        <select id="modelSel" class="select"></select>
+        <button id="downloadBtn" class="btn btn-primary">Download .k</button>
+        <button id="copyBtn" class="btn">Copy</button>
       </div>
     </div>
-  </section>
 
-  <section id="popular" class="max-w-6xl mx-auto px-4 -mt-8 pb-16">
-    <div class="bg-white rounded-3xl shadow border p-6">
-      <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="text-lg font-extrabold">Popular Categories</div>
-        <a href="./library/" class="text-sm px-3 py-2 rounded-xl border bg-white hover:bg-slate-50">
-          View all →
-        </a>
+    <div class="grid2">
+      <div>
+        <h2 class="h2">Inputs</h2>
+        <div class="grid" id="formWrap"></div>
       </div>
-
-      <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-3" id="popularGrid">
-        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
-        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
-        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
-        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
-        <div class="rounded-2xl bg-slate-100 p-4 animate-pulse h-[74px]"></div>
+      <div>
+        <div class="preview-head">
+          <h2 class="h2">Preview</h2>
+          <div class="muted" id="fileNameText"></div>
+        </div>
+        <pre class="pre"><code id="preview"></code></pre>
       </div>
     </div>
-  </section>
 
-  <script src="./assets/home.js"></script>
+    <div class="footer">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </main>
+
+  <script src="../assets/generator.js"></script>
 </body>
 </html>
