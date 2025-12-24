@@ -3,55 +3,70 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Keyword Generator | LS-DYNA Material Hub</title>
-  <link rel="stylesheet" href="../assets/styles.css" />
+  <title>LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="../">
+    <a class="brand" href="./">
       <div class="logo">LS</div>
       <div>
         <div class="brand-title">LS-DYNA Material Hub</div>
         <div class="brand-sub">Material Models</div>
       </div>
     </a>
+
     <nav class="nav">
-      <a class="nav-link" href="../">Home</a>
-      <a class="nav-link" href="../library/">Material Library</a>
-      <a class="nav-link active" href="./">Keyword Generator</a>
+      <a class="nav-link active" href="./">Home</a>
+      <a class="nav-link" href="./library/">Material Library</a>
+      <a class="nav-link" href="./generator/">Keyword Generator</a>
     </nav>
+
+    <div class="cta">
+      <a class="btn btn-primary" href="./library/">Open library →</a>
+    </div>
   </header>
 
   <main class="page">
-    <div class="page-head">
-      <div>
-        <h1>Keyword Generator</h1>
-        <p class="sub">Fill inputs → generate keyword file.</p>
-      </div>
-      <div class="tools">
-        <select id="modelSel" class="select"></select>
-        <button id="downloadBtn" class="btn btn-primary">Download .k</button>
-        <button id="copyBtn" class="btn">Copy</button>
-      </div>
-    </div>
+    <section class="hero">
+      <div class="hero-left">
+        <h1>LS-DYNA<br/>Material Hub</h1>
+        <p class="sub">A lightweight, searchable library for LS-DYNA material models.</p>
 
-    <div class="grid2">
-      <div>
-        <h2 class="h2">Inputs</h2>
-        <div class="grid" id="formWrap"></div>
-      </div>
-      <div>
-        <div class="preview-head">
-          <h2 class="h2">Preview</h2>
-          <div class="muted" id="fileNameText"></div>
+        <div class="actions">
+          <a class="btn btn-primary" href="./library/">Browse library</a>
+          <a class="btn" href="./generator/">Open generator</a>
         </div>
-        <pre class="pre"><code id="preview"></code></pre>
       </div>
-    </div>
+
+      <div class="hero-right">
+        <div class="statcard">
+          <div class="stat-label">Material Models</div>
+          <div class="stat-value" id="statModels">—</div>
+        </div>
+
+        <div class="statcard">
+          <div class="stat-label">Material Types</div>
+          <div class="stat-value" id="statTypes">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Popular Categories</h2>
+          <div class="sub">Top categories by number of models</div>
+        </div>
+        <a class="btn" href="./library/">View all →</a>
+      </div>
+
+      <div class="grid" id="popularGrid"></div>
+    </section>
 
     <div class="footer">© <span id="year"></span> LS-DYNA Material Hub</div>
   </main>
 
-  <script src="../assets/generator.js"></script>
+  <script src="./assets/home.js"></script>
 </body>
 </html>
