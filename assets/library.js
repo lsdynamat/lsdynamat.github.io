@@ -8,7 +8,7 @@ function escapeHtml(s){
 }
 
 function pill(text){
-  return `<span class="px-2 py-1 text-xs rounded-full border bg-slate-50">${escapeHtml(text)}</span>`;
+  return `<span class="pill">${escapeHtml(text)}</span>`;
 }
 
 function titleCase(s){
@@ -103,11 +103,9 @@ function setStatus(text){
 }
 
 async function init(){
-  // footer year (nếu có)
   const year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
 
-  // Required DOM elements (giờ báo rõ cái nào thiếu)
   const grid = document.getElementById("grid");
   const countText = document.getElementById("countText");
   const qEl = document.getElementById("q");
@@ -129,13 +127,11 @@ async function init(){
   const dataUrl = new URL("../data/materials.json", document.baseURI);
   const models = await loadJson(dataUrl);
 
-  // populate categories
   const cats = Array.from(new Set(models.map(m => (m.category || "other").toLowerCase()))).sort();
   catEl.innerHTML =
     `<option value="">All categories</option>` +
     cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(titleCase(c))}</option>`).join("");
 
-  // apply query
   const query = getQuery();
   qEl.value = query.q;
   catEl.value = query.cat;
@@ -159,29 +155,20 @@ async function init(){
       const genId = (m.generatorId || "").toString().trim();
 
       return `
-        <div class="bg-white border rounded-2xl p-6 shadow-sm">
-          <div class="flex flex-wrap gap-2 mb-4">
+        <div class="card">
+          <div class="pills">
             ${pill((m.category || "other").toLowerCase())}
             ${tags}
           </div>
 
-          <h3 class="text-lg font-extrabold">${escapeHtml(m.name || "")}</h3>
-          <div class="text-slate-500 mt-1">${escapeHtml(m.mat || "")}</div>
+          <h3>${escapeHtml(m.name || "")}</h3>
+          <div class="muted">${escapeHtml(m.mat || "")}</div>
 
-          ${m.summary ? `<p class="mt-4 text-slate-700 text-sm">${escapeHtml(m.summary)}</p>` : ""}
+          ${m.summary ? `<div class="desc">${escapeHtml(m.summary)}</div>` : ""}
 
-          <div class="mt-5 flex gap-2 flex-wrap">
-            <a class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm"
-               href="../model/?id=${encodeURIComponent(m.id)}">
-              View
-            </a>
-
-            ${genId ? `
-              <a class="px-3 py-2 rounded-xl border bg-slate-900 text-white hover:opacity-90 text-sm"
-                 href="../generator/?id=${encodeURIComponent(genId)}">
-                Generate
-              </a>
-            ` : ``}
+          <div class="actions">
+            <a class="btn" href="../model/?id=${encodeURIComponent(m.id)}">View</a>
+            ${genId ? `<a class="btn btn-primary" href="../generator/?id=${encodeURIComponent(genId)}">Generate</a>` : ``}
           </div>
         </div>
       `;
