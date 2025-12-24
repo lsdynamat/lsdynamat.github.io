@@ -37,7 +37,6 @@ function setQuery(params){
   history.replaceState(null, "", location.pathname + (qs ? "?" + qs : ""));
 }
 
-/* ---- improved loader: shows HTTP status + JSON parse errors ---- */
 async function loadJson(url){
   const res = await fetch(url, { cache:"no-store" });
   if (!res.ok){
@@ -51,12 +50,10 @@ async function loadJson(url){
 }
 
 function parseMatNumber(m){
-  // expects ids like mat_024, mat_159, mat_084_085, mat_077_h ...
   const id = (m.id || "").toString();
   const match = id.match(/mat_(\d+)/i);
   if (match) return Number(match[1]);
 
-  // fallback: try from mat field "*MAT_024"
   const mat = (m.mat || "").toString();
   const match2 = mat.match(/(\d+)/);
   return match2 ? Number(match2[1]) : Number.POSITIVE_INFINITY;
@@ -79,7 +76,6 @@ function sortModels(list, mode){
     return arr;
   }
 
-  // default: sort by MAT number
   arr.sort((a,b) =>
     parseMatNumber(a) - parseMatNumber(b) ||
     (a.name||"").localeCompare(b.name||"")
@@ -101,30 +97,45 @@ function matches(m, q){
   return hay.includes(s);
 }
 
+function setStatus(text){
+  const countText = document.getElementById("countText");
+  if (countText) countText.textContent = text;
+}
+
 async function init(){
+  // footer year (nếu có)
+  const year = document.getElementById("year");
+  if (year) year.textContent = new Date().getFullYear();
+
+  // Required DOM elements (giờ báo rõ cái nào thiếu)
   const grid = document.getElementById("grid");
   const countText = document.getElementById("countText");
   const qEl = document.getElementById("q");
   const catEl = document.getElementById("cat");
   const sortEl = document.getElementById("sort");
 
-  if (!grid || !countText || !qEl || !catEl || !sortEl){
-    throw new Error("Missing required DOM elements in library page");
+  const missing = [];
+  if (!grid) missing.push("#grid");
+  if (!countText) missing.push("#countText");
+  if (!qEl) missing.push("#q");
+  if (!catEl) missing.push("#cat");
+  if (!sortEl) missing.push("#sort");
+  if (missing.length){
+    throw new Error(`Missing required DOM elements: ${missing.join(", ")}`);
   }
+
+  setStatus("Loading…");
 
   const dataUrl = new URL("../data/materials.json", document.baseURI);
   const models = await loadJson(dataUrl);
 
   // populate categories
-  const cats = Array.from(
-    new Set(models.map(m => (m.category || "other").toLowerCase()))
-  ).sort();
-
+  const cats = Array.from(new Set(models.map(m => (m.category || "other").toLowerCase()))).sort();
   catEl.innerHTML =
     `<option value="">All categories</option>` +
     cats.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(titleCase(c))}</option>`).join("");
 
-  // apply query to UI controls
+  // apply query
   const query = getQuery();
   qEl.value = query.q;
   catEl.value = query.cat;
@@ -141,7 +152,7 @@ async function init(){
     if (cat) list = list.filter(m => (m.category || "other").toLowerCase() === cat);
     list = sortModels(list, sortMode);
 
-    countText.textContent = `Showing ${list.length} of ${models.length} models`;
+    setStatus(`Showing ${list.length} of ${models.length} models`);
 
     grid.innerHTML = list.map(m => {
       const tags = (m.tags || []).slice(0, 4).map(pill).join(" ");
@@ -186,8 +197,5 @@ async function init(){
 
 init().catch((e) => {
   console.error(e);
-  const countText = document.getElementById("countText");
-  if (countText){
-    countText.textContent = e?.message || "Could not load materials.json";
-  }
+  setStatus(e?.message || "Could not load materials.json");
 });
