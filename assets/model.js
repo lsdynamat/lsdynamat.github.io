@@ -8,7 +8,7 @@ function escapeHtml(s){
 }
 
 function pill(text){
-  return `<span class="px-2 py-1 text-xs rounded-full border bg-slate-50">${escapeHtml(text)}</span>`;
+  return `<span class="pill">${escapeHtml(text)}</span>`;
 }
 
 function getId(){
@@ -16,141 +16,137 @@ function getId(){
   return sp.get("id");
 }
 
-async function initModel(){
+async function loadJson(url){
+  const res = await fetch(url, { cache:"no-store" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.url}`);
+  return res.json();
+}
+
+async function init(){
+  const year = document.getElementById("year");
+  if (year) year.textContent = new Date().getFullYear();
+
   const container = document.getElementById("modelContainer");
   const id = getId();
-
   if (!id){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Missing id</div>`;
+    container.innerHTML = `<div class="card">Missing id</div>`;
     return;
   }
 
   try{
-    const url = new URL("../data/materials.json", document.baseURI);
-    const res = await fetch(url, { cache: "no-store" });
-    const models = await res.json();
-
+    const models = await loadJson(new URL("../data/materials.json", document.baseURI));
     const m = models.find(x => x.id === id);
+
     if (!m){
-      container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Not found: <span class="font-mono">${escapeHtml(id)}</span></div>`;
+      container.innerHTML = `<div class="card">Not found: <code>${escapeHtml(id)}</code></div>`;
       return;
     }
 
     document.title = `${m.mat || m.id} | LS-DYNA Material Hub`;
 
     const tags = (m.tags || []).map(pill).join(" ");
-    const keywords = (m.keywords || []).map(k => `<li class="font-mono text-sm">${escapeHtml(k)}</li>`).join("");
-    const useCases = (m.useCases || []).map(u => `<li class="text-sm text-slate-700">${escapeHtml(u)}</li>`).join("");
+    const keywords = (m.keywords || []).map(k => `<li><code>${escapeHtml(k)}</code></li>`).join("");
+    const useCases = (m.useCases || []).map(u => `<li>${escapeHtml(u)}</li>`).join("");
     const params = (m.params || []).map(p => `
-      <tr class="border-t">
-        <td class="py-2 pr-4 font-mono text-sm">${escapeHtml(p.key || "")}</td>
-        <td class="py-2 text-sm text-slate-700">${escapeHtml(p.desc || "")}</td>
+      <tr>
+        <td><code>${escapeHtml(p.key || "")}</code></td>
+        <td>${escapeHtml(p.desc || "")}</td>
       </tr>
     `).join("");
 
     const refs = (m.refs || []).map(r => `
-      <li class="text-sm">
-        <a class="text-blue-700 hover:underline" href="${escapeHtml(r.url || "#")}" target="_blank" rel="noreferrer">
+      <li>
+        <a href="${escapeHtml(r.url || "#")}" target="_blank" rel="noreferrer">
           ${escapeHtml(r.label || r.url || "")}
         </a>
       </li>
     `).join("");
 
-    const example = m.example ? escapeHtml(m.example) : "";
-
-    // ---- generatorId (consistent) ----
     const genId = (m.generatorId || "").toString().trim();
-    const genBtn = genId ? `
-      <a class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm"
-         href="../generator/?id=${encodeURIComponent(genId)}" rel="noreferrer">
-        Open in Generator →
-      </a>
-    ` : "";
 
     container.innerHTML = `
-      <div class="bg-white border rounded-2xl p-6 shadow-sm">
-        ${genBtn ? `
-          <div class="flex items-center justify-end mb-4">
-            ${genBtn}
-          </div>
-        ` : ""}
+      <div class="card">
+        <div class="actions" style="justify-content:flex-end;margin-top:0">
+          ${genId ? `<a class="btn btn-primary" href="../generator/?id=${encodeURIComponent(genId)}">Open in Generator →</a>` : ``}
+          <a class="btn" href="../library/">Back</a>
+        </div>
 
-        <div class="flex flex-wrap gap-2 mb-4">
+        <div class="pills" style="margin-top:10px">
           ${pill(m.category || "other")}
           ${tags}
         </div>
 
-        <h1 class="text-2xl font-extrabold">${escapeHtml(m.name || "")}</h1>
-        <div class="text-slate-500 mt-1">${escapeHtml(m.mat || "")}</div>
+        <h1 style="font-size:26px;margin-top:6px">${escapeHtml(m.name || "")}</h1>
+        <div class="muted" style="margin-top:6px">${escapeHtml(m.mat || "")}</div>
 
-        ${m.summary ? `<p class="mt-4 text-slate-700">${escapeHtml(m.summary)}</p>` : ""}
+        ${m.summary ? `<div class="desc">${escapeHtml(m.summary)}</div>` : ""}
 
-        <div class="mt-8 grid gap-6">
-          ${(m.useCases && m.useCases.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Use cases</h2>
-              <ul class="list-disc pl-5">${useCases}</ul>
-            </section>
-          ` : ""}
+        ${(m.useCases && m.useCases.length) ? `
+          <div style="margin-top:16px">
+            <h2 class="h2">Use cases</h2>
+            <ul>${useCases}</ul>
+          </div>
+        ` : ""}
 
-          ${(m.keywords && m.keywords.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Keywords</h2>
-              <ul class="list-disc pl-5">${keywords}</ul>
-            </section>
-          ` : ""}
+        ${(m.keywords && m.keywords.length) ? `
+          <div style="margin-top:16px">
+            <h2 class="h2">Keywords</h2>
+            <ul>${keywords}</ul>
+          </div>
+        ` : ""}
 
-          ${(m.params && m.params.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">Key parameters</h2>
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <thead>
-                    <tr class="text-left text-xs uppercase tracking-wide text-slate-500">
-                      <th class="py-2 pr-4">Param</th>
-                      <th class="py-2">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>${params}</tbody>
-                </table>
-              </div>
-            </section>
-          ` : ""}
+        ${(m.params && m.params.length) ? `
+          <div style="margin-top:16px">
+            <h2 class="h2">Key parameters</h2>
+            <div style="overflow:auto">
+              <table style="width:100%;border-collapse:collapse">
+                <thead>
+                  <tr>
+                    <th style="text-align:left;padding:8px 6px;border-bottom:1px solid rgba(15,23,42,0.10)">Param</th>
+                    <th style="text-align:left;padding:8px 6px;border-bottom:1px solid rgba(15,23,42,0.10)">Description</th>
+                  </tr>
+                </thead>
+                <tbody>${params}</tbody>
+              </table>
+            </div>
+          </div>
+        ` : ""}
 
-          ${example ? `
-            <section>
-              <div class="flex items-center justify-between gap-3 flex-wrap">
-                <h2 class="font-extrabold">Example</h2>
-                <button id="copyBtn" class="px-3 py-2 rounded-xl border bg-white hover:bg-slate-50 text-sm">
-                  Copy
-                </button>
-              </div>
-              <pre class="mt-3 text-sm bg-slate-950 text-slate-100 rounded-xl p-4 overflow-auto"><code>${example}</code></pre>
-            </section>
-          ` : ""}
+        ${m.example ? `
+          <div style="margin-top:16px">
+            <div class="actions" style="margin-top:0">
+              <h2 class="h2" style="margin:0">Example</h2>
+              <button id="copyBtn" class="btn">Copy</button>
+            </div>
+            <pre class="pre" style="min-height:unset"><code id="ex">${escapeHtml(m.example)}</code></pre>
+          </div>
+        ` : ""}
 
-          ${(m.refs && m.refs.length) ? `
-            <section>
-              <h2 class="font-extrabold mb-2">References</h2>
-              <ul class="list-disc pl-5">${refs}</ul>
-            </section>
-          ` : ""}
-        </div>
+        ${(m.refs && m.refs.length) ? `
+          <div style="margin-top:16px">
+            <h2 class="h2">References</h2>
+            <ul>${refs}</ul>
+          </div>
+        ` : ""}
       </div>
     `;
 
     const copyBtn = document.getElementById("copyBtn");
     if (copyBtn){
       copyBtn.addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(m.example || ""); copyBtn.textContent = "Copied"; }
-        catch { copyBtn.textContent = "Copy failed"; }
+        try{
+          await navigator.clipboard.writeText(m.example || "");
+          copyBtn.textContent = "Copied";
+        } catch {
+          copyBtn.textContent = "Copy failed";
+        }
         setTimeout(()=>copyBtn.textContent="Copy", 1200);
       });
     }
-
-  } catch(e){
-    container.innerHTML = `<div class="bg-white border rounded-2xl p-6">Could not load data</div>`;
+  } catch (e){
+    console.error(e);
+    container.innerHTML = `<div class="card">Could not load data</div>`;
   }
 }
 
-initModel();
+init();
