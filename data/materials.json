@@ -44,28 +44,24 @@
     "example": "",
     "refs": []
   },
-
   {
-  "id": "mat_084_085",
-  "name": "Winfrith Concrete",
-  "mat": "*MAT_084/085",
-  "category": "concrete",
-  "summary": "Winfrith concrete model with strength-dependent tensile behavior and fracture energy based softening length.",
-  "tags": ["concrete", "winfrith"],
-  "keywords": ["*MAT_084", "*MAT_085", "Winfrith", "concrete"],
-  "useCases": ["Concrete structures", "General-purpose concrete modeling"],
-  "params": [
-    { "key": "FC", "desc": "Uniaxial compressive strength (MPa)." },
-    { "key": "DMAX", "desc": "Maximum aggregate size (mm)." },
-    { "key": "RO", "desc": "Density (g/mm³) for mm-ms-g-N-MPa." }
-  ],
-  "example": "",
-  "refs": [],
-  "generatorId": "mat_084_085"
+    "id": "mat_084_085",
+    "name": "Winfrith Concrete",
+    "mat": "*MAT_084/085",
+    "category": "concrete",
+    "summary": "Winfrith concrete model with strength-dependent tensile behavior and fracture energy based softening length.",
+    "tags": ["concrete", "winfrith"],
+    "keywords": ["*MAT_084", "*MAT_085", "Winfrith", "concrete"],
+    "useCases": ["Concrete structures", "General-purpose concrete modeling"],
+    "params": [
+      { "key": "FC", "desc": "Uniaxial compressive strength (MPa)." },
+      { "key": "DMAX", "desc": "Maximum aggregate size (mm)." },
+      { "key": "RO", "desc": "Density (g/mm³) for mm-ms-g-N-MPa." }
+    ],
+    "example": "",
+    "refs": [],
+    "generatorId": "mat_084_085"
   },
-
-
-
   {
     "id": "mat_159",
     "mat": "*MAT_159",
