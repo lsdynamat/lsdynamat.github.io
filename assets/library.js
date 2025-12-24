@@ -107,20 +107,9 @@ async function init(){
   if (year) year.textContent = new Date().getFullYear();
 
   const grid = document.getElementById("grid");
-  const countText = document.getElementById("countText");
   const qEl = document.getElementById("q");
   const catEl = document.getElementById("cat");
   const sortEl = document.getElementById("sort");
-
-  const missing = [];
-  if (!grid) missing.push("#grid");
-  if (!countText) missing.push("#countText");
-  if (!qEl) missing.push("#q");
-  if (!catEl) missing.push("#cat");
-  if (!sortEl) missing.push("#sort");
-  if (missing.length){
-    throw new Error(`Missing required DOM elements: ${missing.join(", ")}`);
-  }
 
   setStatus("Loading…");
 
