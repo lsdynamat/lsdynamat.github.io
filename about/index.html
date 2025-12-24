@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About | LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="../assets/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../">
+      <div class="logo">LS</div>
+      <div>
+        <div class="brand-title">LS-DYNA Material Hub</div>
+        <div class="brand-sub">Material Models</div>
+      </div>
+    </a>
+
+    <nav class="nav">
+      <a class="nav-link" href="../">Home</a>
+      <a class="nav-link" href="../library/">Material Library</a>
+      <a class="nav-link" href="../generator/">Keyword Generator</a>
+      <a class="nav-link active" href="./">About</a>
+      <a class="nav-link" href="../contact/">Contact</a>
+    </nav>
+
+    <div class="cta">
+      <a class="btn btn-primary" href="../library/">Browse library →</a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="card">
+      <h1 style="font-size:26px;margin:0">About</h1>
+      <p class="sub" style="margin-top:8px">
+        LS-DYNA Material Hub is a lightweight website for browsing LS-DYNA material models and generating ready-to-use keyword cards.
+      </p>
+
+      <div style="margin-top:16px">
+        <h2 class="h2">What you can do</h2>
+        <ul>
+          <li>Search material models by MAT number, name, tags, and keywords.</li>
+          <li>Open a model page with key parameters and references.</li>
+          <li>Use the Keyword Generator to export a ready-to-use <code>.k</code> file.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:16px">
+        <h2 class="h2">Scope</h2>
+        <ul>
+          <li>Static site (GitHub Pages friendly).</li>
+          <li>No login, no backend.</li>
+          <li>Data-driven via <code>data/materials.json</code> and <code>data/templates.json</code>.</li>
+        </ul>
+      </div>
+
+      <div style="margin-top:16px">
+        <h2 class="h2">Credits</h2>
+        <p class="sub" style="margin:0">
+          Created and maintained by you. If you want contributions later, we can add a Contribute page + guidelines.
+        </p>
+      </div>
+
+      <div class="actions" style="margin-top:16px">
+        <a class="btn btn-primary" href="../contact/">Send feedback →</a>
+        <a class="btn" href="../generator/">Open generator</a>
+      </div>
+    </div>
+
+    <div class="footer">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </main>
+
+  <script src="../assets/common.js"></script>
+</body>
+</html>
