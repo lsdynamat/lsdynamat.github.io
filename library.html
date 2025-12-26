@@ -12,8 +12,8 @@
       <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
       <nav class="nav">
         <a href="./index.html">Home</a>
-        <a href="./library.html" class="active">Library</a>
-        <a href="./keyword.html">Generator</a>
+        <a class="active" href="./library.html">Library</a>
+        <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
       </nav>
@@ -25,9 +25,9 @@
       <div class="rowBetween">
         <div>
           <h1 class="h1">Material Library</h1>
-          <div class="muted" id="libraryMeta">—</div>
+          <div class="muted" id="libMeta">—</div>
         </div>
-        <a class="btn primary" href="./keyword.html">Open Generator</a>
+        <a class="btn primary" href="./generator.html">Open Generator</a>
       </div>
 
       <div class="toolbar">
@@ -37,8 +37,8 @@
         </select>
         <select id="sort" class="select">
           <option value="name">Sort: Name</option>
+          <option value="mat">Sort: MAT</option>
           <option value="updatedAt">Sort: Updated</option>
-          <option value="mat">Sort: MAT #</option>
         </select>
       </div>
     </section>
@@ -57,11 +57,9 @@
   </main>
 
   <footer class="siteFooter">
-    <div class="wrap muted">
-      © <span id="year"></span> LS-DYNA Material Hub
-    </div>
+    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
   </footer>
 
-  <script type="module" src="./assets/js/app-library.js"></script>
+  <script type="module" src="./assets/js/pages/library.js"></script>
 </body>
 </html>
