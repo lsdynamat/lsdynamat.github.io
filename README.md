@@ -21,5 +21,6 @@
       app-keyword.js
       app-contact.js
       /generators
-        cscm.js
-        kcc_rel3.js
+        072r3_kcc_damage_rel3.js
+        084_winfrith_concrete.js
+        159_cscm_concrete.js
