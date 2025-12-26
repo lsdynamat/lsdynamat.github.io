@@ -66,7 +66,7 @@ function renderUpdates(changelog, modelId){
   });
 }
 
-function renderSamplesList(m){
+function renderSamplesTab(m){
   const box = getEl("samplesBox");
   if (!box) return;
 
@@ -88,8 +88,14 @@ function renderSamplesList(m){
     div.innerHTML = `
       <div class="row between wrapline">
         <div>
-          <div class="item-title">${escapeHtml(s.title || s.id || "Sample")} <span class="tag info">${escapeHtml(s.id || "sample")}</span></div>
-          <div class="item-meta">${escapeHtml(s.source || "—")}${s.updatedAt ? ` • Updated ${escapeHtml(s.updatedAt)}` : ""}</div>
+          <div class="item-title">
+            ${escapeHtml(s.title || s.id || "Sample")}
+            <span class="tag info">${escapeHtml(s.id || "sample")}</span>
+          </div>
+          <div class="item-meta">
+            ${escapeHtml(s.source || "—")}
+            ${s.updatedAt ? ` • Updated ${escapeHtml(s.updatedAt)}` : ""}
+          </div>
           <div class="tagrow" style="margin-top:8px;">
             ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
           </div>
@@ -109,7 +115,6 @@ function renderSamplesList(m){
     box.appendChild(div);
   });
 
-  // convenience button to open full chooser
   const openAll = document.createElement("div");
   openAll.className = "rowitem";
   openAll.innerHTML = `
@@ -156,13 +161,13 @@ function renderSamplesList(m){
     <span class="tag">Generator: ${escapeHtml(m.generator || "—")}</span>
   `;
 
-  const btnGen = getEl("btnGen");
-  btnGen.href = `./generator.html?id=${encodeURIComponent(m.id)}`;
+  getEl("btnGen").href = `./generator.html?id=${encodeURIComponent(m.id)}`;
 
-  // Header "Keyword samples" button (replace old single sample behavior)
+  // Header button shows count + opens modal chooser/viewer
+  const n = Array.isArray(m.samples) ? m.samples.length : 0;
   const btnSamples = getEl("btnSample");
-  btnSamples.textContent = `Keyword samples (${Array.isArray(m.samples) ? m.samples.length : 0})`;
-  btnSamples.onclick = async ()=>{
+  btnSamples.textContent = `Keyword samples (${n})`;
+  btnSamples.onclick = async () => {
     await openSamples({
       modelId: m.id,
       modelTitle: `${m.name} (MAT_${m.mat})`,
@@ -170,6 +175,7 @@ function renderSamplesList(m){
     });
   };
 
+  // doc
   const docBox = getEl("docBox");
   try{
     const md = await loadText(m.doc);
@@ -183,7 +189,6 @@ function renderSamplesList(m){
   const changelog = await loadJSON("./assets/data/changelog.json");
   renderUpdates(changelog, m.id);
 
-  // Render samples tab
-  renderSamplesList(m);
-
+  // samples tab
+  renderSamplesTab(m);
 })().catch(console.error);
