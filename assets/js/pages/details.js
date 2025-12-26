@@ -1,6 +1,7 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
 import { mdToHtml } from "../core/md.js";
+import { openSamples } from "../core/sampleViewer.js";
 
 setText("year", new Date().getFullYear());
 
@@ -9,38 +10,19 @@ function getParam(name){
   return u.searchParams.get(name);
 }
 
-function openModal(title, text){
-  const modalRoot = getEl("modalRoot") || document.body;
+function setupTabs(){
+  const tabs = qsa(".tab");
+  tabs.forEach(t=>{
+    t.addEventListener("click", ()=>{
+      tabs.forEach(x=>x.classList.remove("active"));
+      t.classList.add("active");
 
-  const overlay = document.createElement("div");
-  overlay.className = "modalOverlay";
-
-  const box = document.createElement("div");
-  box.className = "card modalBox";
-
-  box.innerHTML = `
-    <div class="row between wrapline">
-      <div>
-        <div class="item-title">${escapeHtml(title)}</div>
-        <div class="small">Readonly preview.</div>
-      </div>
-      <div class="row gap">
-        <button class="btn" id="copyBtn">Copy</button>
-        <button class="btn danger" id="closeBtn">Close</button>
-      </div>
-    </div>
-    <pre class="preview" id="pre"></pre>
-  `;
-
-  overlay.appendChild(box);
-  modalRoot.appendChild(overlay);
-
-  box.querySelector("#pre").textContent = text || "";
-  overlay.addEventListener("click", (e)=>{ if (e.target === overlay) overlay.remove(); });
-  box.querySelector("#closeBtn").onclick = ()=> overlay.remove();
-  box.querySelector("#copyBtn").onclick = async ()=> {
-    try{ await navigator.clipboard.writeText(text || ""); }catch{}
-  };
+      const key = t.dataset.tab;
+      qsa(".tabpanel").forEach(p=>p.classList.add("hidden"));
+      const panel = getEl(`tab-${key}`);
+      if (panel) panel.classList.remove("hidden");
+    });
+  });
 }
 
 function renderInputs(inputs){
@@ -84,19 +66,66 @@ function renderUpdates(changelog, modelId){
   });
 }
 
-function setupTabs(){
-  const tabs = qsa(".tab");
-  tabs.forEach(t=>{
-    t.addEventListener("click", ()=>{
-      tabs.forEach(x=>x.classList.remove("active"));
-      t.classList.add("active");
+function renderSamplesList(m){
+  const box = getEl("samplesBox");
+  if (!box) return;
 
-      const key = t.dataset.tab;
-      qsa(".tabpanel").forEach(p=>p.classList.add("hidden"));
-      const panel = getEl(`tab-${key}`);
-      if (panel) panel.classList.remove("hidden");
-    });
+  const samples = Array.isArray(m.samples) ? m.samples : [];
+  box.innerHTML = "";
+
+  if (!samples.length){
+    const div = document.createElement("div");
+    div.className = "rowitem";
+    div.innerHTML = `<div class="item-meta">No keyword samples available yet.</div>`;
+    box.appendChild(div);
+    return;
+  }
+
+  samples.forEach(s => {
+    const tags = Array.isArray(s.tags) ? s.tags : [];
+    const div = document.createElement("div");
+    div.className = "rowitem";
+    div.innerHTML = `
+      <div class="row between wrapline">
+        <div>
+          <div class="item-title">${escapeHtml(s.title || s.id || "Sample")} <span class="tag info">${escapeHtml(s.id || "sample")}</span></div>
+          <div class="item-meta">${escapeHtml(s.source || "—")}${s.updatedAt ? ` • Updated ${escapeHtml(s.updatedAt)}` : ""}</div>
+          <div class="tagrow" style="margin-top:8px;">
+            ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+          </div>
+        </div>
+        <div class="row gap">
+          <button class="btn primary" data-view="1">View</button>
+        </div>
+      </div>
+    `;
+    div.querySelector('button[data-view="1"]').onclick = async () => {
+      await openSamples({
+        modelId: m.id,
+        modelTitle: `${m.name} (MAT_${m.mat})`,
+        samples: [s]
+      });
+    };
+    box.appendChild(div);
   });
+
+  // convenience button to open full chooser
+  const openAll = document.createElement("div");
+  openAll.className = "rowitem";
+  openAll.innerHTML = `
+    <div class="row between wrapline">
+      <div class="item-meta">Open sample chooser</div>
+      <button class="btn" id="btnOpenAll">Open</button>
+    </div>
+  `;
+  openAll.querySelector("#btnOpenAll").onclick = async () => {
+    await openSamples({
+      modelId: m.id,
+      modelTitle: `${m.name} (MAT_${m.mat})`,
+      samples: samples
+    });
+  };
+  box.appendChild(openAll);
 }
 
 (async function main(){
@@ -130,6 +159,17 @@ function setupTabs(){
   const btnGen = getEl("btnGen");
   btnGen.href = `./generator.html?id=${encodeURIComponent(m.id)}`;
 
+  // Header "Keyword samples" button (replace old single sample behavior)
+  const btnSamples = getEl("btnSample");
+  btnSamples.textContent = `Keyword samples (${Array.isArray(m.samples) ? m.samples.length : 0})`;
+  btnSamples.onclick = async ()=>{
+    await openSamples({
+      modelId: m.id,
+      modelTitle: `${m.name} (MAT_${m.mat})`,
+      samples: m.samples || []
+    });
+  };
+
   const docBox = getEl("docBox");
   try{
     const md = await loadText(m.doc);
@@ -143,14 +183,7 @@ function setupTabs(){
   const changelog = await loadJSON("./assets/data/changelog.json");
   renderUpdates(changelog, m.id);
 
-  getEl("btnSample").onclick = async ()=>{
-    if (!m.sample) return openModal(`Sample • ${m.id}`, "No sample available.");
-    try{
-      const text = await loadText(m.sample);
-      openModal(`Sample • ${m.id}`, text);
-    }catch{
-      openModal(`Sample • ${m.id}`, `Could not load sample: ${m.sample}`);
-    }
-  };
+  // Render samples tab
+  renderSamplesList(m);
 
 })().catch(console.error);
