@@ -1,402 +1,91 @@
-:root{
-  --bg:#060812;
-  --panel:#0b1020;
-  --card:#0e1428;
-  --border:rgba(255,255,255,.08);
-  --text:rgba(255,255,255,.92);
-  --muted:rgba(255,255,255,.68);
-  --muted2:rgba(255,255,255,.55);
-  --shadow:0 18px 45px rgba(0,0,0,.45);
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a class="active" href="./index.html">Home</a>
+        <a href="./library.html">Library</a>
+        <a href="./generator.html">Generator</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
 
-  --primary:#7c5cff;
-  --primary2:#16d6ff;
-  --danger:#ff4d6d;
-  --ok:#31d28b;
-}
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-left">
+        <div class="badge">Beta</div>
+        <h1>LS-DYNA Material Hub</h1>
+        <p class="lead">
+          A lightweight library for LS-DYNA material models: theory notes, keyword samples, and generators.
+        </p>
+        <div class="row gap">
+          <a class="btn primary" href="./library.html">Open library</a>
+          <a class="btn" href="./generator.html">Open generator</a>
+        </div>
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  background:
-    radial-gradient(900px 450px at 15% 10%, rgba(124,92,255,.18), transparent 60%),
-    radial-gradient(800px 400px at 85% 0%, rgba(22,214,255,.13), transparent 60%),
-    var(--bg);
-  color:var(--text);
-}
+        <div class="hero-note small">
+          Suggested flow: <b>Library</b> → pick a model → <b>Details</b> (theory + sample) → <b>Generator</b>.
+        </div>
+      </div>
 
-a{color:inherit; text-decoration:none}
-.wrap{max-width:1100px; margin:0 auto; padding:18px}
+      <div class="hero-right">
+        <div class="statgrid">
+          <div class="card stat">
+            <div class="stat-k">Models</div>
+            <div class="stat-v" id="statModels">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Categories</div>
+            <div class="stat-v" id="statCats">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Last update</div>
+            <div class="stat-v" id="statLast">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Samples</div>
+            <div class="stat-v" id="statSamples">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-.topbar{
-  position:sticky; top:0; z-index:50;
-  backdrop-filter: blur(10px);
-  background: rgba(6,8,18,.72);
-  border-bottom:1px solid var(--border);
-}
-.topbar-row{display:flex; align-items:center; justify-content:space-between; gap:16px}
-.logo{font-weight:750; letter-spacing:.2px}
-.nav{display:flex; gap:14px; align-items:center; flex-wrap:wrap}
-.nav a{color:var(--muted); padding:8px 10px; border-radius:10px}
-.nav a.active, .nav a:hover{color:var(--text); background:rgba(255,255,255,.06);}
+    <section class="section">
+      <div class="section-title">
+        <h2>Popular categories</h2>
+        <div class="small">Click to open the library filtered</div>
+      </div>
+      <div class="catgrid" id="catGrid"></div>
+    </section>
 
-.footer{border-top:1px solid var(--border); margin-top:24px; padding:10px 0; color:var(--muted)}
+    <section class="section">
+      <div class="section-title">
+        <h2>Recent updates</h2>
+        <div class="small">From changelog</div>
+      </div>
+      <div class="card">
+        <div id="updatesBox" class="list"></div>
+        <div class="small" style="margin-top:10px;">
+          Per-model update history is shown on the <b>Details</b> page.
+        </div>
+      </div>
+    </section>
+  </main>
 
-h1{font-size:34px; margin:0 0 10px}
-h2{margin:0}
-.lead{color:var(--muted); font-size:16px; line-height:1.55; margin:10px 0 14px}
-.small{color:var(--muted2); font-size:13px; line-height:1.45}
-.h2{font-size:16px; margin:0 0 10px; color:rgba(255,255,255,.88)}
+  <footer class="footer">
+    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </footer>
 
-.card{
-  background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:16px;
-  box-shadow: var(--shadow);
-}
-
-.row{display:flex; align-items:center}
-.between{justify-content:space-between}
-.gap{gap:10px}
-.wrapline{flex-wrap:wrap}
-
-.btn{
-  border:1px solid var(--border);
-  background: rgba(255,255,255,.04);
-  color:var(--text);
-  padding:9px 12px;
-  border-radius:12px;
-  cursor:pointer;
-  font-weight:600;
-}
-.btn:hover{background:rgba(255,255,255,.07)}
-.btn.primary{
-  border-color: rgba(124,92,255,.55);
-  background: linear-gradient(90deg, rgba(124,92,255,.85), rgba(22,214,255,.55));
-}
-.btn.primary:hover{filter:brightness(1.05)}
-.btn.danger{border-color:rgba(255,77,109,.55); background:rgba(255,77,109,.10)}
-.btn.danger:hover{background:rgba(255,77,109,.16)}
-
-.badge{
-  display:inline-flex; align-items:center;
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.04);
-  padding:6px 10px;
-  border-radius:999px;
-  color:var(--muted);
-  font-weight:650;
-  font-size:12px;
-}
-
-.hero{
-  display:grid;
-  grid-template-columns: 1.2fr .8fr;
-  gap:16px;
-  margin-top:8px;
-  align-items:stretch;
-}
-@media (max-width:900px){ .hero{grid-template-columns:1fr} }
-
-.hero-left{padding:20px; border-radius:18px; border:1px solid var(--border); background:rgba(255,255,255,.02)}
-.hero-note{margin-top:12px}
-
-.hero-right .statgrid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.stat{padding:14px}
-.stat-k{color:var(--muted); font-size:12px}
-.stat-v{font-size:26px; font-weight:800; margin-top:6px}
-
-.section{margin-top:18px}
-.section-title{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-bottom:10px}
-
-.catgrid{
-  display:grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap:12px;
-}
-@media (max-width:900px){ .catgrid{grid-template-columns: repeat(2, 1fr);} }
-
-.cat{
-  padding:14px;
-  border-radius:16px;
-  border:1px solid var(--border);
-  background: rgba(255,255,255,.02);
-  cursor:pointer;
-}
-.cat:hover{background:rgba(255,255,255,.05)}
-.cat .t{font-weight:750}
-.cat .m{color:var(--muted); margin-top:6px; font-size:13px}
-
-.pagehead{display:flex; justify-content:space-between; align-items:flex-end; gap:10px; margin:10px 0 12px}
-
-.toolbar .field{min-width:190px}
-.field label{display:block; font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:650}
-.field input,.field select{
-  width:100%;
-  background: rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px 10px;
-  color:var(--text);
-  outline:none;
-}
-.field input:focus,.field select:focus{border-color: rgba(124,92,255,.6)}
-
-.grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:12px;
-}
-@media (max-width:1000px){ .grid{grid-template-columns: repeat(2, 1fr);} }
-@media (max-width:700px){ .grid{grid-template-columns:1fr;} }
-
-.item-title{font-weight:800; margin-bottom:6px}
-.item-meta{color:var(--muted); font-size:13px; line-height:1.35}
-.tagrow{display:flex; gap:8px; flex-wrap:wrap}
-.tag{
-  font-size:12px;
-  padding:5px 9px;
-  border-radius:999px;
-  border:1px solid var(--border);
-  color:var(--muted);
-  background:rgba(255,255,255,.03);
-}
-.tag.info{border-color:rgba(22,214,255,.35); color:rgba(22,214,255,.9)}
-
-.list .rowitem{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.02);
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-}
-.list .rowitem:last-child{margin-bottom:0}
-
-.layout2{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px;
-  margin-top:12px;
-}
-@media (max-width:900px){ .layout2{grid-template-columns:1fr} }
-
-.formgrid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
-}
-@media (max-width:700px){ .formgrid{grid-template-columns:1fr} }
-
-.inputbox{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.02);
-  border-radius:14px;
-  padding:10px;
-}
-.inputbox .k{font-size:12px; color:var(--muted); font-weight:700}
-.inputbox .h{font-size:12px; color:var(--muted2); margin-top:6px; line-height:1.35}
-.inputbox input{
-  margin-top:8px;
-  width:100%;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:10px;
-  color:var(--text);
-}
-.inputbox input.invalid{border-color: rgba(255,77,109,.6);}
-
-.preview{
-  margin-top:12px;
-  background:#070c16;
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:12px;
-  overflow:auto;
-  max-height:560px;
-  font-size:12.5px;
-  line-height:1.55;
-  color:rgba(255,255,255,.88);
-}
-
-.tabs{display:flex; gap:10px; margin:12px 0}
-.tab{
-  border:1px solid var(--border);
-  background:rgba(255,255,255,.03);
-  color:var(--muted);
-  padding:9px 12px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:750;
-}
-.tab.active{color:var(--text); border-color: rgba(124,92,255,.45); background:rgba(124,92,255,.14)}
-.hidden{display:none}
-
-.doc{color:rgba(255,255,255,.88); line-height:1.65; font-size:14px}
-.doc h1,.doc h2,.doc h3{margin:14px 0 8px}
-.doc code{background:rgba(255,255,255,.06);border:1px solid var(--border);padding:2px 6px;border-radius:6px}
-.doc pre{background:#070c16;border:1px solid var(--border);padding:12px;border-radius:12px;overflow:auto}
-.doc a{color:#7aa7ff}
-
-/* modal */
-.modalOverlay{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,.55);
-  display:grid;
-  place-items:center;
-  z-index:9999;
-}
-.modalBox{
-  width:min(920px, 92vw);
-  max-height:85vh;
-  overflow:auto;
-  padding:14px;
-}
-/* =========================================================
-   Keyword Sample Viewer (isolated) — DOES NOT TOUCH SITE UI
-   ========================================================= */
-
-body.lsd-modal-open{ overflow: hidden; }
-
-.lsd-modal{
-  position: fixed;
-  inset: 0;
-  z-index: 2147483000;
-  background: rgba(0,0,0,0.65);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px;
-}
-
-.lsd-modal__dialog{
-  width: min(980px, 100%);
-  max-height: calc(100vh - 36px);
-  overflow: auto;
-  border-radius: 14px;
-
-  /* solid neutral */
-  background: #111827;
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 18px 60px rgba(0,0,0,.50);
-  padding: 14px;
-}
-
-.lsd-modal__header{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-}
-
-.lsd-modal__title{
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-
-.lsd-modal__subtitle{
-  margin-top: 4px;
-  font-size: 12px;
-  color: rgba(255,255,255,.70);
-  line-height: 1.4;
-}
-
-.lsd-modal__body{ padding-top: 12px; }
-
-.lsd-tags{ display:flex; gap:6px; flex-wrap:wrap; }
-.lsd-tag{
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.10);
-  color: rgba(255,255,255,.92);
-}
-.lsd-tag--info{
-  background: rgba(59,130,246,.15);
-  border-color: rgba(59,130,246,.30);
-}
-
-.lsd-bar{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.lsd-btnrow{ display:flex; gap:8px; flex-wrap:wrap; }
-
-.lsd-btn{
-  appearance:none;
-  cursor:pointer;
-  font-size: 13px;
-  padding: 8px 12px;
-  border-radius: 10px;
-
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
-  color: rgba(255,255,255,.92);
-}
-.lsd-btn:hover{ filter: brightness(1.08); }
-
-.lsd-btn--primary{
-  background: rgba(59,130,246,.18);
-  border-color: rgba(59,130,246,.30);
-}
-.lsd-btn--danger{
-  background: rgba(239,68,68,.16);
-  border-color: rgba(239,68,68,.28);
-}
-
-.lsd-code{
-  background: rgba(0,0,0,.35);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 12px;
-  padding: 12px;
-
-  overflow: auto;
-  white-space: pre;
-
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono","Courier New", monospace;
-  font-size: 13px;
-  line-height: 1.45;
-  color: rgba(255,255,255,.92);
-}
-
-.lsd-list{ display:grid; gap: 10px; }
-.lsd-item{
-  border-radius: 12px;
-  padding: 12px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.10);
-
-  display:flex;
-  align-items:flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.lsd-item__left{ min-width: 260px; }
-.lsd-item__title{ font-weight: 700; color: rgba(255,255,255,.95); }
-.lsd-item__meta{ margin-top: 4px; font-size: 12px; color: rgba(255,255,255,.70); }
-.lsd-item__right{ display:flex; gap:8px; flex-wrap:wrap; }
-
-.lsd-note{
-  padding: 12px;
-  border-radius: 12px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.10);
-  color: rgba(255,255,255,.85);
-}
+  <script type="module" src="./assets/js/pages/home.js"></script>
+</body>
+</html>
