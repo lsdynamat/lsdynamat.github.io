@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <header class="siteHeader">
-    <div class="wrap headerRow">
-      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
       <nav class="nav">
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
@@ -21,44 +21,31 @@
   </header>
 
   <main class="wrap">
-    <section class="card">
-      <h1 class="h1">Contact</h1>
-      <p class="muted">Stored locally (you can submit multiple times).</p>
+    <div class="card">
+      <h1>Contact</h1>
+      <p>If you found an issue or want to request a new model, please submit the form below.</p>
+      <p class="small">Google Forms is used for easier maintenance and spam protection.</p>
+    </div>
 
-      <div class="grid2">
-        <div class="inputs">
-          <div class="inputCard">
-            <div class="inputLabel">Name</div>
-            <input class="input" id="name" placeholder="Your name" />
-          </div>
-          <div class="inputCard">
-            <div class="inputLabel">Email</div>
-            <input class="input" id="email" placeholder="you@example.com" />
-          </div>
-          <div class="inputCard">
-            <div class="inputLabel">Message</div>
-            <textarea class="textarea" id="message" rows="6" placeholder="Feedback..."></textarea>
-          </div>
-          <div class="row">
-            <button class="btn primary" id="btnSend">Send</button>
-            <button class="btn" id="btnClear">Clear</button>
-            <button class="btn danger" id="btnReset">Reset history</button>
-          </div>
-          <div class="muted" id="status">—</div>
-        </div>
-
-        <div>
-          <h2 class="h2">History</h2>
-          <div id="history" class="listCards"></div>
-        </div>
-      </div>
-    </section>
+    <div class="card" style="padding:0; margin-top:16px;">
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSebLNGa8pjvNXe8Ow1WyhZxSIbCDrUB8ntDXzGClXstg_aTPQ/viewform?embedded=true"
+        width="100%"
+        height="1200"
+        frameborder="0"
+        marginheight="0"
+        marginwidth="0"
+        style="border:0; border-radius:16px;"
+      >Loading…</iframe>
+    </div>
   </main>
 
-  <footer class="siteFooter">
-    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
+  <footer class="footer">
+    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
   </footer>
 
-  <script type="module" src="./assets/js/pages/contact.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
