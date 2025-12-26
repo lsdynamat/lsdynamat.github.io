@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,8 +11,8 @@
     <div class="wrap topbar-row">
       <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
       <nav class="nav">
-        <a href="./index.html">Trang chủ</a>
-        <a class="active" href="./library.html">Thư viện</a>
+        <a href="./index.html">Home</a>
+        <a class="active" href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
@@ -23,32 +23,22 @@
   <main class="wrap">
     <div class="pagehead">
       <div>
-        <h1>Thư viện material models</h1>
-        <div class="small">Tìm nhanh model → xem Details / sample / generator.</div>
+        <h1>Material library</h1>
+        <div class="small">Find a model → open Details / sample / generator.</div>
       </div>
     </div>
 
     <div class="toolbar card">
       <div class="row gap wrapline">
         <div class="field">
-          <label>Tìm kiếm</label>
-          <input id="q" placeholder="VD: Johnson-Cook, MAT_015, concrete, rubber..." />
+          <label>Search</label>
+          <input id="q" placeholder="e.g., Johnson-Cook, MAT_015, concrete, rubber..." />
         </div>
 
         <div class="field">
           <label>Category</label>
           <select id="cat">
             <option value="">All</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Difficulty</label>
-          <select id="diff">
-            <option value="">All</option>
-            <option value="Đơn giản">Đơn giản</option>
-            <option value="Trung bình">Trung bình</option>
-            <option value="Nâng cao">Nâng cao</option>
           </select>
         </div>
 
@@ -62,7 +52,7 @@
         </div>
 
         <div class="row gap" style="align-items:flex-end;">
-          <button class="btn" id="btnReset">Reset filter</button>
+          <button class="btn" id="btnReset">Reset</button>
         </div>
       </div>
     </div>
