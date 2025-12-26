@@ -7,73 +7,59 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <header class="siteHeader">
-    <div class="wrap headerRow">
-      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
-      <nav class="nav">
+  <div class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <div class="nav">
         <a class="active" href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
-      </nav>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <section class="hero card">
-      <div>
-        <h1 class="h1">Material library + keyword generator</h1>
-        <p class="muted">
-          Static site (GitHub Pages). Modular generators: adding a new model won’t break the whole system.
-        </p>
-        <div class="heroActions">
-          <a class="btn primary" href="./generator.html">Open Generator</a>
-          <a class="btn" href="./library.html">Browse Library</a>
-        </div>
-        <div class="muted" id="homeLatest">—</div>
       </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">Material Library</h1>
+      <p class="sub">Browse models and generate LS-DYNA keyword cards. Modular generators (safe add/upgrade).</p>
 
       <div class="stats">
-        <div class="statCard">
-          <div class="statLabel">Materials</div>
-          <div class="statValue" id="statMaterials">—</div>
+        <div class="stat">
+          <div class="stat-label">Total models</div>
+          <div class="stat-value" id="statTotal">—</div>
         </div>
-        <div class="statCard">
-          <div class="statLabel">Categories</div>
-          <div class="statValue" id="statCategories">—</div>
+        <div class="stat">
+          <div class="stat-label">Concrete models</div>
+          <div class="stat-value" id="statConcrete">—</div>
         </div>
-        <div class="statCard">
-          <div class="statLabel">Last build</div>
-          <div class="statValue" id="statBuild">—</div>
+        <div class="stat">
+          <div class="stat-label">Last update</div>
+          <div class="stat-value" id="statLastUpdate">—</div>
         </div>
       </div>
-    </section>
 
-    <section class="grid2" style="margin-top:16px;">
-      <div class="card">
-        <h2 class="h2">How to add a new model</h2>
-        <ol class="list">
-          <li>Create a generator file in <code>assets/js/generators/</code> exporting <code>default function generate(params, meta)</code></li>
-          <li>Add model metadata + inputs in <code>assets/data/materials.json</code> and point to that module path</li>
-          <li>Done. No registry edits.</li>
-        </ol>
+      <div class="row" style="margin-top:12px;">
+        <a class="btn primary" href="./generator.html">Open Generator</a>
+        <a class="btn" href="./library.html">Open Library</a>
       </div>
 
-      <div class="card">
-        <h2 class="h2">Safety</h2>
-        <ul class="list">
-          <li>Broken generator only affects itself (try/catch + sandboxed dynamic import)</li>
-          <li>UI never depends on a single JS file registry</li>
-          <li>Clear error messages for debugging</li>
-        </ul>
-      </div>
-    </section>
-  </main>
+      <div class="small" id="homeChangelog">—</div>
+    </div>
 
-  <footer class="siteFooter">
-    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </footer>
+    <div class="card" style="margin-top:14px;">
+      <div class="row between">
+        <h2 class="h2">Catalog</h2>
+        <input class="input" id="homeSearch" placeholder="Quick search..." />
+      </div>
+      <div class="grid" id="homeCatalog"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </div>
 
   <script type="module" src="./assets/js/pages/home.js"></script>
 </body>
