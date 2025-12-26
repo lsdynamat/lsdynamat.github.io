@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,59 +7,82 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <div class="topbar">
+  <header class="topbar">
     <div class="wrap topbar-row">
       <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
-      <div class="nav">
-        <a class="active" href="./index.html">Home</a>
-        <a href="./library.html">Library</a>
+      <nav class="nav">
+        <a class="active" href="./index.html">Trang chủ</a>
+        <a href="./library.html">Thư viện</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
-      </div>
+      </nav>
     </div>
-  </div>
+  </header>
 
-  <div class="wrap">
-    <div class="card">
-      <h1 class="title">Material Library</h1>
-      <p class="sub">Browse models and generate LS-DYNA keyword cards. Modular generators (safe add/upgrade).</p>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-left">
+        <div class="badge">Phiên bản Beta</div>
+        <h1>LS-DYNA Material Hub</h1>
+        <p class="lead">
+          Tra cứu material models và keyword LS-DYNA. Mục tiêu: giúp bạn định nghĩa mô hình nhanh chóng.
+        </p>
+        <div class="row gap">
+          <a class="btn primary" href="./library.html">Vào thư viện</a>
+          <a class="btn" href="./generator.html">Mở generator</a>
+        </div>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Total models</div>
-          <div class="stat-value" id="statTotal">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Concrete models</div>
-          <div class="stat-value" id="statConcrete">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Last update</div>
-          <div class="stat-value" id="statLastUpdate">—</div>
+        <div class="hero-note small">
+          Gợi ý: vào <b>Thư viện</b> → chọn model → <b>Details</b> (lý thuyết + sample) → <b>Generator</b>.
         </div>
       </div>
 
-      <div class="row" style="margin-top:12px;">
-        <a class="btn primary" href="./generator.html">Open Generator</a>
-        <a class="btn" href="./library.html">Open Library</a>
+      <div class="hero-right">
+        <div class="statgrid">
+          <div class="card stat">
+            <div class="stat-k">Material models</div>
+            <div class="stat-v" id="statModels">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Categories</div>
+            <div class="stat-v" id="statCats">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Last update</div>
+            <div class="stat-v" id="statLast">—</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-k">Samples</div>
+            <div class="stat-v" id="statSamples">—</div>
+          </div>
+        </div>
       </div>
+    </section>
 
-      <div class="small" id="homeChangelog">—</div>
-    </div>
-
-    <div class="card" style="margin-top:14px;">
-      <div class="row between">
-        <h2 class="h2">Catalog</h2>
-        <input class="input" id="homeSearch" placeholder="Quick search..." />
+    <section class="section">
+      <div class="section-title">
+        <h2>Danh mục phổ biến</h2>
+        <div class="small">Click để lọc thư viện</div>
       </div>
-      <div class="grid" id="homeCatalog"></div>
-    </div>
-  </div>
+      <div class="catgrid" id="catGrid"></div>
+    </section>
 
-  <div class="footer">
+    <section class="section">
+      <div class="section-title">
+        <h2>Updates gần đây</h2>
+        <div class="small">Theo changelog</div>
+      </div>
+      <div class="card">
+        <div id="updatesBox" class="list"></div>
+        <div class="small" style="margin-top:10px;">Chi tiết theo từng model: mở <b>Details</b>.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
     <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </div>
+  </footer>
 
   <script type="module" src="./assets/js/pages/home.js"></script>
 </body>
