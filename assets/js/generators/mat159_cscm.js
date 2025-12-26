@@ -248,14 +248,12 @@ function renderKeyword(f, p) {
   const fcStr = toFixed(f.fc, 1);
   const dAggStr = toFixed(f.dmax, 0);
 
-  const titleLine = `Concrete, f_c = ${fcStr} MPa, d_agg = ${dAggStr} mm`;
+  const titleLine = `Concrete CSCM, f_c = ${fcStr} MPa, d_max = ${dAggStr} mm`;
 
   // ✅ IMPORTANT: initialize BEFORE any push
   const lines = [];
 
-  lines.push("*KEYWORD");
-  lines.push("*MAT_CSCM_TITLE");
-  lines.push(titleLine);
+ 
 
   // Metadata comment lines
   lines.push(UNITS_LINE);
@@ -263,6 +261,10 @@ function renderKeyword(f, p) {
   lines.push(HUB_LINE);
   lines.push("");
 
+  lines.push("*KEYWORD");
+  lines.push("*MAT_CSCM_TITLE");
+  lines.push(titleLine);
+  
   // Material card (same as before)
   lines.push("$#     mid        ro     nplot     incre     irate     erode     recov   itretrc");
   lines.push(
