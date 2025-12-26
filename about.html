@@ -3,58 +3,45 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contact • LS-DYNA Material Hub</title>
+  <title>About • LS-DYNA Material Hub</title>
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <div class="topbar">
+  <header class="topbar">
     <div class="wrap topbar-row">
       <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
-      <div class="nav">
+      <nav class="nav">
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
-        <a href="./about.html">About</a>
-        <a class="active" href="./contact.html">Contact</a>
-      </div>
+        <a class="active" href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
     </div>
-  </div>
+  </header>
 
-  <div class="wrap">
+  <main class="wrap">
     <div class="card">
-      <h1 class="title">Contact</h1>
-      <p class="sub">Local history (you can submit multiple times).</p>
-
-      <div class="inputs">
-        <label class="small">Name</label>
-        <input class="input" id="name" placeholder="Your name" />
-
-        <label class="small">Email</label>
-        <input class="input" id="email" placeholder="you@example.com" />
-
-        <label class="small">Message</label>
-        <textarea class="input" id="message" rows="6" placeholder="Your message..."></textarea>
-
-        <div class="row">
-          <button class="btn primary" id="btnSend">Send</button>
-          <button class="btn" id="btnClear">Clear</button>
-          <button class="btn danger" id="btnReset">Reset history</button>
-        </div>
-
-        <div class="small" id="status">—</div>
-      </div>
+      <h1>About</h1>
+      <p>
+        LS-DYNA Material Hub is a small project to help users quickly find LS-DYNA material models and define keywords
+        using (1) short theory notes, (2) runnable keyword samples, and (3) parameterized generators.
+      </p>
+      <ul>
+        <li><b>Library</b>: searchable list of models</li>
+        <li><b>Details</b>: theory + workflow + update history</li>
+        <li><b>Generator</b>: edit inputs (with defaults) and export keyword</li>
+      </ul>
+      <p class="small">No AI, no marketing. Just fast lookup and practical keyword help.</p>
     </div>
+  </main>
 
-    <div class="card" style="margin-top:14px;">
-      <h2 class="h2">History</h2>
-      <div class="list" id="history"></div>
-    </div>
-  </div>
-
-  <div class="footer">
+  <footer class="footer">
     <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </div>
+  </footer>
 
-  <script type="module" src="./assets/js/pages/contact.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
