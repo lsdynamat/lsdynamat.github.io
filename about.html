@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About • LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <header class="siteHeader">
+    <div class="wrap headerRow">
+      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a href="./index.html">Home</a>
+        <a href="./library.html">Library</a>
+        <a href="./keyword.html">Generator</a>
+        <a href="./about.html" class="active">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h1 class="h1">About</h1>
+      <p class="muted">
+        Static, maintainable LS-DYNA material library + keyword generator.
+        Each model has its own generator module to avoid breaking the entire system when adding new materials.
+      </p>
+
+      <h2 class="h2">How to add a new model</h2>
+      <ol class="list">
+        <li>Create generator file in <code>/assets/js/generators/</code> (prefix by MAT for sorting)</li>
+        <li>Register it in <code>registry.js</code> (import + map)</li>
+        <li>Add metadata + inputs to <code>/assets/data/materials.json</code></li>
+      </ol>
+
+      <h2 class="h2">Design goals</h2>
+      <ul class="list">
+        <li>Easy maintenance (small modules)</li>
+        <li>Isolation (generator errors won’t break other models)</li>
+        <li>Friendly DYNA workflow (inputs → preview → download)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="siteFooter">
+    <div class="wrap muted">
+      © <span id="year"></span> LS-DYNA Material Hub
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app-common.js"></script>
+</body>
+</html>
