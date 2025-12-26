@@ -1,0 +1,30 @@
+[
+  {
+    "id": "mat015_johnson_cook",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_015 Johnson–Cook",
+    "change": "Initial generator + details + sample."
+  },
+  {
+    "id": "mat027_mooney_rivlin",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_027 Mooney–Rivlin",
+    "change": "Initial generator + details + sample."
+  },
+  {
+    "id": "mat084_winfrith",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_084 Winfrith",
+    "change": "Initial generator + details + sample."
+  },
+  {
+    "id": "mat159_cscm",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_159 CSCM",
+    "change": "Initial generator + details + sample."
+  }
+]
