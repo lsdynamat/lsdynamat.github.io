@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -11,8 +11,8 @@
     <div class="wrap topbar-row">
       <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
       <nav class="nav">
-        <a class="active" href="./index.html">Trang chủ</a>
-        <a href="./library.html">Thư viện</a>
+        <a class="active" href="./index.html">Home</a>
+        <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
@@ -23,25 +23,25 @@
   <main class="wrap">
     <section class="hero">
       <div class="hero-left">
-        <div class="badge">Phiên bản Beta</div>
+        <div class="badge">Beta</div>
         <h1>LS-DYNA Material Hub</h1>
         <p class="lead">
-          Tra cứu material models và keyword LS-DYNA. Mục tiêu: giúp bạn định nghĩa mô hình nhanh chóng.
+          A lightweight library for LS-DYNA material models: theory notes, keyword samples, and generators.
         </p>
         <div class="row gap">
-          <a class="btn primary" href="./library.html">Vào thư viện</a>
-          <a class="btn" href="./generator.html">Mở generator</a>
+          <a class="btn primary" href="./library.html">Open library</a>
+          <a class="btn" href="./generator.html">Open generator</a>
         </div>
 
         <div class="hero-note small">
-          Gợi ý: vào <b>Thư viện</b> → chọn model → <b>Details</b> (lý thuyết + sample) → <b>Generator</b>.
+          Suggested flow: <b>Library</b> → pick a model → <b>Details</b> (theory + sample) → <b>Generator</b>.
         </div>
       </div>
 
       <div class="hero-right">
         <div class="statgrid">
           <div class="card stat">
-            <div class="stat-k">Material models</div>
+            <div class="stat-k">Models</div>
             <div class="stat-v" id="statModels">—</div>
           </div>
           <div class="card stat">
@@ -62,20 +62,22 @@
 
     <section class="section">
       <div class="section-title">
-        <h2>Danh mục phổ biến</h2>
-        <div class="small">Click để lọc thư viện</div>
+        <h2>Popular categories</h2>
+        <div class="small">Click to open the library filtered</div>
       </div>
       <div class="catgrid" id="catGrid"></div>
     </section>
 
     <section class="section">
       <div class="section-title">
-        <h2>Updates gần đây</h2>
-        <div class="small">Theo changelog</div>
+        <h2>Recent updates</h2>
+        <div class="small">From changelog</div>
       </div>
       <div class="card">
         <div id="updatesBox" class="list"></div>
-        <div class="small" style="margin-top:10px;">Chi tiết theo từng model: mở <b>Details</b>.</div>
+        <div class="small" style="margin-top:10px;">
+          Per-model update history is shown on the <b>Details</b> page.
+        </div>
       </div>
     </section>
   </main>
