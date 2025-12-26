@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Library • LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <header class="siteHeader">
+    <div class="wrap headerRow">
+      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a href="./index.html">Home</a>
+        <a href="./library.html" class="active">Library</a>
+        <a href="./keyword.html">Generator</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="rowBetween">
+        <div>
+          <h1 class="h1">Material Library</h1>
+          <div class="muted" id="libraryMeta">—</div>
+        </div>
+        <a class="btn primary" href="./keyword.html">Open Generator</a>
+      </div>
+
+      <div class="toolbar">
+        <input id="q" class="input" placeholder="Search (name, keyword, mat, notes)..." />
+        <select id="type" class="select">
+          <option value="">All types</option>
+        </select>
+        <select id="sort" class="select">
+          <option value="name">Sort: Name</option>
+          <option value="updatedAt">Sort: Updated</option>
+          <option value="mat">Sort: MAT #</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="grid2" style="margin-top:16px;">
+      <div class="card">
+        <h2 class="h2">Results</h2>
+        <div id="list" class="listCards"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="h2">Details</h2>
+        <div id="details" class="muted">Select a model to view details.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="siteFooter">
+    <div class="wrap muted">
+      © <span id="year"></span> LS-DYNA Material Hub
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app-library.js"></script>
+</body>
+</html>
