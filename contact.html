@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contact • LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <header class="siteHeader">
+    <div class="wrap headerRow">
+      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a href="./index.html">Home</a>
+        <a href="./library.html">Library</a>
+        <a href="./keyword.html">Generator</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html" class="active">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h1 class="h1">Contact</h1>
+      <p class="muted">
+        This form stores submissions locally so you can send multiple times.
+      </p>
+
+      <div class="grid2">
+        <div>
+          <div class="inputs">
+            <div class="inputCard">
+              <div class="inputLabel">Name</div>
+              <input id="name" class="input" placeholder="Your name" />
+            </div>
+            <div class="inputCard">
+              <div class="inputLabel">Email</div>
+              <input id="email" class="input" placeholder="you@example.com" />
+            </div>
+            <div class="inputCard">
+              <div class="inputLabel">Message</div>
+              <textarea id="message" class="textarea" rows="6" placeholder="Your feedback..."></textarea>
+            </div>
+
+            <div class="row">
+              <button class="btn primary" id="btnSend">Send</button>
+              <button class="btn" id="btnClear">Clear</button>
+              <button class="btn danger" id="btnResetHistory">Reset history</button>
+            </div>
+
+            <div class="muted" id="contactStatus">—</div>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="h2">Local submission history</h2>
+          <div class="muted">Stored in your browser (LocalStorage).</div>
+          <div id="history" class="listCards" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="siteFooter">
+    <div class="wrap muted">
+      © <span id="year"></span> LS-DYNA Material Hub
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app-contact.js"></script>
+</body>
+</html>
