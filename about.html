@@ -7,45 +7,37 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <header class="siteHeader">
-    <div class="wrap headerRow">
-      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
-      <nav class="nav">
+  <div class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <div class="nav">
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a class="active" href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
-      </nav>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <main class="wrap">
-    <section class="card">
-      <h1 class="h1">About</h1>
-      <p class="muted">
-        Modular LS-DYNA material hub. The core UI never imports generators directly.
-        Each model points to its own generator module via JSON.
+  <div class="wrap">
+    <div class="card">
+      <h1 class="title">About</h1>
+      <p class="sub">
+        This site keeps the original UI simple, but the code is modular to avoid “break whole system” when adding new models.
       </p>
 
-      <h2 class="h2">Add new model (2 steps)</h2>
-      <ol class="list">
-        <li>Add entry in <code>assets/data/materials.json</code> with <code>generatorModule</code></li>
-        <li>Create generator file exporting <code>default function generate(params, meta)</code></li>
+      <h2 class="h2">How to add a new model</h2>
+      <ol class="small">
+        <li>Add a new entry in <code>assets/data/materials.json</code> with <code>generatorModule</code></li>
+        <li>Create file in <code>assets/js/generators/</code> exporting <code>default function generate(params, meta)</code></li>
       </ol>
+    </div>
+  </div>
 
-      <h2 class="h2">Why this won’t break the whole site</h2>
-      <ul class="list">
-        <li>Dynamic import per model + try/catch</li>
-        <li>Even if generator fails, UI still works</li>
-        <li>No global registry to forget updating</li>
-      </ul>
-    </section>
-  </main>
-
-  <footer class="siteFooter">
-    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </footer>
+  <div class="footer">
+    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </div>
 
   <script type="module">
     document.getElementById("year").textContent = new Date().getFullYear();
