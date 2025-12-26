@@ -1,5 +1,6 @@
-import { loadJSON, loadText } from "../core/fetch.js";
+import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
+import { openSamples } from "../core/sampleViewer.js";
 
 setText("year", new Date().getFullYear());
 
@@ -15,43 +16,17 @@ function sorters(kind){
   return (a,b)=> (a.mat||"").toString().localeCompare((b.mat||"").toString(), undefined, { numeric:true });
 }
 
-function openSampleModal(title, text){
-  const overlay = document.createElement("div");
-  overlay.className = "modalOverlay";
-
-  const box = document.createElement("div");
-  box.className = "card modalBox";
-
-  box.innerHTML = `
-    <div class="row between wrapline">
-      <div>
-        <div class="item-title">${escapeHtml(title)}</div>
-        <div class="small">Readonly preview. Copy into your deck.</div>
-      </div>
-      <div class="row gap">
-        <button class="btn" id="copyBtn">Copy</button>
-        <button class="btn danger" id="closeBtn">Close</button>
-      </div>
-    </div>
-    <pre class="preview" id="pre"></pre>
-  `;
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  box.querySelector("#pre").textContent = text || "";
-
-  overlay.addEventListener("click", (e)=>{ if (e.target === overlay) overlay.remove(); });
-  box.querySelector("#closeBtn").onclick = ()=> overlay.remove();
-  box.querySelector("#copyBtn").onclick = async ()=> {
-    try{ await navigator.clipboard.writeText(text || ""); }catch{}
-  };
+function countSamples(m){
+  const arr = Array.isArray(m.samples) ? m.samples : [];
+  return arr.length;
 }
 
 function renderList(listEl, items){
   listEl.innerHTML = "";
 
   for (const m of items){
+    const nSamples = countSamples(m);
+
     const div = document.createElement("div");
     div.className = "card";
 
@@ -67,25 +42,28 @@ function renderList(listEl, items){
       <div class="row gap" style="margin-top:12px;">
         <a class="btn primary" href="./generator.html?id=${encodeURIComponent(m.id)}">Generator</a>
         <a class="btn" href="./details.html?id=${encodeURIComponent(m.id)}">Details</a>
-        <button class="btn" data-sample="${escapeHtml(m.sample || "")}" data-id="${escapeHtml(m.id)}">Keyword sample</button>
+        <button class="btn" data-samples="1" data-id="${escapeHtml(m.id)}">
+          Keyword samples (${nSamples})
+        </button>
       </div>
     `;
 
     listEl.appendChild(div);
   }
 
-  listEl.querySelectorAll("button[data-id]").forEach(btn => {
+  // Attach events
+  listEl.querySelectorAll('button[data-samples="1"]').forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-id");
-      const samplePath = btn.getAttribute("data-sample");
-      if (!samplePath) return openSampleModal(`Sample • ${id}`, `No sample available yet for: ${id}\n`);
+      const data = await loadJSON("./assets/data/materials.json");
+      const m = (data.materials || []).find(x => x.id === id);
+      if (!m) return;
 
-      try{
-        const text = await loadText(samplePath);
-        openSampleModal(`Sample • ${id}`, text);
-      }catch{
-        openSampleModal(`Sample • ${id}`, `Could not load sample: ${samplePath}\n`);
-      }
+      await openSamples({
+        modelId: m.id,
+        modelTitle: `${m.name} (MAT_${m.mat})`,
+        samples: m.samples || []
+      });
     });
   });
 }
