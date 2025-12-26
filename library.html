@@ -7,58 +7,56 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <header class="siteHeader">
-    <div class="wrap headerRow">
-      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
-      <nav class="nav">
+  <div class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <div class="nav">
         <a href="./index.html">Home</a>
         <a class="active" href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
-      </nav>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <main class="wrap">
-    <section class="card">
-      <div class="rowBetween">
+  <div class="wrap">
+    <div class="card">
+      <div class="row between">
         <div>
-          <h1 class="h1">Material Library</h1>
-          <div class="muted" id="libMeta">—</div>
+          <h1 class="title">Library</h1>
+          <div class="small" id="libInfo">—</div>
         </div>
-        <a class="btn primary" href="./generator.html">Open Generator</a>
+        <a class="btn primary" href="./generator.html">Generator</a>
       </div>
 
-      <div class="toolbar">
-        <input id="q" class="input" placeholder="Search (name, keyword, mat, notes)..." />
-        <select id="type" class="select">
+      <div class="row" style="margin-top:10px;">
+        <input class="input" id="q" placeholder="Search..." />
+        <select class="select" id="type">
           <option value="">All types</option>
         </select>
-        <select id="sort" class="select">
-          <option value="name">Sort: Name</option>
-          <option value="mat">Sort: MAT</option>
-          <option value="updatedAt">Sort: Updated</option>
+        <select class="select" id="sort">
+          <option value="mat">Sort by MAT</option>
+          <option value="name">Sort by Name</option>
+          <option value="updatedAt">Sort by Updated</option>
         </select>
       </div>
-    </section>
+    </div>
 
-    <section class="grid2" style="margin-top:16px;">
-      <div class="card">
-        <h2 class="h2">Results</h2>
-        <div id="list" class="listCards"></div>
-      </div>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="h2">Results</h2>
+      <div class="list" id="list"></div>
+    </div>
 
-      <div class="card">
-        <h2 class="h2">Details</h2>
-        <div id="details" class="muted">Select a model to view details.</div>
-      </div>
-    </section>
-  </main>
+    <div class="card" style="margin-top:14px;">
+      <h2 class="h2">Details</h2>
+      <div id="details" class="small">Select one item.</div>
+    </div>
+  </div>
 
-  <footer class="siteFooter">
-    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </footer>
+  <div class="footer">
+    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+  </div>
 
   <script type="module" src="./assets/js/pages/library.js"></script>
 </body>
