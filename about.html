@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>About • LS-DYNA Material Hub</title>
+  <title>Contact • LS-DYNA Material Hub</title>
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
@@ -14,24 +14,40 @@
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
-        <a class="active" href="./about.html">About</a>
-        <a href="./contact.html">Contact</a>
+        <a href="./about.html">About</a>
+        <a class="active" href="./contact.html">Contact</a>
       </div>
     </div>
   </div>
 
   <div class="wrap">
     <div class="card">
-      <h1 class="title">About</h1>
-      <p class="sub">
-        This site keeps the original UI simple, but the code is modular to avoid “break whole system” when adding new models.
-      </p>
+      <h1 class="title">Contact</h1>
+      <p class="sub">Local history (you can submit multiple times).</p>
 
-      <h2 class="h2">How to add a new model</h2>
-      <ol class="small">
-        <li>Add a new entry in <code>assets/data/materials.json</code> with <code>generatorModule</code></li>
-        <li>Create file in <code>assets/js/generators/</code> exporting <code>default function generate(params, meta)</code></li>
-      </ol>
+      <div class="inputs">
+        <label class="small">Name</label>
+        <input class="input" id="name" placeholder="Your name" />
+
+        <label class="small">Email</label>
+        <input class="input" id="email" placeholder="you@example.com" />
+
+        <label class="small">Message</label>
+        <textarea class="input" id="message" rows="6" placeholder="Your message..."></textarea>
+
+        <div class="row">
+          <button class="btn primary" id="btnSend">Send</button>
+          <button class="btn" id="btnClear">Clear</button>
+          <button class="btn danger" id="btnReset">Reset history</button>
+        </div>
+
+        <div class="small" id="status">—</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h2 class="h2">History</h2>
+      <div class="list" id="history"></div>
     </div>
   </div>
 
@@ -39,8 +55,6 @@
     <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
   </div>
 
-  <script type="module">
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+  <script type="module" src="./assets/js/pages/contact.js"></script>
 </body>
 </html>
