@@ -1,0 +1,67 @@
+{
+  "project": "LS-DYNA Material Hub",
+  "lastBuild": "2025-12-24",
+  "materials": [
+    {
+      "id": "mat072r3_kcc_rel3",
+      "display": "*MAT_072R3 | K&C Damage Release III",
+      "name": "K&C Damage Release III",
+      "keyword": "*MAT_CONCRETE_DAMAGE_REL3_TITLE",
+      "mat": "072R3",
+      "type": "concrete",
+      "generatorKey": "mat072r3_kcc_rel3",
+      "version": "1.0.1",
+      "updatedAt": "2025-12-24",
+      "updatedBy": "Han",
+      "notes": "Ported from your Python script. Uses default lambda/eta table (npts=13) + DIF curve + EOS tabulated compaction.",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "default": 1, "min": 1, "max": 999999, "step": 1 },
+        { "key": "fc", "label": "Uniaxial compressive strength fc", "unit": "MPa", "default": 25, "min": 10, "max": 150, "step": 1 },
+        { "key": "elm_size", "label": "Element size", "unit": "mm", "default": 25, "min": 1, "max": 200, "step": 1 },
+        { "key": "omega", "label": "Omega (ω)", "unit": "", "default": 0.5, "min": 0, "max": 1, "step": 0.05 },
+        { "key": "rho", "label": "Density ρ", "unit": "g/mm³", "default": 0.0023, "min": 0.0018, "max": 0.0026, "step": 0.0001 }
+      ]
+    },
+
+    {
+      "id": "mat084_winfrith",
+      "display": "*MAT_084 | Winfrith Concrete (Han generator)",
+      "name": "Winfrith Concrete",
+      "keyword": "*MAT_WINFRITH_CONCRETE_TITLE",
+      "mat": "084",
+      "type": "concrete",
+      "generatorKey": "mat084_winfrith",
+      "version": "1.1.0",
+      "updatedAt": "2025-12-24",
+      "updatedBy": "Han",
+      "notes": "Implements Han Python formulas: TM(fc), FT(fc), GF(fc,dmax), WC=2*GF/FT, FE=WC, ASIZE=dmax/2. Writes full Winfrith 4-row card.",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "default": 99, "min": 1, "max": 999999, "step": 1 },
+        { "key": "ro", "label": "Density RO", "unit": "g/mm³", "default": 0.0023, "min": 0.0018, "max": 0.0026, "step": 0.0001 },
+        { "key": "pr", "label": "Poisson ratio PR", "unit": "", "default": 0.2, "min": 0.05, "max": 0.45, "step": 0.01 },
+        { "key": "fc", "label": "Compressive strength fc", "unit": "MPa", "default": 30, "min": 5, "max": 200, "step": 1 },
+        { "key": "dmax", "label": "Max aggregate size dmax", "unit": "mm", "default": 16, "min": 4, "max": 40, "step": 1 }
+      ]
+    },
+
+    {
+      "id": "mat159_cscm",
+      "display": "*MAT_159 | CSCM (Han generator)",
+      "name": "CSCM (Concrete)",
+      "keyword": "*MAT_CSCM_TITLE",
+      "mat": "159",
+      "type": "concrete",
+      "generatorKey": "mat159_cscm",
+      "version": "1.1.0",
+      "updatedAt": "2025-12-24",
+      "updatedBy": "Han",
+      "notes": "Implements Han CSCM python formulas (GF, G/K, alpha/theta/lambda/beta, R/XD, eta0c/eta0t/overc/overt). Deterministic MID via input.",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "default": 159, "min": 1, "max": 999999, "step": 1 },
+        { "key": "ro", "label": "Density RO", "unit": "g/mm³", "default": 0.0023, "min": 0.0018, "max": 0.0026, "step": 0.0001 },
+        { "key": "fc", "label": "Compressive strength fc", "unit": "MPa", "default": 40, "min": 5, "max": 200, "step": 1 },
+        { "key": "dmax", "label": "Max aggregate size dmax", "unit": "mm", "default": 16, "min": 4, "max": 40, "step": 1 }
+      ]
+    }
+  ]
+}
