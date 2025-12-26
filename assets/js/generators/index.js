@@ -11,13 +11,8 @@ export const GENERATORS = {
   mat159_cscm: mat159,
 };
 
-export const GENERATOR_KEYS = Object.keys(GENERATORS).sort((a, b) => {
-  // sort by numeric id if present: mat159_... > 159
-  const na = Number((a.match(/^mat(\d+)/) || [])[1] || 999999);
-  const nb = Number((b.match(/^mat(\d+)/) || [])[1] || 999999);
-  if (na !== nb) return na - nb;
-  return a.localeCompare(b);
-});
+// IMPORTANT: for dropdown order + stable sorting
+export const GENERATOR_KEYS = Object.keys(GENERATORS).sort((a, b) => a.localeCompare(b));
 
 export function getGenerator(key) {
   return GENERATORS[key] || null;
