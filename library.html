@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,56 +7,73 @@
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <div class="topbar">
+  <header class="topbar">
     <div class="wrap topbar-row">
       <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
-      <div class="nav">
-        <a href="./index.html">Home</a>
-        <a class="active" href="./library.html">Library</a>
+      <nav class="nav">
+        <a href="./index.html">Trang chủ</a>
+        <a class="active" href="./library.html">Thư viện</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="pagehead">
+      <div>
+        <h1>Thư viện material models</h1>
+        <div class="small">Tìm nhanh model → xem Details / sample / generator.</div>
       </div>
     </div>
-  </div>
 
-  <div class="wrap">
-    <div class="card">
-      <div class="row between">
-        <div>
-          <h1 class="title">Library</h1>
-          <div class="small" id="libInfo">—</div>
+    <div class="toolbar card">
+      <div class="row gap wrapline">
+        <div class="field">
+          <label>Tìm kiếm</label>
+          <input id="q" placeholder="VD: Johnson-Cook, MAT_015, concrete, rubber..." />
         </div>
-        <a class="btn primary" href="./generator.html">Generator</a>
+
+        <div class="field">
+          <label>Category</label>
+          <select id="cat">
+            <option value="">All</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Difficulty</label>
+          <select id="diff">
+            <option value="">All</option>
+            <option value="Đơn giản">Đơn giản</option>
+            <option value="Trung bình">Trung bình</option>
+            <option value="Nâng cao">Nâng cao</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Sort</label>
+          <select id="sort">
+            <option value="mat">MAT number</option>
+            <option value="name">Name</option>
+            <option value="updatedAt">Updated</option>
+          </select>
+        </div>
+
+        <div class="row gap" style="align-items:flex-end;">
+          <button class="btn" id="btnReset">Reset filter</button>
+        </div>
       </div>
-
-      <div class="row" style="margin-top:10px;">
-        <input class="input" id="q" placeholder="Search..." />
-        <select class="select" id="type">
-          <option value="">All types</option>
-        </select>
-        <select class="select" id="sort">
-          <option value="mat">Sort by MAT</option>
-          <option value="name">Sort by Name</option>
-          <option value="updatedAt">Sort by Updated</option>
-        </select>
-      </div>
     </div>
 
-    <div class="card" style="margin-top:14px;">
-      <h2 class="h2">Results</h2>
-      <div class="list" id="list"></div>
-    </div>
+    <div id="resultMeta" class="small" style="margin:10px 0 8px;">—</div>
+    <div id="list" class="grid"></div>
+  </main>
 
-    <div class="card" style="margin-top:14px;">
-      <h2 class="h2">Details</h2>
-      <div id="details" class="small">Select one item.</div>
-    </div>
-  </div>
-
-  <div class="footer">
+  <footer class="footer">
     <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
-  </div>
+  </footer>
 
   <script type="module" src="./assets/js/pages/library.js"></script>
 </body>
