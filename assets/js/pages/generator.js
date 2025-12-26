@@ -104,22 +104,46 @@ function downloadText(filename, text){
     outEl.textContent = "Click Generate.";
   }
 
+
   function generate(){
     const g = getGenerator(cur.generator);
     if (!g || typeof g.generate !== "function"){
       outEl.textContent = `Generator not found: ${cur.generator}`;
       return;
     }
-
+  
     const { ok, values } = validateAndCollect(cur.inputs);
     if (!ok){
       outEl.textContent = "Invalid inputs. Please fix highlighted fields.";
       return;
     }
-
-    outEl.textContent = g.generate(values);
+  
+    let out;
+    try{
+      out = g.generate(values);
+    }catch(e){
+      outEl.textContent = `Generate failed: ${e?.message || e}`;
+      return;
+    }
+  
+    // ✅ support both:
+    // - old generators: return string
+    // - new generators (MAT_159): return { filename, keyword }
+    if (typeof out === "string"){
+      outEl.textContent = out;
+      outEl.dataset.filename = `${cur.id}.k`;
+    } else if (out && typeof out === "object"){
+      outEl.textContent = out.keyword || "";
+      outEl.dataset.filename = out.filename || `${cur.id}.k`;
+    } else {
+      outEl.textContent = "";
+      outEl.dataset.filename = `${cur.id}.k`;
+    }
+  
     curValues = values;
   }
+
+
 
   on(sel, "change", syncUI);
 
