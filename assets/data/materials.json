@@ -1,0 +1,102 @@
+{
+  "materials": [
+    {
+      "id": "mat015_johnson_cook",
+      "mat": "015",
+      "name": "Johnson–Cook Plasticity",
+      "category": "Metals",
+      "summary": "Metal plasticity model for large strain; can include strain-rate and thermal effects.",
+      "version": "1.0",
+      "updatedAt": "2025-12-26",
+      "generator": "mat015_johnson_cook",
+      "doc": "./assets/docs/mat015_johnson_cook.md",
+      "sample": "./assets/samples/mat015_johnson_cook.k.txt",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "type": "number", "default": 15, "min": 1, "max": 999999, "hint": "Example MID = 15." },
+        { "key": "ro", "label": "Density", "unit": "g/mm³", "type": "number", "default": 0.00785, "min": 0.0001, "max": 0.02, "hint": "Steel ~0.00785 g/mm³." },
+        { "key": "e", "label": "Young's modulus", "unit": "MPa", "type": "number", "default": 210000, "min": 1, "max": 1000000, "hint": "Typical steel ~210000 MPa." },
+        { "key": "pr", "label": "Poisson ratio", "unit": "-", "type": "number", "default": 0.3, "min": 0.0, "max": 0.49, "hint": "Typical steel ~0.30." },
+        { "key": "a", "label": "A (yield stress)", "unit": "MPa", "type": "number", "default": 350, "min": 0, "max": 5000, "hint": "Example value only." },
+        { "key": "b", "label": "B (hardening)", "unit": "MPa", "type": "number", "default": 400, "min": 0, "max": 5000, "hint": "Example value only." },
+        { "key": "n", "label": "n (hardening exponent)", "unit": "-", "type": "number", "default": 0.35, "min": 0, "max": 2, "hint": "Common range: 0.1–0.7." },
+        { "key": "c", "label": "C (rate effect)", "unit": "-", "type": "number", "default": 0.02, "min": 0, "max": 1, "hint": "Set small if rate effects are not used." },
+        { "key": "m", "label": "m (thermal softening)", "unit": "-", "type": "number", "default": 1.0, "min": 0, "max": 5, "hint": "Used with temperature-dependent terms." },
+        { "key": "troom", "label": "Room temperature", "unit": "K", "type": "number", "default": 293, "min": 1, "max": 5000, "hint": "293 K ≈ 20°C." },
+        { "key": "tmelt", "label": "Melt temperature", "unit": "K", "type": "number", "default": 1793, "min": 1, "max": 10000, "hint": "Steel ~1793 K (varies by alloy)." },
+        { "key": "eps0", "label": "Reference strain rate", "unit": "1/s", "type": "number", "default": 1.0, "min": 1e-9, "max": 1e9, "hint": "Common default: 1.0 1/s." }
+      ]
+    },
+
+    {
+      "id": "mat027_mooney_rivlin",
+      "mat": "027",
+      "name": "Mooney–Rivlin Rubber",
+      "category": "Rubber",
+      "summary": "Hyperelastic rubber model for large deformations.",
+      "version": "1.0",
+      "updatedAt": "2025-12-26",
+      "generator": "mat027_mooney_rivlin",
+      "doc": "./assets/docs/mat027_mooney_rivlin.md",
+      "sample": "./assets/samples/mat027_mooney_rivlin.k.txt",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "type": "number", "default": 27, "min": 1, "max": 999999, "hint": "Example MID = 27." },
+        { "key": "ro", "label": "Density", "unit": "g/mm³", "type": "number", "default": 0.0011, "min": 0.0001, "max": 0.01, "hint": "Rubber ~0.0010–0.0012." },
+        { "key": "pr", "label": "Poisson ratio", "unit": "-", "type": "number", "default": 0.49, "min": 0.0, "max": 0.499, "hint": "Near-incompressible: ~0.49." },
+        { "key": "c10", "label": "C10", "unit": "MPa", "type": "number", "default": 0.5, "min": 0, "max": 1000, "hint": "Example only; calibrate from tests." },
+        { "key": "c01", "label": "C01", "unit": "MPa", "type": "number", "default": 0.2, "min": 0, "max": 1000, "hint": "Example only; calibrate from tests." },
+        { "key": "k", "label": "Bulk penalty (K)", "unit": "MPa", "type": "number", "default": 2000, "min": 0, "max": 1e7, "hint": "Penalty to keep volume stable; depends on setup." }
+      ]
+    },
+
+    {
+      "id": "mat084_winfrith",
+      "mat": "084",
+      "name": "Winfrith Concrete",
+      "category": "Concrete",
+      "summary": "Concrete cracking model; practical for quick setups and basic cracking behavior.",
+      "version": "1.0",
+      "updatedAt": "2025-12-26",
+      "generator": "mat084_winfrith",
+      "doc": "./assets/docs/mat084_winfrith.md",
+      "sample": "./assets/samples/mat084_winfrith.k.txt",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "type": "number", "default": 84, "min": 1, "max": 999999, "hint": "Example MID = 84." },
+        { "key": "ro", "label": "Density", "unit": "g/mm³", "type": "number", "default": 0.0023, "min": 0.0018, "max": 0.0026, "hint": "Normal concrete ~0.0022–0.0024." },
+        { "key": "tm", "label": "Tangent modulus (TM)", "unit": "MPa", "type": "number", "default": 30000, "min": 1, "max": 200000, "hint": "Typical 25–35 GPa → 25000–35000 MPa." },
+        { "key": "pr", "label": "Poisson ratio (PR)", "unit": "-", "type": "number", "default": 0.2, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
+        { "key": "ucs", "label": "Compressive strength (UCS)", "unit": "MPa", "type": "number", "default": 30, "min": 1, "max": 200, "hint": "Example: 30 MPa." },
+        { "key": "uts", "label": "Tensile strength (UTS)", "unit": "MPa", "type": "number", "default": 2.9, "min": 0, "max": 20, "hint": "Often ~2–4 MPa; depends on fc." },
+        { "key": "fe", "label": "Fracture energy term (FE)", "unit": "-", "type": "number", "default": 0.12, "min": 0, "max": 10, "hint": "Guidance only; use your formulation/calibration." },
+        { "key": "asize", "label": "Aggregate size /2 (ASIZE)", "unit": "mm", "type": "number", "default": 8, "min": 0, "max": 50, "hint": "If dmax=16 mm → asize=8 mm." }
+      ]
+    },
+
+    {
+      "id": "mat159_cscm",
+      "mat": "159",
+      "name": "CSCM Concrete",
+      "category": "Concrete",
+      "summary": "Robust concrete model for damage/crushing; commonly used for impact/blast-type problems.",
+      "version": "1.0",
+      "updatedAt": "2025-12-26",
+      "generator": "mat159_cscm",
+      "doc": "./assets/docs/mat159_cscm.md",
+      "sample": "./assets/samples/mat159_cscm.k.txt",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "", "type": "number", "default": 159, "min": 1, "max": 999999, "hint": "Example MID = 159." },
+        { "key": "ro", "label": "Density", "unit": "g/mm³", "type": "number", "default": 0.0023, "min": 0.0018, "max": 0.0026, "hint": "Normal concrete ~0.0022–0.0024." },
+        { "key": "g", "label": "Shear modulus (G)", "unit": "MPa", "type": "number", "default": 12500, "min": 1, "max": 300000, "hint": "Guidance only; calibrate for your concrete." },
+        { "key": "k", "label": "Bulk modulus (K)", "unit": "MPa", "type": "number", "default": 20833, "min": 1, "max": 500000, "hint": "Guidance only; calibrate for your concrete." },
+        { "key": "alpha", "label": "alpha", "unit": "-", "type": "number", "default": 0.5, "min": 0, "max": 50, "hint": "See Details for meaning." },
+        { "key": "theta", "label": "theta", "unit": "-", "type": "number", "default": 0.2, "min": -10, "max": 10, "hint": "See Details for meaning." },
+        { "key": "lamda", "label": "lambda", "unit": "-", "type": "number", "default": 0.3, "min": -100, "max": 100, "hint": "See Details for meaning." },
+        { "key": "beta", "label": "beta", "unit": "-", "type": "number", "default": 0.1, "min": 0, "max": 100, "hint": "See Details for meaning." },
+        { "key": "r", "label": "R", "unit": "-", "type": "number", "default": 2.5, "min": 0, "max": 20, "hint": "See Details for meaning." },
+        { "key": "xd", "label": "XD", "unit": "-", "type": "number", "default": 60, "min": 0, "max": 500, "hint": "See Details for meaning." },
+        { "key": "gfc", "label": "GFC", "unit": "-", "type": "number", "default": 10, "min": 0, "max": 10000, "hint": "Compression fracture-related term (guidance)." },
+        { "key": "gft", "label": "GFT", "unit": "-", "type": "number", "default": 0.1, "min": 0, "max": 10000, "hint": "Tension fracture-related term (guidance)." },
+        { "key": "gfs", "label": "GFS", "unit": "-", "type": "number", "default": 0.1, "min": 0, "max": 10000, "hint": "Shear fracture-related term (guidance)." }
+      ]
+    }
+  ]
+}
