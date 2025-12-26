@@ -126,9 +126,9 @@
       "doc": "./assets/docs/mat159_cscm.md",
       "samples": [],
       "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "-", "type": "number", "default": 1001, "min": 1, "max": 999999, "hint": "Example MID." },
         { "key": "fc_mpa", "label": "Compressive strength (fc)", "unit": "MPa", "type": "number", "default": 30.0, "min": 1, "max": 300, "hint": "Concrete compressive strength." },
         { "key": "dmax_mm", "label": "Max aggregate size (dmax)", "unit": "mm", "type": "number", "default": 16.0, "min": 1, "max": 50, "hint": "e.g., 16 mm." },
-        { "key": "mid", "label": "Material ID (MID)", "unit": "-", "type": "number", "default": 1001, "min": 1, "max": 999999, "hint": "Example MID." },
         { "key": "ro", "label": "Density (RO)", "unit": "g/mm³", "type": "number", "default": 0.0023, "min": 0.000001, "max": 0.01, "hint": "Normal concrete ~0.0022–0.0024." },
         { "key": "poisson_ratio", "label": "Poisson ratio (ν)", "unit": "-", "type": "number", "default": 0.2, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." }
       ]
