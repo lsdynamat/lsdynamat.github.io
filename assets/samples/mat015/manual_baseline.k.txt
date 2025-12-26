@@ -1,0 +1,10 @@
+*KEYWORD
+*MAT_JOHNSON_COOK_TITLE
+Johnson-Cook sample (baseline)
+$#     mid        ro         e        pr
+15 0.00785 210000 0.3
+$#       a         b         n         c         m
+350 400 0.35 0.02 1.0
+$#   troom     tmelt      eps0
+293 1793 1.0
+*END
