@@ -4,74 +4,89 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>LS-DYNA Material Hub</title>
-  <link rel="stylesheet" href="./assets/styles.css" />
+  <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="./">
-      <div class="logo">LS</div>
-      <div>
-        <div class="brand-title">LS-DYNA Material Hub</div>
-        <div class="brand-sub">Material Models</div>
-      </div>
-    </a>
-
-    <nav class="nav">
-      <a class="nav-link active" href="./">Home</a>
-      <a class="nav-link" href="./library/">Material Library</a>
-      <a class="nav-link" href="./generator/">Keyword Generator</a>
-      <a class="nav-link" href="./about/">About</a>
-      <a class="nav-link" href="./contact/">Contact</a>
-    </nav>
-
-
-
-
-    <div class="cta">
-      <a class="btn btn-primary" href="./library/">Open library →</a>
+  <header class="siteHeader">
+    <div class="wrap headerRow">
+      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a href="./index.html" class="active">Home</a>
+        <a href="./library.html">Library</a>
+        <a href="./keyword.html">Generator</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
     </div>
   </header>
 
-  <main class="page">
-    <section class="hero">
-      <div class="hero-left">
-        <h1>LS-DYNA<br/>Material Hub</h1>
-        <p class="sub">A lightweight, searchable library for LS-DYNA material models.</p>
-
-        <div class="actions">
-          <a class="btn btn-primary" href="./library/">Browse library</a>
-          <a class="btn" href="./generator/">Open generator</a>
+  <main class="wrap">
+    <section class="hero card">
+      <div>
+        <h1 class="h1">Fast, searchable LS-DYNA material library + keyword generator</h1>
+        <p class="muted">
+          Static site (GitHub Pages friendly). Add new models safely using per-model generator modules.
+        </p>
+        <div class="heroActions">
+          <a class="btn primary" href="./keyword.html">Open Generator</a>
+          <a class="btn" href="./library.html">Browse Library</a>
         </div>
+        <div class="muted" id="latestUpdateHome">—</div>
       </div>
 
-      <div class="hero-right">
-        <div class="statcard">
-          <div class="stat-label">Material Models</div>
-          <div class="stat-value" id="statModels">—</div>
+      <div class="stats">
+        <div class="statCard">
+          <div class="statLabel">Materials</div>
+          <div class="statValue" id="statMaterials">—</div>
         </div>
-
-        <div class="statcard">
-          <div class="stat-label">Material Types</div>
-          <div class="stat-value" id="statTypes">—</div>
+        <div class="statCard">
+          <div class="statLabel">Categories</div>
+          <div class="statValue" id="statCategories">—</div>
+        </div>
+        <div class="statCard">
+          <div class="statLabel">Last build</div>
+          <div class="statValue" id="statBuild">—</div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Popular Categories</h2>
-          <div class="sub">Top categories by number of models</div>
-        </div>
-        <a class="btn" href="./library/">View all →</a>
+    <section class="grid2">
+      <div class="card">
+        <h2 class="h2">What you get</h2>
+        <ul class="list">
+          <li>Material catalog with search + filters</li>
+          <li>Keyword generator with live preview</li>
+          <li>Per-model update info (version/updatedAt/notes)</li>
+          <li>Module registry: generator bugs won’t break the whole site</li>
+        </ul>
       </div>
 
-      <div class="grid" id="popularGrid"></div>
+      <div class="card">
+        <h2 class="h2">Quick links</h2>
+        <div class="quickLinks">
+          <a class="linkCard" href="./keyword.html">
+            <div class="linkTitle">Keyword Generator</div>
+            <div class="muted">Input parameters → preview → download .k</div>
+          </a>
+          <a class="linkCard" href="./library.html">
+            <div class="linkTitle">Material Library</div>
+            <div class="muted">Browse models & view metadata</div>
+          </a>
+          <a class="linkCard" href="./contact.html">
+            <div class="linkTitle">Contact</div>
+            <div class="muted">Send feedback multiple times</div>
+          </a>
+        </div>
+      </div>
     </section>
-
-    <div class="footer">© <span id="year"></span> LS-DYNA Material Hub</div>
   </main>
 
-  <script src="./assets/home.js"></script>
+  <footer class="siteFooter">
+    <div class="wrap muted">
+      © <span id="year"></span> LS-DYNA Material Hub • Static & maintainable.
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app-home.js"></script>
 </body>
 </html>
