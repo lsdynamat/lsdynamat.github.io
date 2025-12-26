@@ -1,191 +1,406 @@
-import { escapeHtml } from "./dom.js";
-import { loadText } from "./fetch.js";
+/* =========================================================
+   LS-DYNA Material Library — Minimal Dark UI (Full CSS)
+   - Clean layout
+   - Solid UI
+   - Readable dropdown options
+   - Isolated keyword sample viewer (lsd-*)
+   ========================================================= */
 
-/**
- * sample object schema:
- * { id, title, source, path, updatedAt, tags?:[] }
- */
+:root{
+  --bg: #070b17;
+  --panel: #0b1020;
+  --panel2: #0f172a;
+  --border: #1f2a44;
+  --border2: #24314f;
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.70);
+  --muted2: rgba(255,255,255,.60);
+  --accent: #2f4588;
+  --danger: #6a2222;
 
-function downloadText(filename, text) {
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  --radius: 14px;
+  --radius2: 12px;
+  --shadow: 0 18px 60px rgba(0,0,0,.40);
 }
 
-function createOverlay() {
-  document.body.classList.add("modal-open");
+*{ box-sizing: border-box; }
 
-  const overlay = document.createElement("div");
-  overlay.className = "modalOverlay";
-
-  function close() {
-    overlay.remove();
-  }
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) close();
-  });
-
-  const onKey = (e) => {
-    if (e.key === "Escape") close();
-  };
-  window.addEventListener("keydown", onKey);
-
-  // cleanup on remove
-  const oldRemove = overlay.remove.bind(overlay);
-  overlay.remove = () => {
-    try { document.body.classList.remove("modal-open"); } catch {}
-    try { window.removeEventListener("keydown", onKey); } catch {}
-    oldRemove();
-  };
-
-  overlay._close = close;
-  return overlay;
+html, body{
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  line-height: 1.5;
 }
 
-function createBox(title, subtitle) {
-  const box = document.createElement("div");
-  box.className = "card modalBox";
-  box.innerHTML = `
-    <div class="row between wrapline">
-      <div>
-        <div class="item-title">${escapeHtml(title)}</div>
-        <div class="small">${escapeHtml(subtitle || "")}</div>
-      </div>
-      <div class="row gap">
-        <button class="btn danger" id="closeBtn">Close</button>
-      </div>
-    </div>
-    <div id="body" style="margin-top:12px;"></div>
-  `;
-  return box;
+a{
+  color: inherit;
+  text-decoration: none;
 }
 
-async function openTextViewer({ modelId, modelTitle, sample }) {
-  const overlay = createOverlay();
-  const subtitle = `${sample.title || sample.id || "Sample"}${sample.source ? " • " + sample.source : ""}`;
+img{ max-width: 100%; display: block; }
 
-  const box = createBox(`Keyword sample • ${modelTitle}`, subtitle);
-  const body = box.querySelector("#body");
-
-  body.innerHTML = `
-    <div class="row between wrapline">
-      <div class="tagrow" id="tagRow"></div>
-      <div class="row gap">
-        <button class="btn" id="copyBtn">Copy</button>
-        <button class="btn" id="downloadBtn">Download</button>
-      </div>
-    </div>
-    <pre class="preview" id="pre">Loading…</pre>
-  `;
-
-  const tags = Array.isArray(sample.tags) ? sample.tags : [];
-  body.querySelector("#tagRow").innerHTML = `
-    <span class="tag info">${escapeHtml(sample.id || "sample")}</span>
-    ${sample.updatedAt ? `<span class="tag">Updated ${escapeHtml(sample.updatedAt)}</span>` : ""}
-    ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
-  `;
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  box.querySelector("#closeBtn").onclick = () => overlay._close();
-
-  let text = "";
-  try {
-    text = await loadText(sample.path);
-    body.querySelector("#pre").textContent = text;
-  } catch {
-    body.querySelector("#pre").textContent = `Could not load sample:\n${sample.path}`;
-  }
-
-  box.querySelector("#copyBtn").onclick = async () => {
-    try { await navigator.clipboard.writeText(text || ""); } catch {}
-  };
-
-  box.querySelector("#downloadBtn").onclick = () => {
-    const fn = `${modelId || "model"}__${sample.id || "sample"}.k`;
-    downloadText(fn, text || "");
-  };
+.container{
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 18px;
 }
 
-function openListModal({ modelId, modelTitle, samples }) {
-  const overlay = createOverlay();
-  const box = createBox(`Keyword samples • ${modelTitle}`, "Choose a sample to preview and copy.");
-  const body = box.querySelector("#body");
-
-  body.innerHTML = `<div class="list" id="list"></div>`;
-  const list = body.querySelector("#list");
-
-  samples.forEach((s) => {
-    const tags = Array.isArray(s.tags) ? s.tags : [];
-    const row = document.createElement("div");
-    row.className = "rowitem";
-
-    row.innerHTML = `
-      <div class="row between wrapline">
-        <div>
-          <div class="item-title">${escapeHtml(s.title || s.id || "Sample")}</div>
-          <div class="item-meta">
-            ${escapeHtml(s.source || "—")}
-            ${s.updatedAt ? ` • Updated ${escapeHtml(s.updatedAt)}` : ""}
-          </div>
-          <div class="tagrow" style="margin-top:8px;">
-            <span class="tag info">${escapeHtml(s.id || "sample")}</span>
-            ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
-          </div>
-        </div>
-        <div class="row gap" style="align-items:flex-start;">
-          <button class="btn primary" data-view="1">View</button>
-          <button class="btn" data-copy="1">Copy</button>
-        </div>
-      </div>
-    `;
-
-    row.querySelector('button[data-view="1"]').onclick = async () => {
-      overlay._close();
-      await openTextViewer({ modelId, modelTitle, sample: s });
-    };
-
-    row.querySelector('button[data-copy="1"]').onclick = async () => {
-      try {
-        const text = await loadText(s.path);
-        await navigator.clipboard.writeText(text);
-      } catch {}
-    };
-
-    list.appendChild(row);
-  });
-
-  overlay.appendChild(box);
-  document.body.appendChild(overlay);
-
-  box.querySelector("#closeBtn").onclick = () => overlay._close();
+header.site-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  padding: 12px 0 18px;
 }
 
-export async function openSamples({ modelId, modelTitle, samples }) {
-  const arr = Array.isArray(samples) ? samples : [];
+.brand{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
 
-  if (arr.length === 0) {
-    const overlay = createOverlay();
-    const box = createBox(`Keyword samples • ${modelTitle}`, "No samples available yet for this model.");
-    box.querySelector("#body").innerHTML = `<div class="small">Add samples in materials.json → samples: []</div>`;
-    overlay.appendChild(box);
-    document.body.appendChild(overlay);
-    box.querySelector("#closeBtn").onclick = () => overlay._close();
-    return;
-  }
+.brand .logo{
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
 
-  if (arr.length === 1) {
-    await openTextViewer({ modelId, modelTitle, sample: arr[0] });
-    return;
-  }
+.brand .title{
+  font-weight: 800;
+  letter-spacing: .2px;
+}
 
-  openListModal({ modelId, modelTitle, samples: arr });
+.brand .subtitle{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+nav.site-nav{
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.navlink{
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.navlink:hover{ filter: brightness(1.08); }
+
+.card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.22);
+}
+
+.card + .card{ margin-top: 12px; }
+
+.h1{ font-size: 22px; font-weight: 800; margin: 0 0 10px; }
+.h2{ font-size: 16px; font-weight: 800; margin: 0 0 10px; }
+.small{ font-size: 12px; color: var(--muted); }
+.muted{ color: var(--muted); }
+
+.row{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.row.gap{ gap: 10px; }
+.between{ justify-content: space-between; }
+.wrapline{ flex-wrap: wrap; }
+
+.item-title{
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.item-meta{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.tagrow{
+  display:flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.tag.info{
+  background: #111b33;
+  border-color: #2c3a60;
+}
+
+.btn{
+  appearance:none;
+  cursor:pointer;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #2a3b5f;
+  background: var(--panel2);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.btn:hover{ filter: brightness(1.08); }
+
+.btn.primary{
+  background: #1b2a55;
+  border-color: var(--accent);
+}
+
+.btn.danger{
+  background: #2a1111;
+  border-color: var(--danger);
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea{
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  color: var(--text);
+  outline: none;
+  font-size: 13px;
+}
+
+textarea{ min-height: 120px; resize: vertical; }
+
+/* Dropdown options readability (dark) */
+select option,
+select optgroup{
+  background: var(--panel);
+  color: var(--text);
+}
+
+/* Generic list used by library/details */
+.list{
+  display: grid;
+  gap: 10px;
+}
+
+.rowitem{
+  padding: 12px;
+  border-radius: var(--radius2);
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+}
+
+pre{
+  margin: 0;
+}
+
+/* =========================================================
+   LSD Keyword Sample Viewer — isolated, SOLID, no conflicts
+   ========================================================= */
+
+body.lsd-modal-open{
+  overflow: hidden;
+}
+
+.lsd-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: rgba(0,0,0,0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.lsd-modal__dialog{
+  width: min(980px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.lsd-modal__header{
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.lsd-modal__headtext{
+  max-width: calc(100% - 80px);
+}
+
+.lsd-modal__title{
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.lsd-modal__subtitle{
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.lsd-modal__body{
+  padding-top: 12px;
+}
+
+.lsd-bar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.lsd-tags{
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.lsd-tag{
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+}
+
+.lsd-tag--info{
+  background: #111b33;
+  border-color: #2c3a60;
+}
+
+.lsd-btnrow{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lsd-btn{
+  appearance: none;
+  cursor: pointer;
+  background: var(--panel2);
+  border: 1px solid #2a3b5f;
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.lsd-btn:hover{ filter: brightness(1.08); }
+
+.lsd-btn--primary{
+  background: #1b2a55;
+  border-color: var(--accent);
+}
+
+.lsd-btn--danger{
+  background: #2a1111;
+  border-color: var(--danger);
+}
+
+.lsd-code{
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px;
+  overflow: auto;
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono","Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.lsd-list{
+  display: grid;
+  gap: 10px;
+}
+
+.lsd-item{
+  border-radius: 12px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.lsd-item__left{ min-width: 260px; }
+
+.lsd-item__title{
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.lsd-item__meta{
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.lsd-item__right{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.lsd-note{
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--text);
+}
+
+.lsd-note code{
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  padding: 2px 6px;
+  border-radius: 8px;
 }
