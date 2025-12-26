@@ -21,7 +21,7 @@ function countSamples(m){
   return arr.length;
 }
 
-function renderList(listEl, items){
+function renderList(listEl, items, materials){
   listEl.innerHTML = "";
 
   for (const m of items){
@@ -51,12 +51,10 @@ function renderList(listEl, items){
     listEl.appendChild(div);
   }
 
-  // Attach events
   listEl.querySelectorAll('button[data-samples="1"]').forEach(btn => {
     btn.addEventListener("click", async () => {
       const id = btn.getAttribute("data-id");
-      const data = await loadJSON("./assets/data/materials.json");
-      const m = (data.materials || []).find(x => x.id === id);
+      const m = materials.find(x => x.id === id);
       if (!m) return;
 
       await openSamples({
@@ -105,9 +103,8 @@ function renderList(listEl, items){
     }
 
     items.sort(sorters(sort));
-
     metaEl.textContent = `Results: ${items.length} / ${materials.length}`;
-    renderList(listEl, items);
+    renderList(listEl, items, materials);
   }
 
   on(qEl, "input", apply);
@@ -122,5 +119,4 @@ function renderList(listEl, items){
   });
 
   apply();
-
 })().catch(console.error);
