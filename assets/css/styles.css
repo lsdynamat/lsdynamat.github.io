@@ -148,24 +148,25 @@ h2{margin:0}
   padding:10px 10px;
   color:var(--text);
   outline:none;
+  -webkit-appearance:none;
+  appearance:none;
 }
 .field input:focus,.field select:focus{border-color: rgba(124,92,255,.6)}
 
-/* ✅ FIX: dropdown menu (select options) in dark UI */
+/* ✅ Dropdown menu fix (works best in Chrome/Edge/Firefox; Safari may ignore option styling) */
+.field select,
+select{
+  color: var(--text);
+  background-color: rgba(255,255,255,.04);
+}
 .field select option,
-.field select optgroup{
-  background-color: #0b1020 !important;
-  color: rgba(255,255,255,.92) !important;
-}
-.field select option:checked{
-  background-color: rgba(124,92,255,.25) !important;
-}
-/* global backup (in case select is not inside .field) */
+.field select optgroup,
 select option,
 select optgroup{
   background-color: #0b1020 !important;
   color: rgba(255,255,255,.92) !important;
 }
+select:focus{ outline: none; }
 
 .grid{
   display:grid;
