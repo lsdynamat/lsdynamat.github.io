@@ -13,8 +13,8 @@
       <nav class="nav">
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
-        <a href="./keyword.html">Generator</a>
-        <a href="./about.html" class="active">About</a>
+        <a href="./generator.html">Generator</a>
+        <a class="active" href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
       </nav>
     </div>
@@ -24,32 +24,31 @@
     <section class="card">
       <h1 class="h1">About</h1>
       <p class="muted">
-        Static, maintainable LS-DYNA material library + keyword generator.
-        Each model has its own generator module to avoid breaking the entire system when adding new materials.
+        Modular LS-DYNA material hub. The core UI never imports generators directly.
+        Each model points to its own generator module via JSON.
       </p>
 
-      <h2 class="h2">How to add a new model</h2>
+      <h2 class="h2">Add new model (2 steps)</h2>
       <ol class="list">
-        <li>Create generator file in <code>/assets/js/generators/</code> (prefix by MAT for sorting)</li>
-        <li>Register it in <code>registry.js</code> (import + map)</li>
-        <li>Add metadata + inputs to <code>/assets/data/materials.json</code></li>
+        <li>Add entry in <code>assets/data/materials.json</code> with <code>generatorModule</code></li>
+        <li>Create generator file exporting <code>default function generate(params, meta)</code></li>
       </ol>
 
-      <h2 class="h2">Design goals</h2>
+      <h2 class="h2">Why this won’t break the whole site</h2>
       <ul class="list">
-        <li>Easy maintenance (small modules)</li>
-        <li>Isolation (generator errors won’t break other models)</li>
-        <li>Friendly DYNA workflow (inputs → preview → download)</li>
+        <li>Dynamic import per model + try/catch</li>
+        <li>Even if generator fails, UI still works</li>
+        <li>No global registry to forget updating</li>
       </ul>
     </section>
   </main>
 
   <footer class="siteFooter">
-    <div class="wrap muted">
-      © <span id="year"></span> LS-DYNA Material Hub
-    </div>
+    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
   </footer>
 
-  <script type="module" src="./assets/js/app-common.js"></script>
+  <script type="module">
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
