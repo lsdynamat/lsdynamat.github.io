@@ -258,3 +258,145 @@ h2{margin:0}
   overflow:auto;
   padding:14px;
 }
+/* =========================================================
+   Keyword Sample Viewer (isolated) — DOES NOT TOUCH SITE UI
+   ========================================================= */
+
+body.lsd-modal-open{ overflow: hidden; }
+
+.lsd-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.lsd-modal__dialog{
+  width: min(980px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow: auto;
+  border-radius: 14px;
+
+  /* solid neutral */
+  background: #111827;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 18px 60px rgba(0,0,0,.50);
+  padding: 14px;
+}
+
+.lsd-modal__header{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+.lsd-modal__title{
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lsd-modal__subtitle{
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255,255,255,.70);
+  line-height: 1.4;
+}
+
+.lsd-modal__body{ padding-top: 12px; }
+
+.lsd-tags{ display:flex; gap:6px; flex-wrap:wrap; }
+.lsd-tag{
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92);
+}
+.lsd-tag--info{
+  background: rgba(59,130,246,.15);
+  border-color: rgba(59,130,246,.30);
+}
+
+.lsd-bar{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.lsd-btnrow{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.lsd-btn{
+  appearance:none;
+  cursor:pointer;
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.92);
+}
+.lsd-btn:hover{ filter: brightness(1.08); }
+
+.lsd-btn--primary{
+  background: rgba(59,130,246,.18);
+  border-color: rgba(59,130,246,.30);
+}
+.lsd-btn--danger{
+  background: rgba(239,68,68,.16);
+  border-color: rgba(239,68,68,.28);
+}
+
+.lsd-code{
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 12px;
+  padding: 12px;
+
+  overflow: auto;
+  white-space: pre;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono","Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255,255,255,.92);
+}
+
+.lsd-list{ display:grid; gap: 10px; }
+.lsd-item{
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.lsd-item__left{ min-width: 260px; }
+.lsd-item__title{ font-weight: 700; color: rgba(255,255,255,.95); }
+.lsd-item__meta{ margin-top: 4px; font-size: 12px; color: rgba(255,255,255,.70); }
+.lsd-item__right{ display:flex; gap:8px; flex-wrap:wrap; }
+
+.lsd-note{
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  color: rgba(255,255,255,.85);
+}
