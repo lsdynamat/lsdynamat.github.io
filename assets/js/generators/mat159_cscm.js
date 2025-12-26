@@ -1,7 +1,5 @@
 // assets/js/generators/mat159_cscm.js
 // CSCM Generator (LS-DYNA *MAT_CSCM)
-// Inputs (with suggested defaults): fc (MPa), dmax (mm), mid, density (ro), poisson_ratio
-// Everything else is fixed to match the original Python "source of truth".
 
 export const KEY = "mat159_cscm";
 export const ID = 159;
@@ -9,12 +7,14 @@ export const NAME = "CSCM Concrete (*MAT_CSCM)";
 export const CATEGORY = "Concrete";
 export const UNITS = "mm-ms-g-N-MPa";
 
-const HUB_LINE = "$ Model: Continuous Surface Cap Model (CSCM) - MAT_159";
-const HUB_LINE = "$ Novozhilov, Y. V., Dmitriev, A. N., & Mikhaluk, D. S. (2022).";
-const HUB_LINE = "$Precise calibration of the continuous surface cap model for";
-const HUB_LINE = "$concrete simulation. Buildings, 12(5), 636.";
-const HUB_LINE = "$concrete simulation. Buildings, 12(5), 636.";
-const HUB_LINE = "$ DOI: https://doi.org/10.3390/buildings12050636";
+const HUB_LINES = [
+  "$ Model: Continuous Surface Cap Model (CSCM) - MAT_159",
+  "$ Novozhilov, Y. V., Dmitriev, A. N., & Mikhaluk, D. S. (2022).",
+  "$ Precise calibration of the continuous surface cap model for",
+  "$ concrete simulation. Buildings, 12(5), 636.",
+  "$ DOI: https://doi.org/10.3390/buildings12050636",
+];
+
 const UNITS_LINE = "$ Units: mm-ms-g-N-MPa";
 
 export const DEFAULTS = {
@@ -22,7 +22,6 @@ export const DEFAULTS = {
   dmax_mm: 16.0,
   mid: 1001,
 
-  // suggested defaults (same as your Python assumptions)
   ro: 0.0023,
   poisson_ratio: 0.2,
 };
@@ -31,14 +30,11 @@ export const FIELDS = [
   { key: "fc_mpa", label: "Compressive strength (fc)", unit: "MPa", type: "number", step: 0.1, min: 1, default: DEFAULTS.fc_mpa },
   { key: "dmax_mm", label: "Max aggregate size (dmax)", unit: "mm", type: "number", step: 0.1, min: 1, default: DEFAULTS.dmax_mm },
   { key: "mid", label: "Material ID (MID)", unit: "-", type: "integer", step: 1, min: 1, default: DEFAULTS.mid },
-
-  // optional overrides (but prefilled)
   { key: "ro", label: "Density (RO)", unit: "g/mm^3", type: "number", step: 0.0001, min: 0.000001, default: DEFAULTS.ro },
   { key: "poisson_ratio", label: "Poisson ratio (ν)", unit: "-", type: "number", step: 0.01, min: 0.0, max: 0.49, default: DEFAULTS.poisson_ratio },
 ];
 
 export function generate(input = {}) {
-  // NOTE: if UI passes undefined / "" you should clean it there, but we also guard here.
   const inp = { ...DEFAULTS, ...normalizeInput(input) };
 
   const fc = mustPositive("fc_mpa", inp.fc_mpa);
@@ -48,7 +44,6 @@ export function generate(input = {}) {
   const ro = mustPositive("ro", inp.ro);
   const poisson_ratio = mustInRange("poisson_ratio", inp.poisson_ratio, 0.0, 0.49);
 
-  // Fixed constants from Python
   const nplot = 1;
   const incre = 0.0;
   const irate = 0;
@@ -70,7 +65,6 @@ export function generate(input = {}) {
   const nh = 0.0;
   const ch = 0.0;
 
-  // Derived parameters (ported from Python)
   const p = computeParams(fc, dmax, poisson_ratio);
 
   const keyword = renderKeyword(
@@ -82,14 +76,13 @@ export function generate(input = {}) {
     p
   );
 
+  // (tuỳ bạn) đổi filename cho thống nhất với title mới
   const filename =
-    `MAT_CSCM_${toFixed(fc, 1)}MPa_dmax${toFixed(dmax, 1)}mm_mid${mid}.k`;
+    `MAT_CSCM_fc${toFixed(fc, 1)}MPa_dagg${toFixed(dmax, 1)}mm_mid${mid}.k`;
 
   return { filename, keyword };
 }
 
-// ------------------------
-// input normalization (supports blank strings)
 function normalizeInput(obj) {
   const out = { ...obj };
   for (const k of Object.keys(out)) {
@@ -98,9 +91,6 @@ function normalizeInput(obj) {
   return out;
 }
 
-// ------------------------
-// Validation helpers
-// ------------------------
 function mustPositive(name, x) {
   const v = Number(x);
   if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
@@ -157,7 +147,6 @@ function calculateModulus(fc_mpa, poisson_ratio) {
   const fcm = fc_mpa + delta_f;
   const fcm0 = 10.0;
 
-  // matches your Python (note: it used (fcm + delta_f) again)
   const E = Ec0 * Math.pow((fcm + delta_f) / fcm0, 1 / 3);
   const G = E / (2 * (1 + poisson_ratio));
   const K = E / (3 * (1 - 2 * poisson_ratio));
@@ -234,12 +223,13 @@ function computeParams(fc, dmax, poisson_ratio) {
 // Keyword rendering
 // ------------------------
 function renderKeyword(f, p) {
-  const title = `MAT_CSCM_${toFixed(f.fc, 1)}MPa`;
+  // ✅ Title theo format bạn yêu cầu:
+  const title = `MAT CSCM fc = ${toFixed(f.fc, 1)}; d_agg = ${toFixed(f.dmax, 1)}`;
 
   const lines = [];
   lines.push("$# ------------------------------------------------------------------------------");
   lines.push(UNITS_LINE);
-  lines.push(HUB_LINE);
+  lines.push(...HUB_LINES); // ✅ chèn full hubline
   lines.push("$# ------------------------------------------------------------------------------");
   lines.push("*KEYWORD");
   lines.push("*TITLE");
