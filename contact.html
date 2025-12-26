@@ -13,9 +13,9 @@
       <nav class="nav">
         <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
-        <a href="./keyword.html">Generator</a>
+        <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
-        <a href="./contact.html" class="active">Contact</a>
+        <a class="active" href="./contact.html">Contact</a>
       </nav>
     </div>
   </header>
@@ -23,51 +23,42 @@
   <main class="wrap">
     <section class="card">
       <h1 class="h1">Contact</h1>
-      <p class="muted">
-        This form stores submissions locally so you can send multiple times.
-      </p>
+      <p class="muted">Stored locally (you can submit multiple times).</p>
 
       <div class="grid2">
-        <div>
-          <div class="inputs">
-            <div class="inputCard">
-              <div class="inputLabel">Name</div>
-              <input id="name" class="input" placeholder="Your name" />
-            </div>
-            <div class="inputCard">
-              <div class="inputLabel">Email</div>
-              <input id="email" class="input" placeholder="you@example.com" />
-            </div>
-            <div class="inputCard">
-              <div class="inputLabel">Message</div>
-              <textarea id="message" class="textarea" rows="6" placeholder="Your feedback..."></textarea>
-            </div>
-
-            <div class="row">
-              <button class="btn primary" id="btnSend">Send</button>
-              <button class="btn" id="btnClear">Clear</button>
-              <button class="btn danger" id="btnResetHistory">Reset history</button>
-            </div>
-
-            <div class="muted" id="contactStatus">—</div>
+        <div class="inputs">
+          <div class="inputCard">
+            <div class="inputLabel">Name</div>
+            <input class="input" id="name" placeholder="Your name" />
           </div>
+          <div class="inputCard">
+            <div class="inputLabel">Email</div>
+            <input class="input" id="email" placeholder="you@example.com" />
+          </div>
+          <div class="inputCard">
+            <div class="inputLabel">Message</div>
+            <textarea class="textarea" id="message" rows="6" placeholder="Feedback..."></textarea>
+          </div>
+          <div class="row">
+            <button class="btn primary" id="btnSend">Send</button>
+            <button class="btn" id="btnClear">Clear</button>
+            <button class="btn danger" id="btnReset">Reset history</button>
+          </div>
+          <div class="muted" id="status">—</div>
         </div>
 
         <div>
-          <h2 class="h2">Local submission history</h2>
-          <div class="muted">Stored in your browser (LocalStorage).</div>
-          <div id="history" class="listCards" style="margin-top:10px;"></div>
+          <h2 class="h2">History</h2>
+          <div id="history" class="listCards"></div>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="siteFooter">
-    <div class="wrap muted">
-      © <span id="year"></span> LS-DYNA Material Hub
-    </div>
+    <div class="wrap muted">© <span id="year"></span> LS-DYNA Material Hub</div>
   </footer>
 
-  <script type="module" src="./assets/js/app-contact.js"></script>
+  <script type="module" src="./assets/js/pages/contact.js"></script>
 </body>
 </html>
