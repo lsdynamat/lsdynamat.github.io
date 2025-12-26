@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generator • LS-DYNA Material Hub</title>
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <header class="siteHeader">
+    <div class="wrap headerRow">
+      <a class="brand" href="./index.html">LS-DYNA Material Hub</a>
+      <nav class="nav">
+        <a href="./index.html">Home</a>
+        <a href="./library.html">Library</a>
+        <a href="./keyword.html" class="active">Generator</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="rowBetween">
+        <div>
+          <h1 class="h1">Keyword Generator</h1>
+          <div class="muted" id="latestUpdate">—</div>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnCopy">Copy</button>
+          <button class="btn primary" id="btnDownload">Download .k</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <select id="modelSelect" class="select"></select>
+        <div class="pill" id="fileName">—</div>
+      </div>
+
+      <div class="infoRow">
+        <div class="pill" id="modelKeyword">—</div>
+        <div class="pill" id="modelVersion">v—</div>
+        <div class="pill" id="modelUpdated">Updated —</div>
+      </div>
+      <div class="muted" id="modelNotes">—</div>
+    </section>
+
+    <section class="grid2" style="margin-top:16px;">
+      <div class="card">
+        <h2 class="h2">Inputs</h2>
+        <div id="inputsBox" class="inputs"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="h2">Preview</h2>
+        <pre class="preview" id="previewBox"></pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="siteFooter">
+    <div class="wrap muted">
+      © <span id="year"></span> LS-DYNA Material Hub
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/app-keyword.js"></script>
+</body>
+</html>
