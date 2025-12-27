@@ -47,6 +47,9 @@ function renderUpdates(updates){
   const samples = materials.filter(m => !!m.sample).length;
   setText("statSamples", samples);
 
+  const genCount = materials.filter(m => typeof m.generator === "string" && m.generator.trim() !== "").length;
+  setText("statKeywordGenerators", genCount);
+
   renderCats(cats);
 
   const changelog = await loadJSON("./assets/data/changelog.json");
