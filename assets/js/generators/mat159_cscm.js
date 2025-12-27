@@ -29,7 +29,6 @@ export const FIELDS = [
 
 // ---------- Reference/header lines as requested
 const REF_LINES = [
-  "*TITLE"
   "$ Model: Continuous Surface Cap Model (CSCM) - MAT_159",
   "$ Reference: Novozhilov Y.V., Dmitriev A.N., Mikhaluk D.S. Precise Calibration",
   "$ of the Continuous Surface Cap Model for Concrete Simulation. Buildings. 2022.",
@@ -91,12 +90,10 @@ export function generate(input = {}) {
 
   const lines = [];
 
-  lines.push("$# LS-DYNA Keyword file created by LS-PrePost(R) V4.8.17 - 24Jun2021");
   lines.push(createdLine);
   lines.push("*KEYWORD");
   lines.push("*TITLE");
   lines.push("$#                                                                         title");
-  lines.push("LS-DYNA keyword deck by LS-PrePost");
   lines.push("*MAT_CSCM_TITLE");
   lines.push(titleCard);
 
