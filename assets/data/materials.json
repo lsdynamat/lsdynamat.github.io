@@ -79,40 +79,66 @@
       "mat": "084",
       "name": "Winfrith Concrete",
       "category": "Concrete",
-      "summary": "Concrete cracking model; practical for quick setups and basic cracking behavior.",
+      "summary": "Concrete model with fracture energy based softening; good for impact/crash-style concrete behavior.",
       "version": "1.0",
-      "updatedAt": "2025-12-26",
+      "updatedAt": "2025-12-27",
       "generator": "mat084_winfrith",
       "doc": "./assets/docs/mat084_winfrith.md",
+      "inputs": [
+        {
+          "key": "mid",
+          "label": "Material ID (MID)",
+          "unit": "-",
+          "default": 99,
+          "min": 1,
+          "hint": "Example: 99"
+        },
+        {
+          "key": "fc",
+          "label": "Compressive strength (f_c)",
+          "unit": "MPa",
+          "default": 30,
+          "min": 1,
+          "hint": "Example: 30.0"
+        },
+        {
+          "key": "dmax",
+          "label": "Max aggregate size (d_max)",
+          "unit": "mm",
+          "default": 16,
+          "min": 1,
+          "hint": "Example: 16"
+        },
+        {
+          "key": "ro",
+          "label": "Density (RO)",
+          "unit": "g/mm^3",
+          "default": 0.0023,
+          "min": 0.000001,
+          "hint": "Typical: 0.0022–0.0024"
+        },
+        {
+          "key": "pr",
+          "label": "Poisson ratio (PR)",
+          "unit": "-",
+          "default": 0.2,
+          "min": 0,
+          "max": 0.49,
+          "hint": "Typical: 0.20"
+        }
+      ],
       "samples": [
         {
           "id": "manual_baseline",
-          "title": "Baseline keyword (manual-style)",
-          "source": "LS-DYNA Keyword User's Manual — MAT_WINFRITH_CONCRETE",
+          "title": "Baseline keyword (example)",
+          "source": "Internal example",
           "path": "./assets/samples/mat084/manual_baseline.k.txt",
-          "updatedAt": "2025-12-10",
-          "tags": ["manual", "baseline"]
-        },
-        {
-          "id": "paper_case_A",
-          "title": "Case A (paper reproduction)",
-          "source": "Paper: Author (Year) — Example deck",
-          "path": "./assets/samples/mat084/paper_case_A.k.txt",
-          "updatedAt": "2025-12-20",
-          "tags": ["paper", "validation"]
+          "updatedAt": "2025-12-27",
+          "tags": ["baseline"]
         }
-      ],
-      "inputs": [
-        { "key": "mid", "label": "Material ID (MID)", "unit": "", "type": "number", "default": 84, "min": 1, "max": 999999, "hint": "Example MID = 84." },
-        { "key": "ro", "label": "Density", "unit": "g/mm³", "type": "number", "default": 0.0023, "min": 0.0018, "max": 0.0026, "hint": "Normal concrete ~0.0022–0.0024." },
-        { "key": "tm", "label": "Tangent modulus (TM)", "unit": "MPa", "type": "number", "default": 30000, "min": 1, "max": 200000, "hint": "Typical 25–35 GPa → 25000–35000 MPa." },
-        { "key": "pr", "label": "Poisson ratio (PR)", "unit": "-", "type": "number", "default": 0.2, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
-        { "key": "ucs", "label": "Compressive strength (UCS)", "unit": "MPa", "type": "number", "default": 30, "min": 1, "max": 200, "hint": "Example: 30 MPa." },
-        { "key": "uts", "label": "Tensile strength (UTS)", "unit": "MPa", "type": "number", "default": 2.9, "min": 0, "max": 20, "hint": "Often ~2–4 MPa; depends on fc." },
-        { "key": "fe", "label": "Fracture energy term (FE)", "unit": "-", "type": "number", "default": 0.12, "min": 0, "max": 10, "hint": "Guidance only; calibrate for your setup." },
-        { "key": "asize", "label": "Aggregate size /2 (ASIZE)", "unit": "mm", "type": "number", "default": 8, "min": 0, "max": 50, "hint": "If dmax=16 mm → asize=8 mm." }
       ]
     },
+
     
     {
       "id": "mat159_cscm",
