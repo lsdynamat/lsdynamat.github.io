@@ -84,12 +84,12 @@ export function generate(input = {}) {
   // Requested title style
 
   const lines = [];
-  lines.push(titleLine);
   lines.push(UNITS_LINE);
   REF_LINES.forEach(s => lines.push(s));
   lines.push(HUB_LINE);
   lines.push("*KEYWORD");
   lines.push("*MAT_CSCM_TITLE");
+  lines.push(titleLine);
   const titleLine = `Concrete, f_c = ${toFixed(fc, 1)} MPa, d_agg = ${toFixed(dmax, 0)} mm`;
   lines.push("");
 
