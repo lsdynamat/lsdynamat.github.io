@@ -47,7 +47,8 @@ function renderUpdates(updates){
   const samples = materials.filter(m => !!m.sample).length;
   setText("statSamples", samples);
 
-  const genCount = materials.filter(m => typeof m.generator === "string" && m.generator.trim() !== "").length;
+  // ✅ count keyword generators (model nào có generator key thì tính)
+  const genCount = materials.filter(m => (m.generator || "").toString().trim() !== "").length;
   setText("statKeywordGenerators", genCount);
 
   renderCats(cats);
