@@ -94,7 +94,7 @@ export function generate(input = {}) {
   lines.push("$#                                                                         title");
   lines.push("LS-DYNA keyword deck by LS-PrePost");
   lines.push("*MAT_CSCM_TITLE");
-  lines.push(titleMat);
+  lines.push(matTitleLine);
 
   // Meta lines (as in screenshot)
   lines.push(UNITS_LINE);
