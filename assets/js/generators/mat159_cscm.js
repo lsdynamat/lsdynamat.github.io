@@ -80,7 +80,8 @@ export function generate(input = {}) {
 
   // --- Title lines (match screenshot vibe)
   const createdLine = `$# Created on ${formatCreatedNow()}`;
-  const titleMat = `MAT_CSCM_${fc.toFixed(1)}MPa`;
+  //const titleMat = `MAT_CSCM_${fc.toFixed(1)}MPa`;
+  const titleMat = `MAT Concrete CSCM, fc= ${fc.toFixed(1)}MPa, dmax = ${dmax.toFixed(0)}mm`;
   const matTitleLine = `MAT Concrete CSCM, fc= ${fc.toFixed(1)}MPa, dmax = ${dmax.toFixed(0)}mm`;
 
   const lines = [];
