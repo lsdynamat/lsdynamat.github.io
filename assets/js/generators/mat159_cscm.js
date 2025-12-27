@@ -29,6 +29,7 @@ export const FIELDS = [
 
 // ---------- Reference/header lines as requested
 const REF_LINES = [
+  "*TITLE"
   "$ Model: Continuous Surface Cap Model (CSCM) - MAT_159",
   "$ Reference: Novozhilov Y.V., Dmitriev A.N., Mikhaluk D.S. Precise Calibration",
   "$ of the Continuous Surface Cap Model for Concrete Simulation. Buildings. 2022.",
