@@ -82,15 +82,15 @@ export function generate(input = {}) {
   const ch = 0.0;
 
   // Requested title style
-  const titleLine = `Concrete, f_c = ${toFixed(fc, 1)} MPa, d_agg = ${toFixed(dmax, 0)} mm`;
 
   const lines = [];
-  lines.push("*KEYWORD");
-  lines.push("*MAT_CSCM_TITLE");
   lines.push(titleLine);
   lines.push(UNITS_LINE);
   REF_LINES.forEach(s => lines.push(s));
   lines.push(HUB_LINE);
+  lines.push("*KEYWORD");
+  lines.push("*MAT_CSCM_TITLE");
+  const titleLine = `Concrete, f_c = ${toFixed(fc, 1)} MPa, d_agg = ${toFixed(dmax, 0)} mm`;
   lines.push("");
 
   // Same alignment headers as Python
