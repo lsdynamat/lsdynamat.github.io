@@ -1,62 +1,93 @@
+// assets/js/pages/home.js
 import { loadJSON } from "../core/fetch.js";
-import { getEl, setText, escapeHtml } from "../core/dom.js";
+import { getEl, setText } from "../core/dom.js";
 
 setText("year", new Date().getFullYear());
 
-function uniq(arr){ return [...new Set(arr)]; }
-
-function renderCats(cats){
-  const grid = getEl("catGrid");
-  if (!grid) return;
-  grid.innerHTML = "";
-  for (const c of cats) {
-    const div = document.createElement("div");
-    div.className = "cat";
-    div.innerHTML = `<div class="t">${escapeHtml(c)}</div><div class="m">Open filtered library</div>`;
-    div.onclick = () => { window.location.href = `./library.html?cat=${encodeURIComponent(c)}`; };
-    grid.appendChild(div);
-  }
+function uniq(arr){
+  return Array.from(new Set(arr));
 }
 
-function renderUpdates(updates){
-  const box = getEl("updatesBox");
-  if (!box) return;
-  box.innerHTML = "";
-  updates.slice(0,6).forEach(u => {
-    const div = document.createElement("div");
-    div.className = "rowitem";
-    div.innerHTML = `
-      <div class="item-title">${escapeHtml(u.model)} <span class="tag info">v${escapeHtml(u.version || "—")}</span></div>
-      <div class="item-meta">${escapeHtml(u.date)} • ${escapeHtml(u.change)}</div>
-    `;
-    box.appendChild(div);
-  });
+function formatDateISO(d){
+  // d is ISO string like "2025-12-26"
+  return (d || "—").toString().slice(0, 10);
 }
 
 (async function main(){
   const data = await loadJSON("./assets/data/materials.json");
-  const materials = data.materials || [];
+  const materials = (data.materials || []);
 
-  const cats = uniq(materials.map(m => m.category).filter(Boolean)).sort();
-  setText("statModels", materials.length);
-  setText("statCats", cats.length);
+  // Counts
+  const modelCount = materials.length;
 
-  const last = materials.map(m => m.updatedAt).filter(Boolean).sort().at(-1) || "—";
-  setText("statLast", last);
+  const categories = uniq(materials.map(m => (m.category || "").trim()).filter(Boolean));
+  const categoryCount = categories.length;
 
-  const samples = materials.filter(m => !!m.sample).length;
-  setText("statSamples", samples);
+  // Keyword generators count = number of materials having a valid generator key
+  const generatorCount = materials.filter(m => typeof m.generator === "string" && m.generator.trim() !== "").length;
 
-  renderCats(cats);
+  // Last update: max of updatedAt in materials or in changelog (if you have it)
+  const dates = materials
+    .map(m => (m.updatedAt || "").toString().slice(0,10))
+    .filter(Boolean)
+    .sort(); // lex sort works for ISO dates
 
-  const changelog = await loadJSON("./assets/data/changelog.json");
-  changelog.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
-  renderUpdates(changelog);
+  const lastUpdate = dates.length ? dates[dates.length - 1] : (data.updatedAt ? formatDateISO(data.updatedAt) : "—");
 
-})().catch(err => {
-  console.error(err);
-  setText("statModels","—");
-  setText("statCats","—");
-  setText("statLast","—");
-  setText("statSamples","—");
-});
+  // Set stats
+  setText("statModels", modelCount);
+  setText("statCats", categoryCount);
+  setText("statLast", lastUpdate);
+
+  // NEW: Keyword generators
+  const statGen = getEl("statGenerators");
+  if (statGen) statGen.textContent = String(generatorCount);
+
+  // Popular categories UI (kept like your old homepage logic)
+  const catGrid = getEl("catGrid");
+  if (catGrid){
+    catGrid.innerHTML = "";
+    categories
+      .sort((a,b)=>a.localeCompare(b))
+      .forEach(cat=>{
+        const count = materials.filter(m => (m.category||"").trim() === cat).length;
+
+        const div = document.createElement("div");
+        div.className = "cat";
+        div.innerHTML = `
+          <div class="t">${cat}</div>
+          <div class="m">${count} models</div>
+          <div class="small" style="margin-top:10px;">
+            <a class="btn" href="./library.html?category=${encodeURIComponent(cat)}">Open filtered library</a>
+          </div>
+        `;
+        catGrid.appendChild(div);
+      });
+  }
+
+  // Recent updates box (optional — giữ như cũ: đọc changelog nếu có)
+  const updatesBox = getEl("updatesBox");
+  if (updatesBox){
+    // If you have data.changelog in materials.json:
+    const changelog = (data.changelog || []).slice(0, 10);
+    if (!changelog.length){
+      updatesBox.innerHTML = `<div class="small">No updates yet.</div>`;
+    } else {
+      updatesBox.innerHTML = "";
+      changelog.forEach(u=>{
+        const row = document.createElement("div");
+        row.className = "rowitem";
+        row.innerHTML = `
+          <div class="row between wrapline gap">
+            <div>
+              <div class="item-title">${u.title || "Update"}</div>
+              <div class="item-meta">${(u.date || "").slice(0,10)} • ${u.note || ""}</div>
+            </div>
+            ${u.modelId ? `<a class="btn" href="./details.html?id=${encodeURIComponent(u.modelId)}">Details</a>` : ""}
+          </div>
+        `;
+        updatesBox.appendChild(row);
+      });
+    }
+  }
+})().catch(console.error);
