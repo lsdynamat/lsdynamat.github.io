@@ -26,5 +26,23 @@
     "version": "1.0",
     "model": "MAT_159 CSCM",
     "change": "Initial generator + details + sample."
+  },
+
+
+  {
+    "date": "2025-12-29",
+    "type": "added",
+    "model": "MAT_273 CDP (*MAT_CONCRETE_DAMAGE_PLASTIC_MODEL)",
+    "details": "Added CDP generator with confinement dropdown (cover/core) and FT method dropdown (auto EC2 or manual). Auto-derives ECC and WF using paper-style formulas.",
+    "files": [
+      "assets/js/generators/mat273_cdp.js",
+      "assets/js/generators/index.js",
+      "assets/data/materials.json",
+      "assets/docs/mat273_cdp.md"
+    ]
   }
+
+
+
+  
 ]
