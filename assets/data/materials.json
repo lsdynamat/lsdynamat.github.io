@@ -182,7 +182,7 @@
       "name": "CDP Concrete",
       "category": "Concrete",
       "summary": "Concrete Damage Plasticity (MAT_273) for nonlinear concrete behavior in tension and compression with damage evolution.",
-      "version": "1.1",
+      "version": "1.0",
       "updatedAt": "2025-12-29",
       "generator": "mat273_cdp",
       "doc": "./assets/docs/mat273_cdp.md",
