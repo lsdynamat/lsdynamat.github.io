@@ -179,36 +179,77 @@
     {
       "id": "mat273_cdp",
       "mat": "273",
-      "name": "Concrete Damage Plasticity",
+      "name": "CDP Concrete",
       "category": "Concrete",
-      "summary": "CDP model.",
+      "summary": "Concrete Damage Plasticity (MAT_273). Minimal inputs: MID, FC, confinement (cover/core), FT method (auto EC2/manual). Auto computes ECC and WF using paper-style formulas.",
       "version": "1.0",
       "updatedAt": "2025-12-29",
       "generator": "mat273_cdp",
       "doc": "./assets/docs/mat273_cdp.md",
       "inputs": [
-        { "key": "mid", "default": 1, "label": "Material ID (MID)", "unit": "-", "min": 1, "hint": "Unique positive integer" },
-        { "key": "confinement", "default": "cover", "label": "Concrete confinement", "unit": "-", "hint": "cover=EFC 0.005, core=EFC 0.010" },
-        { "key": "ftMethod", "default": "auto_ec2", "label": "FT method", "unit": "-", "hint": "auto_ec2 or manual" },
+        {
+          "key": "mid",
+          "default": 1,
+          "label": "Material ID (MID)",
+          "unit": "-",
+          "min": 1,
+          "hint": "Unique positive integer"
+        },
+        {
+          "key": "fc",
+          "default": 30,
+          "label": "Compressive strength FC",
+          "unit": "MPa",
+          "min": 1,
+          "hint": "f'c in MPa"
+        },
+        {
+          "key": "confinement",
+          "default": "cover",
+          "label": "Confinement",
+          "unit": "-",
+          "hint": "cover=non-confined (EFC=0.005), core=confined (EFC=0.010)"
+        },
+        {
+          "key": "ftMethod",
+          "default": "auto_ec2",
+          "label": "FT method",
+          "unit": "-",
+          "hint": "auto_ec2 computes FT from FC; manual uses FT manual"
+        },
+        {
+          "key": "ft_manual",
+          "default": 2.9,
+          "label": "FT (manual)",
+          "unit": "MPa",
+          "min": 0.001,
+          "hint": "Only used if FT method = manual"
+        },
     
-        { "key": "ro", "default": 0.0024, "label": "Density (RO)", "unit": "g/mm^3", "min": 1e-6 },
-        { "key": "E", "default": 30000, "label": "Young's modulus (E)", "unit": "MPa", "min": 1 },
-        { "key": "pr", "default": 0.2, "label": "Poisson ratio (PR)", "unit": "-", "min": 0.0, "max": 0.49 },
-    
-        { "key": "fc", "default": 30, "label": "Compressive strength (FC)", "unit": "MPa", "min": 1 },
-        { "key": "ft_manual", "default": 2.9, "label": "Tensile strength (FT manual)", "unit": "MPa", "min": 0.001, "hint": "Only used when ftMethod=manual" },
-    
-        { "key": "ecc", "default": "", "label": "ECC (override)", "unit": "-", "hint": "Leave blank to auto-compute" },
-        { "key": "qh0", "default": 0.3, "label": "QH0 (FC0/FC)", "unit": "-", "min": 0.0, "max": 1.0 },
-    
-        { "key": "type", "default": 1, "label": "Damage TYPE", "unit": "-", "hint": "1=bi-linear recommended" },
-        { "key": "strflg", "default": 0, "label": "STRFLG", "unit": "-", "hint": "0=no rate, 1=rate-dependent" },
-        { "key": "failflg", "default": 0, "label": "FAILFLG", "unit": "-", "hint": "0 disables erosion" },
-    
-        { "key": "wf", "default": "", "label": "WF (override)", "unit": "mm", "hint": "Leave blank to auto-compute" },
-        { "key": "efc", "default": "", "label": "EFC (override)", "unit": "-", "hint": "Leave blank to use cover/core defaults" }
+        {
+          "key": "ecc_override",
+          "default": "",
+          "label": "ECC override (optional)",
+          "unit": "-",
+          "hint": "Leave blank to auto-compute"
+        },
+        {
+          "key": "wf_override",
+          "default": "",
+          "label": "WF override (optional)",
+          "unit": "mm",
+          "hint": "Leave blank to auto-compute"
+        },
+        {
+          "key": "efc_override",
+          "default": "",
+          "label": "EFC override (optional)",
+          "unit": "-",
+          "hint": "Leave blank to use cover/core default"
+        }
       ]
     }
+
 
     
     
