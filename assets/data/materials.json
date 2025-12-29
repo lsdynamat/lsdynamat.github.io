@@ -203,11 +203,17 @@
           "min": 1,
           "hint": "f'c in MPa"
         },
+    
         {
           "key": "confinement",
           "default": "cover",
           "label": "Confinement",
           "unit": "-",
+          "type": "select",
+          "options": [
+            { "value": "cover", "label": "Non-confined (Cover)" },
+            { "value": "core", "label": "Confined (Core)" }
+          ],
           "hint": "cover=non-confined (EFC=0.005), core=confined (EFC=0.010)"
         },
         {
@@ -215,8 +221,14 @@
           "default": "auto_ec2",
           "label": "FT method",
           "unit": "-",
+          "type": "select",
+          "options": [
+            { "value": "auto_ec2", "label": "Auto (EC2/fib function)" },
+            { "value": "manual", "label": "Manual input" }
+          ],
           "hint": "auto_ec2 computes FT from FC; manual uses FT manual"
         },
+    
         {
           "key": "ft_manual",
           "default": 2.9,
@@ -249,6 +261,7 @@
         }
       ]
     }
+
 
 
     
