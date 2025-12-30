@@ -3,15 +3,14 @@
 // LS-PrePost V4.8.17 card order (3 numeric lines)
 // Units: mm-ms-g-N-MPa
 //
-// Minimal inputs (UI-friendly):
+// Inputs (minimal, UI-safe):
 // - mid (required)
 // - fc  (required)
-// - ft (optional): blank => auto (EC2/fib function below)
-// - confinement (optional): blank => cover; type 'core' => confined (affects EFC)
-// - ecc_override / wf_override / efc_override (optional): blank or 0 => auto
+// - ft (optional): blank/0 => auto (EC2/fib); >0 => override
+// - confinement (optional): blank => cover; "core" => confined (affects EFC)
+// - ecc_override / wf_override / efc_override (optional): blank/0 => auto; >0 => override
 //
-// NOTE (important bugfix):
-// Some UIs serialize blank numeric inputs as 0. We treat "", null, undefined, 0, "0" as "no override".
+// NOTE: This generator is robust against UI that serializes blank numeric fields as 0.
 
 export const KEY = "mat273_cdp";
 export const ID = 273;
@@ -31,22 +30,20 @@ const MATERIAL_CARDS_BANNER = [
   "$ --+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8",
 ];
 
-// ------------------------
-// Defaults (not exposed as inputs)
-// ------------------------
+// Fixed defaults (not inputs)
 const DEFAULTS = {
-  // Elastic (typical)
+  // Elastic
   ro: 0.0024,     // g/mm^3
   E: 30000.0,     // MPa
   pr: 0.20,
 
-  // 1st line extras
+  // Line 1
   qh0: 0.30,
 
-  // 2nd line defaults (Grassl-style)
-  strflg: 0.0,    // quasi-static
-  hp_qs: 0.01,    // recommended if STRFLG=0
-  hp_rate: 0.5,   // recommended if STRFLG=1
+  // Line 2
+  strflg: 0.0,
+  hp_qs: 0.01,
+  hp_rate: 0.5,
   ah: 0.08,
   bh: 0.003,
   ch: 2.0,
@@ -55,62 +52,55 @@ const DEFAULTS = {
   df: 0.85,
   fc0: 0.0,
 
-  // 3rd line defaults
-  type: 1.0,      // bi-linear
+  // Line 3
+  type: 1.0,
   bs: 1.0,
-  failflg: 0.0,   // no erosion
+  failflg: 0.0,
 };
 
-// ------------------------
-// UI fields (minimal)
-// ------------------------
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: 1, min: 1, hint: "Unique positive integer" },
   { key: "fc", label: "Compressive strength FC", unit: "MPa", default: 30.0, min: 1, hint: "f'c in MPa" },
 
-  { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank to auto-compute (EC2/fib)" },
+  { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank to auto-compute using EC2/fib. Enter a value to override." },
 
-  { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Blank=cover (EFC=0.005). Type 'core' for confined (EFC=0.010)." },
+  { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Leave blank for cover (unconfined, EFC=0.005). Type 'core' for confined (EFC=0.010)." },
 
-  // Optional overrides (blank or 0 => auto)
-  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Blank/0=auto" },
-  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Blank/0=auto" },
-  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Blank/0=auto" },
+  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to auto-compute from FC and FT." },
+  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Leave blank/0 to auto-compute from fracture energy." },
+  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to use default based on confinement." },
 ];
 
 export function generate(input = {}) {
   const inp = normalizeInput(input);
 
-  // Required
+  // required
   const mid = mustIntPositive("mid", inp.mid);
   const fc = mustPositive("fc", inp.fc);
 
-  // FT: blank => auto
-  const ft = hasOverride(inp.ft) ? mustPositive("ft", inp.ft) : calculate_ft_ec2(fc);
+  // optional FT
+  const ftOv = readOptionalPositive(inp.ft);
+  const ft = ftOv != null ? ftOv : calculate_ft_ec2(fc);
 
-  // Confinement: blank => cover; core => confined
+  // confinement text
   const isCore = normalizeConfinement(inp.confinement) === "core";
 
-  // ECC / WF / EFC: blank or 0 => auto
-  const ecc = hasOverride(inp.ecc_override)
-    ? mustPositive("ecc_override", inp.ecc_override)
-    : computeEccentricity(fc, ft);
+  // optional overrides (blank/0 => auto)
+  const eccOv = readOptionalPositive(inp.ecc_override);
+  const wfOv  = readOptionalPositive(inp.wf_override);
+  const efcOv = readOptionalPositive(inp.efc_override);
 
-  const wf = hasOverride(inp.wf_override)
-    ? mustPositive("wf_override", inp.wf_override)
-    : computeWfFromPaper(fc, ft);
+  const ecc = eccOv != null ? eccOv : computeEccentricity(fc, ft);
+  const wf  = wfOv  != null ? wfOv  : computeWfFromPaper(fc, ft);
+  const efc = efcOv != null ? efcOv : (isCore ? 0.010 : 0.005);
 
-  const efc = hasOverride(inp.efc_override)
-    ? mustPositive("efc_override", inp.efc_override)
-    : (isCore ? 0.010 : 0.005);
-
-  // Bi-linear (TYPE=1) defaults
+  // TYPE=1 bi-linear defaults
   const wf1 = 0.15 * wf;
   const ft1 = 0.3 * ft;
 
-  // Fixed defaults (not inputs)
+  // fixed defaults
   const ro = DEFAULTS.ro;
-  const E = DEFAULTS.E;
+  const E  = DEFAULTS.E;
   const pr = DEFAULTS.pr;
   const qh0 = DEFAULTS.qh0;
 
@@ -128,12 +118,12 @@ export function generate(input = {}) {
   const bs = DEFAULTS.bs;
   const failflg = DEFAULTS.failflg;
 
-  // Title
+  // title
   const tag = isCore ? "CORE(confined)" : "COVER(unconfined)";
-  const ftTag = hasOverride(inp.ft) ? "FT=manual" : "FT=auto(EC2)";
+  const ftTag = (ftOv != null) ? "FT=manual" : "FT=auto(EC2)";
   const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}`;
 
-  // Keyword output
+  // keyword
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
   lines.push("*KEYWORD");
@@ -190,7 +180,7 @@ export function generate(input = {}) {
 }
 
 // ------------------------
-// FT auto function (as you provided)
+// Auto FT (your function)
 // ------------------------
 function calculate_ft_ec2(fc) {
   if (fc <= 50) return 0.3 * Math.pow(fc, 2 / 3);
@@ -198,7 +188,7 @@ function calculate_ft_ec2(fc) {
 }
 
 // ------------------------
-// Paper-style formulas (used in your workflow)
+// ECC / WF workflow formulas
 // ------------------------
 function computeEccentricity(fc, ft) {
   const fbc = 1.16 * fc;
@@ -206,41 +196,42 @@ function computeEccentricity(fc, ft) {
   if (Math.abs(denom) < 1e-12) throw new Error("ECC denominator ~0; check fc/ft values.");
   return (ft * (fbc * fbc - ft * ft)) / denom;
 }
-
 function computeGfFromPaper(fc) {
-  return 73.0 * Math.pow(fc, 0.18); // treated as N/mm in mm–MPa convention
+  return 73.0 * Math.pow(fc, 0.18);
 }
-
 function computeWfFromPaper(fc, ft) {
   const Gf = computeGfFromPaper(fc);
-  return (4.444 * Gf) / ft; // mm
+  return (4.444 * Gf) / ft;
 }
 
 // ------------------------
-// Helpers
+// Helpers (robust optional parsing)
 // ------------------------
 function normalizeConfinement(x) {
   const v = (x ?? "").toString().trim().toLowerCase();
   if (v === "core" || v === "confined") return "core";
   return "cover";
 }
-
 function normalizeInput(obj) {
-  const out = { ...obj };
-  for (const k of Object.keys(out)) {
-    if (out[k] === "") out[k] = ""; // keep empty string as empty string
-  }
-  return out;
+  return { ...obj };
 }
 
-// Treat "", null, undefined, 0, "0" as "no override"
-function hasOverride(x) {
-  if (x === undefined || x === null) return false;
+// Optional numeric: blank/null/undefined/0/"0" => null
+function readOptionalNumber(x) {
+  if (x === undefined || x === null) return null;
   const s = String(x).trim();
-  if (s === "" || s === "0") return false;
-  const n = Number(s);
-  if (Number.isFinite(n) && n === 0) return false;
-  return true;
+  if (s === "" || s === "0") return null;
+  const v = Number(s);
+  if (!Number.isFinite(v)) return null;
+  if (v === 0) return null;
+  return v;
+}
+// Optional positive: only accept >0, else null
+function readOptionalPositive(x) {
+  const v = readOptionalNumber(x);
+  if (v == null) return null;
+  if (v <= 0) return null;
+  return v;
 }
 
 function mustPositive(name, x) {
@@ -249,7 +240,6 @@ function mustPositive(name, x) {
   if (v <= 0) throw new Error(`${name} must be > 0`);
   return v;
 }
-
 function mustIntPositive(name, x) {
   const v = Number(x);
   if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
@@ -257,14 +247,11 @@ function mustIntPositive(name, x) {
   if (vi <= 0) throw new Error(`${name} must be an integer > 0`);
   return vi;
 }
-
 function toFixed(x, n) {
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x);
   return v.toFixed(n);
 }
-
-// 10-char alignment like LS-PrePost blocks
 function fmt10(x, decimals = 6) {
   if (Number.isInteger(x)) return String(x).padStart(10, " ");
   const v = Number(x);
