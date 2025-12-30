@@ -1,12 +1,7 @@
 // assets/js/generators/mat273_cdp.js
 // CDP (LS-DYNA *MAT_CONCRETE_DAMAGE_PLASTIC_MODEL) — MAT_273
 // Units: mm-ms-g-N-MPa
-// Fixed per your spec: TYPE=1 (bi-linear), BS=1.5
-//
-// Key decisions:
-// - ECC is NOT exposed in UI. Keyword writes ECC=0.0 so LS-DYNA auto-computes ECC (manual).
-// - EFC IS exposed (optional). Blank/0 => default cover value 0.005. Use 0.010 for confined core.
-// - WF uses Gf conversion N/m -> N/mm (/1000) for unit consistency.
+
 
 export const KEY = "mat273_cdp";
 export const ID = 273;
@@ -119,8 +114,8 @@ export function generate(input = {}) {
   const efcOv = readOptionalPositive(inp.efc);
   const efc = efcOv != null ? efcOv : FIXED.efc_default_cover;
 
-  // ECC (hidden): write 0.0 so LS-DYNA auto-computes ECC (manual)
-  const ecc = 0.0;
+  // ECC (hidden) — COMPUTED HERE (manual formula), not solver auto
+  const ecc = calculate_ecc_manual(fc, ft);
 
   // WF (bilinear)
   const wfOv = readOptionalPositive(inp.wf_override);
@@ -144,7 +139,9 @@ export function generate(input = {}) {
   const ftTag = ftOv != null ? "FT=manual" : "FT=auto";
   const eTag = EOv != null ? "E=manual" : "E=auto(EC2)";
   const efcTag = efcOv != null ? `EFC=${toFixed(efc, 3)}` : "EFC=0.005(default)";
-  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${eTag}, ECC=0(auto), TYPE=1, BS=1.5, ${efcTag}`;
+  const titleLine =
+    `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${eTag}, ` +
+    `ECC=${toFixed(ecc, 4)}(calc), TYPE=1, BS=1.5, ${efcTag}`;
 
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
@@ -211,10 +208,25 @@ function calculate_ft_ec2(fc) {
 }
 
 // ------------------------
-// E (EC2) using fcm directly (your requirement)
+// E (EC2) using fcm directly
 // E = 22000 * (fcm/10)^0.3   [MPa]
 function calculate_E_ec2_from_fcm(fcm) {
   return 22000.0 * Math.pow(fcm / 10.0, 0.3);
+}
+
+// ------------------------
+// ECC (manual): Jirásek & Bažant formulation used in LS-DYNA manual
+// fbc = 1.16*fc
+// eps = ft*(fbc^2 - fc^2) / (fbc*(fc^2 - ft^2))
+// ECC = (1+eps)/(2-eps)
+function calculate_ecc_manual(fc, ft) {
+  const fbc = 1.16 * fc;
+  const denom = fbc * (fc * fc - ft * ft);
+  if (Math.abs(denom) < 1e-12) throw new Error("ECC denominator ~0; check fc/ft.");
+  const eps = (ft * (fbc * fbc - fc * fc)) / denom;
+  const ecc = (1.0 + eps) / (2.0 - eps);
+  if (!Number.isFinite(ecc) || ecc <= 0) throw new Error("ECC computation failed; check fc/ft.");
+  return ecc;
 }
 
 // ------------------------
