@@ -1,7 +1,5 @@
-// assets/js/generators/mat273_cdp.js
-// CDP (LS-DYNA *MAT_CONCRETE_DAMAGE_PLASTIC_MODEL) — MAT_273
-// Units: mm-ms-g-N-MPa
-
+// assets/js/generators/mat273_cdp.js  (ONLY the updated parts shown fully usable)
+// Replace your current file with this full version if you want; it's complete.
 
 export const KEY = "mat273_cdp";
 export const ID = 273;
@@ -22,12 +20,8 @@ const MATERIAL_CARDS_BANNER = [
   "$ --+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8",
 ];
 
-// Fixed defaults (kept internal)
 const FIXED = {
-  // initial hardening
   qh0: 0.30,
-
-  // hardening/ductility/flow defaults
   ah: 0.08,
   bh: 0.003,
   ch: 2.0,
@@ -35,33 +29,28 @@ const FIXED = {
   as: 15.0,
   df: 0.85,
 
-  // damage formulation (your request)
   type: 1.0, // bi-linear
   bs: 1.5,   // your request
   wf1_ratio: 0.15,
   ft1_ratio: 0.30,
 
-  // erosion
   failflg: 0.0,
 
-  // EFC defaults
-  efc_default_cover: 0.005,
+  // NEW: EFC default (per your request)
+  efc_default: 1.0e-4,
 };
 
 export const DEFAULTS = {
   mid: 1,
+  ro: "",
+  pr: "",
+  E: "",
+  ft: "",
+  wf: "",
+  efc: "",
 
-  // optional numeric: blank/0 => use defaults/auto
-  ro: "",  // default 0.0023
-  pr: "",  // default 0.18
-  E: "",   // auto EC2 using fcm
-  ft: "",  // auto by your function
-  wf: "",  // WF override (mm)
-  efc: "", // EFC input
-
-  // strain-rate (optional)
-  strflg: "",   // blank/0 => 0
-  fc0_rate: "", // blank/0 => if STRFLG=1 -> 10 MPa
+  // STRFLG still optional (keep)
+  strflg: "",
 };
 
 export const FIELDS = [
@@ -74,20 +63,19 @@ export const FIELDS = [
   { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: DEFAULTS.ft, hint: "Leave blank/0 to auto-compute; enter to override" },
 
   { key: "wf", label: "WF (optional)", unit: "mm", default: DEFAULTS.wf, hint: "Leave blank/0 to auto-compute from Gf and FT" },
-  { key: "efc", label: "EFC (optional)", unit: "-", default: DEFAULTS.efc, hint: "Leave blank/0 to use 0.005 (cover/unconfined). Use 0.010 for confined core, or enter your calibrated value." },
+
+  // UPDATED hint: no cover/core values
+  { key: "efc", label: "EFC (optional)", unit: "-", default: DEFAULTS.efc, hint: "Leave blank/0 to use 1.0E-4. Enter your calibrated value to override." },
 
   { key: "strflg", label: "STRFLG (optional)", unit: "-", default: DEFAULTS.strflg, hint: "0=no strain-rate, 1=strain-rate dependent" },
-  { key: "fc0_rate", label: "FC0 (rate parameter, optional)", unit: "MPa", default: DEFAULTS.fc0_rate, hint: "Only used if STRFLG=1. Leave blank/0 to use 10 MPa." },
 ];
 
 export function generate(input = {}) {
   const inp = { ...DEFAULTS, ...normalizeInput(input) };
 
-  // required
   const mid = mustIntPositive("mid", inp.mid);
   const fc  = mustPositive("fc", inp.fc);
 
-  // optional defaults
   const roOv = readOptionalPositive(inp.ro);
   const ro = roOv != null ? roOv : 0.0023;
 
@@ -100,45 +88,34 @@ export function generate(input = {}) {
   const ftOv = readOptionalPositive(inp.ft);
   const ft = ftOv != null ? ftOv : calculate_ft_ec2(fc);
 
-  // STRFLG + related defaults
+  // STRFLG
   const strflgOv = readOptionalNumber(inp.strflg);
   const strflg = strflgOv != null ? (strflgOv >= 0.5 ? 1.0 : 0.0) : 0.0;
 
-  const hp = strflg >= 0.5 ? 0.5 : 0.01; // recommended
-  const fc0 = strflg >= 0.5 ? (readOptionalPositive(inp.fc0_rate) ?? 10.0) : 0.0;
+  // HP depends on STRFLG (keep as before)
+  const hp = strflg >= 0.5 ? 0.5 : 0.01;
 
-  // EFC (shown)
+  // FC0 is AUTO (your request)
+  const fc0 = strflg >= 0.5 ? 10.0 : 0.0;
+
+  // EFC: default 1e-4, allow override
   const efcOv = readOptionalPositive(inp.efc);
-  const efc = efcOv != null ? efcOv : FIXED.efc_default_cover;
+  const efc = efcOv != null ? efcOv : FIXED.efc_default;
 
-  // ECC (hidden) — computed per manual (Jirásek & Bažant)
+  // ECC: computed internally (manual)
   const ecc = calculate_ecc_manual(fc, ft);
 
-  // WF (bilinear)
+  // WF
   const wfOv = readOptionalPositive(inp.wf);
   const wf  = wfOv != null ? wfOv : calculate_wf_cdp(fc, ft);
   const wf1 = FIXED.wf1_ratio * wf;
   const ft1 = FIXED.ft1_ratio * ft;
 
-  // fixed
   const qh0 = FIXED.qh0;
-  const ah = FIXED.ah;
-  const bh = FIXED.bh;
-  const ch = FIXED.ch;
-  const dh = FIXED.dh;
-  const as = FIXED.as;
-  const df = FIXED.df;
+  const ah = FIXED.ah, bh = FIXED.bh, ch = FIXED.ch, dh = FIXED.dh, as = FIXED.as, df = FIXED.df;
+  const type = FIXED.type, bs = FIXED.bs, failflg = FIXED.failflg;
 
-  const type = FIXED.type;     // 1
-  const bs   = FIXED.bs;       // 1.5
-  const failflg = FIXED.failflg;
-
-  const ftTag = ftOv != null ? "FT=manual" : "FT=auto";
-  const eTag  = EOv  != null ? "E=manual"  : "E=auto(EC2)";
-  const efcTag = efcOv != null ? `EFC=${toFixed(efc, 3)}` : "EFC=0.005(default)";
-  const titleLine =
-    `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${eTag}, ` +
-    `ECC=${toFixed(ecc, 4)}(calc), TYPE=1, BS=1.5, ${efcTag}`;
+  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa`;
 
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
@@ -196,26 +173,14 @@ export function generate(input = {}) {
   return { filename, keyword: lines.join("\n") };
 }
 
-// ------------------------
-// FT (your function)
-// ------------------------
+// ---- math helpers ----
 function calculate_ft_ec2(fc) {
   if (fc <= 50) return 0.3 * Math.pow(fc, 2 / 3);
   return 2.12 * Math.log(1 + 0.1 * (fc + 8));
 }
-
-// ------------------------
-// E (EC2) using fcm directly
-// E = 22000 * (fcm/10)^0.3   [MPa]
 function calculate_E_ec2_from_fcm(fcm) {
   return 22000.0 * Math.pow(fcm / 10.0, 0.3);
 }
-
-// ------------------------
-// ECC (manual): Jirásek & Bažant (as in LS-DYNA manual)
-// fbc = 1.16*fc
-// eps = ft*(fbc^2 - fc^2) / (fbc*(fc^2 - ft^2))
-// ECC = (1+eps)/(2-eps)
 function calculate_ecc_manual(fc, ft) {
   const fbc = 1.16 * fc;
   const denom = fbc * (fc * fc - ft * ft);
@@ -225,11 +190,6 @@ function calculate_ecc_manual(fc, ft) {
   if (!Number.isFinite(ecc) || ecc <= 0) throw new Error("ECC computation failed; check fc/ft.");
   return ecc;
 }
-
-// ------------------------
-// WF via fracture energy with unit consistency
-// Gf = 73*fc^0.18 [N/m]  -> convert to N/mm by /1000
-// WF = 4.444*Gf(N/mm)/ft(MPa)
 function calculate_gf_cdp_Nmm(fc) {
   return (73.0 * Math.pow(fc, 0.18)) / 1000.0; // N/mm
 }
@@ -238,16 +198,12 @@ function calculate_wf_cdp(fc, ft) {
   return (4.444 * Gf) / ft; // mm
 }
 
-// ------------------------
-// helpers
-// ------------------------
+// ---- generic helpers ----
 function normalizeInput(obj) {
   const out = { ...obj };
   for (const k of Object.keys(out)) if (out[k] === "") out[k] = "";
   return out;
 }
-
-// Optional numeric: blank/null/undefined/"0"/0 => null
 function readOptionalNumber(x) {
   if (x === undefined || x === null) return null;
   const s = String(x).trim();
@@ -263,7 +219,6 @@ function readOptionalPositive(x) {
   if (v <= 0) return null;
   return v;
 }
-
 function mustPositive(name, x) {
   const v = Number(x);
   if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
@@ -288,8 +243,6 @@ function toFixed(x, n) {
   if (!Number.isFinite(v)) return String(x);
   return v.toFixed(n);
 }
-
-// 10-char alignment like LS-PrePost blocks
 function fmt10(x, decimals = 6) {
   if (Number.isInteger(x)) return String(x).padStart(10, " ");
   const v = Number(x);
