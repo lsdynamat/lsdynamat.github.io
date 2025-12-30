@@ -177,6 +177,7 @@
     },
 
 
+    // assets/data/materials.json  (ENTRY for MAT_273)
     {
       "id": "mat273_cdp",
       "mat": "273",
@@ -184,63 +185,25 @@
       "category": "Concrete",
       "summary": "Concrete Damage Plasticity (MAT_273) for nonlinear concrete behavior in tension and compression with damage evolution.",
       "version": "1.0",
-      "updatedAt": "2025-12-29",
+      "updatedAt": "2025-12-30",
       "generator": "mat273_cdp",
       "doc": "./assets/docs/mat273_cdp.md",
       "inputs": [
-        {
-          "key": "mid",
-          "default": 1,
-          "label": "Material ID (MID)",
-          "unit": "-",
-          "min": 1,
-          "hint": "Unique positive integer"
-        },
-        {
-          "key": "fc",
-          "default": 30,
-          "label": "Compressive strength FC",
-          "unit": "MPa",
-          "min": 1,
-          "hint": "f'c in MPa"
-        },
-        {
-          "key": "ft",
-          "default": "",
-          "label": "Tensile strength FT (optional)",
-          "unit": "MPa",
-          "hint": "Leave blank to auto-compute using EC2/fib. Enter a value to override."
-        },
-        {
-          "key": "confinement",
-          "default": "",
-          "label": "Confinement (optional)",
-          "unit": "-",
-          "hint": "Leave blank for cover (unconfined, EFC=0.005). Type 'core' for confined concrete (EFC=0.010)."
-        },
-        {
-          "key": "ecc_override",
-          "default": "",
-          "label": "ECC override (optional)",
-          "unit": "-",
-          "hint": "Leave blank to auto-compute from FC and FT."
-        },
-        {
-          "key": "wf_override",
-          "default": "",
-          "label": "WF override (optional)",
-          "unit": "mm",
-          "hint": "Leave blank to auto-compute from fracture energy."
-        },
-        {
-          "key": "efc_override",
-          "default": "",
-          "label": "EFC override (optional)",
-          "unit": "-",
-          "hint": "Leave blank to use default based on confinement."
-        }
+        { "key": "mid", "default": 1, "label": "Material ID (MID)", "unit": "-", "min": 1, "hint": "Unique positive integer" },
+        { "key": "fc", "default": 30, "label": "Compressive strength FC (= fcm)", "unit": "MPa", "min": 1, "hint": "Mean strength from tests (fcm) in MPa" },
+    
+        { "key": "pr", "default": "", "label": "Poisson ratio PR (optional)", "unit": "-", "hint": "Typical 0.15–0.22. Leave blank/0 to use 0.18." },
+        { "key": "E",  "default": "", "label": "Young's modulus E (optional)", "unit": "MPa", "hint": "Leave blank/0 to auto-compute from FC (EC2 using fcm). Enter value to override." },
+    
+        { "key": "ft", "default": "", "label": "Tensile strength FT (optional)", "unit": "MPa", "hint": "Leave blank/0 to auto-compute. Enter a value to override." },
+        { "key": "confinement", "default": "", "label": "Confinement (optional)", "unit": "-", "hint": "Blank=cover (EFC=0.005). Type 'core' for confined (EFC=0.010)." },
+    
+        { "key": "ecc_override", "default": "", "label": "ECC override (optional)", "unit": "-", "hint": "Leave blank/0 to auto-compute." },
+        { "key": "wf_override",  "default": "", "label": "WF override (optional)",  "unit": "mm", "hint": "Leave blank/0 to auto-compute." },
+        { "key": "efc_override", "default": "", "label": "EFC override (optional)", "unit": "-", "hint": "Leave blank/0 to auto-compute." }
       ]
     }
+
 
 
 
