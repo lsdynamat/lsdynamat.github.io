@@ -3,14 +3,15 @@
 // LS-PrePost V4.8.17 card order (3 numeric lines)
 // Units: mm-ms-g-N-MPa
 //
-// ✅ Minimal inputs only (everything else uses defaults):
-// - MID (required)
-// - FC (required)
-// - Confinement dropdown: cover/core (auto EFC)
-// - FT method dropdown: auto/manual
-// - FT manual (only used if manual)
-// Optional advanced overrides (kept but hidden-ish): ECC, WF, EFC (if you want to force)
-//   -> If you really don't want these, delete those 3 fields below.
+// Minimal inputs (UI-friendly):
+// - mid (required)
+// - fc  (required)
+// - ft (optional): blank => auto (EC2/fib function below)
+// - confinement (optional): blank => cover; type 'core' => confined (affects EFC)
+// - ecc_override / wf_override / efc_override (optional): blank or 0 => auto
+//
+// NOTE (important bugfix):
+// Some UIs serialize blank numeric inputs as 0. We treat "", null, undefined, 0, "0" as "no override".
 
 export const KEY = "mat273_cdp";
 export const ID = 273;
@@ -31,7 +32,7 @@ const MATERIAL_CARDS_BANNER = [
 ];
 
 // ------------------------
-// Defaults (NOT exposed as inputs unless you add fields)
+// Defaults (not exposed as inputs)
 // ------------------------
 const DEFAULTS = {
   // Elastic (typical)
@@ -39,17 +40,13 @@ const DEFAULTS = {
   E: 30000.0,     // MPa
   pr: 0.20,
 
-  // Manual/keyword defaults (good general starting point)
+  // 1st line extras
   qh0: 0.30,
-  type: 1.0,      // bi-linear damage recommended
-  bs: 1.0,
-  strflg: 0.0,    // quasi-static
-  failflg: 0.0,   // no erosion (recommended for cyclic)
 
-  // 2nd line (keep default as-is unless you know what you're doing)
-  // If STRFLG=0 -> HP=0.01; if STRFLG=1 -> HP=0.5
-  hp_qs: 0.01,
-  hp_rate: 0.5,
+  // 2nd line defaults (Grassl-style)
+  strflg: 0.0,    // quasi-static
+  hp_qs: 0.01,    // recommended if STRFLG=0
+  hp_rate: 0.5,   // recommended if STRFLG=1
   ah: 0.08,
   bh: 0.003,
   ch: 2.0,
@@ -57,104 +54,67 @@ const DEFAULTS = {
   as: 15.0,
   df: 0.85,
   fc0: 0.0,
+
+  // 3rd line defaults
+  type: 1.0,      // bi-linear
+  bs: 1.0,
+  failflg: 0.0,   // no erosion
 };
 
-// Dropdown options (UI)
-const CONFINEMENT_OPTIONS = [
-  { value: "cover", label: "Non-confined (Cover)" },
-  { value: "core", label: "Confined (Core)" },
-];
-const FT_METHOD_OPTIONS = [
-  { value: "auto_ec2", label: "Auto (EC2/fib function)" },
-  { value: "manual", label: "Manual input" },
-];
-
-// ✅ Minimal fields only
+// ------------------------
+// UI fields (minimal)
+// ------------------------
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: 1, min: 1, hint: "Unique positive integer" },
-
   { key: "fc", label: "Compressive strength FC", unit: "MPa", default: 30.0, min: 1, hint: "f'c in MPa" },
 
-  {
-    key: "confinement",
-    label: "Confinement",
-    unit: "-",
-    default: "cover",
-    kind: "select",
-    options: CONFINEMENT_OPTIONS,
-    hint: "cover -> EFC=0.005, core -> EFC=0.010",
-  },
+  { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank to auto-compute (EC2/fib)" },
 
-  {
-    key: "ftMethod",
-    label: "FT method",
-    unit: "-",
-    default: "auto_ec2",
-    kind: "select",
-    options: FT_METHOD_OPTIONS,
-    hint: "Auto computes FT from FC; Manual uses FT_manual below",
-  },
+  { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Blank=cover (EFC=0.005). Type 'core' for confined (EFC=0.010)." },
 
-  { key: "ft_manual", label: "FT (manual)", unit: "MPa", default: 2.9, min: 0.001, hint: "Used only if FT method=Manual" },
-
-  // --- Optional advanced overrides (if you want to force)
-  // If you truly don't want advanced inputs, delete these 3 entries:
-  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Leave blank = auto" },
-  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Leave blank = auto" },
-  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Leave blank = auto from confinement" },
+  // Optional overrides (blank or 0 => auto)
+  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Blank/0=auto" },
+  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Blank/0=auto" },
+  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Blank/0=auto" },
 ];
 
 export function generate(input = {}) {
-  const inp = { ...normalizeInput(input) };
+  const inp = normalizeInput(input);
 
   // Required
   const mid = mustIntPositive("mid", inp.mid);
   const fc = mustPositive("fc", inp.fc);
 
-  // Dropdowns
-  const confinement = normalizeConfinement(inp.confinement);
-  const ftMethod = normalizeFtMethod(inp.ftMethod);
-  const isCore = confinement === "core";
+  // FT: blank => auto
+  const ft = hasOverride(inp.ft) ? mustPositive("ft", inp.ft) : calculate_ft_ec2(fc);
 
-  // FT
-  const ft =
-    ftMethod === "manual"
-      ? mustPositive("ft_manual", inp.ft_manual)
-      : calculate_ft_ec2(fc);
+  // Confinement: blank => cover; core => confined
+  const isCore = normalizeConfinement(inp.confinement) === "core";
 
-  // ECC (auto unless overridden)
-  const ecc =
-    hasValue(inp.ecc_override)
-      ? mustPositive("ecc_override", inp.ecc_override)
-      : computeEccentricity(fc, ft);
+  // ECC / WF / EFC: blank or 0 => auto
+  const ecc = hasOverride(inp.ecc_override)
+    ? mustPositive("ecc_override", inp.ecc_override)
+    : computeEccentricity(fc, ft);
 
-  // WF (auto unless overridden)
-  const wf =
-    hasValue(inp.wf_override)
-      ? mustPositive("wf_override", inp.wf_override)
-      : computeWfFromPaper(fc, ft);
+  const wf = hasOverride(inp.wf_override)
+    ? mustPositive("wf_override", inp.wf_override)
+    : computeWfFromPaper(fc, ft);
 
-  // Bi-linear defaults (manual)
+  const efc = hasOverride(inp.efc_override)
+    ? mustPositive("efc_override", inp.efc_override)
+    : (isCore ? 0.010 : 0.005);
+
+  // Bi-linear (TYPE=1) defaults
   const wf1 = 0.15 * wf;
   const ft1 = 0.3 * ft;
 
-  // EFC (auto from confinement unless overridden)
-  const efc =
-    hasValue(inp.efc_override)
-      ? mustPositive("efc_override", inp.efc_override)
-      : (isCore ? 0.010 : 0.005);
-
-  // Fixed defaults (not exposed as inputs)
+  // Fixed defaults (not inputs)
   const ro = DEFAULTS.ro;
   const E = DEFAULTS.E;
   const pr = DEFAULTS.pr;
-
   const qh0 = DEFAULTS.qh0;
-  const type = DEFAULTS.type;
-  const bs = DEFAULTS.bs;
-  const strflg = DEFAULTS.strflg;
-  const failflg = DEFAULTS.failflg;
 
+  const strflg = DEFAULTS.strflg;
   const hp = (strflg >= 0.5) ? DEFAULTS.hp_rate : DEFAULTS.hp_qs;
   const ah = DEFAULTS.ah;
   const bh = DEFAULTS.bh;
@@ -164,11 +124,16 @@ export function generate(input = {}) {
   const df = DEFAULTS.df;
   const fc0 = DEFAULTS.fc0;
 
+  const type = DEFAULTS.type;
+  const bs = DEFAULTS.bs;
+  const failflg = DEFAULTS.failflg;
+
+  // Title
   const tag = isCore ? "CORE(confined)" : "COVER(unconfined)";
-  const ftTag = ftMethod === "manual" ? "FT=manual" : "FT=auto(EC2)";
+  const ftTag = hasOverride(inp.ft) ? "FT=manual" : "FT=auto(EC2)";
   const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}`;
 
-  // Keyword
+  // Keyword output
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
   lines.push("*KEYWORD");
@@ -220,12 +185,12 @@ export function generate(input = {}) {
   lines.push("*END");
   lines.push("");
 
-  const filename = `MAT_273_CDP_fc=${toFixed(fc, 1)}MPa_${confinement}_${ftMethod}_mid=${mid}.k`;
+  const filename = `MAT_273_CDP_fc=${toFixed(fc, 1)}MPa_${isCore ? "core" : "cover"}_mid=${mid}.k`;
   return { filename, keyword: lines.join("\n") };
 }
 
 // ------------------------
-// FT auto (your function)
+// FT auto function (as you provided)
 // ------------------------
 function calculate_ft_ec2(fc) {
   if (fc <= 50) return 0.3 * Math.pow(fc, 2 / 3);
@@ -233,7 +198,7 @@ function calculate_ft_ec2(fc) {
 }
 
 // ------------------------
-// Paper formulas used in your workflow
+// Paper-style formulas (used in your workflow)
 // ------------------------
 function computeEccentricity(fc, ft) {
   const fbc = 1.16 * fc;
@@ -260,20 +225,22 @@ function normalizeConfinement(x) {
   return "cover";
 }
 
-function normalizeFtMethod(x) {
-  const v = (x ?? "").toString().trim().toLowerCase();
-  if (v === "manual") return "manual";
-  return "auto_ec2";
-}
-
 function normalizeInput(obj) {
   const out = { ...obj };
-  for (const k of Object.keys(out)) if (out[k] === "") out[k] = undefined;
+  for (const k of Object.keys(out)) {
+    if (out[k] === "") out[k] = ""; // keep empty string as empty string
+  }
   return out;
 }
 
-function hasValue(x) {
-  return x !== undefined && x !== null && String(x).trim() !== "";
+// Treat "", null, undefined, 0, "0" as "no override"
+function hasOverride(x) {
+  if (x === undefined || x === null) return false;
+  const s = String(x).trim();
+  if (s === "" || s === "0") return false;
+  const n = Number(s);
+  if (Number.isFinite(n) && n === 0) return false;
+  return true;
 }
 
 function mustPositive(name, x) {
