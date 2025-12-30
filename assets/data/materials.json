@@ -178,7 +178,7 @@
 
 
   
-   
+  
     {
       "id": "mat273_cdp",
       "mat": "273",
@@ -198,14 +198,14 @@
         { "key": "E",  "default": "", "label": "Young's modulus E (optional)", "unit": "MPa", "hint": "Leave blank/0 to auto-compute (EC2 using fcm)" },
         { "key": "ft", "default": "", "label": "Tensile strength FT (optional)", "unit": "MPa", "hint": "Leave blank/0 to auto-compute; enter to override" },
     
-        { "key": "wf_override",  "default": "", "label": "WF override (optional)", "unit": "mm", "hint": "Leave blank/0 to auto-compute from Gf and FT" },
+        { "key": "wf", "default": "", "label": "WF (optional)", "unit": "mm", "hint": "Leave blank/0 to auto-compute from Gf and FT" },
     
-        { "key": "efc", "default": "", "label": "EFC (optional)", "unit": "-", "hint": "Leave blank/0 to use 0.005 (cover/unconfined). Use 0.010 for confined core, or enter your calibrated value." },
+        { "key": "efc", "default": "", "label": "EFC (optional)", "unit": "-", "hint": "Leave blank/0 to use 1.0E-4. Enter your calibrated value to override." },
     
-        { "key": "strflg",   "default": "", "label": "STRFLG (optional)", "unit": "-", "hint": "0=no strain-rate, 1=strain-rate dependent" },
-        { "key": "fc0_rate", "default": "", "label": "FC0 (rate parameter, optional)", "unit": "MPa", "hint": "Only used if STRFLG=1. Leave blank/0 to use 10 MPa." }
+        { "key": "strflg",   "default": "", "label": "STRFLG (optional)", "unit": "-", "hint": "0=no strain-rate, 1=strain-rate dependent" }
       ]
     }
+
 
 
 
