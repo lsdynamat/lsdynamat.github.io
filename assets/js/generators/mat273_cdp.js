@@ -10,6 +10,8 @@
 // - pr (optional): blank/0 => 0.18
 // - E  (optional):  blank/0 => auto from EC2 using f_cm: E = 22000*(fc/10)^0.3 (MPa)
 // - ft (optional): blank/0 => auto (your function); >0 => override
+// - strflg (optional): 0/blank => 0, >=0.5 => 1
+// - fc0 (optional): only used if STRFLG=1, blank/0 => 10 MPa
 // - confinement (optional): blank => cover; "core" => confined (affects EFC)
 // - ecc_override / wf_override / efc_override (optional): blank/0 => auto; >0 => override
 //
@@ -41,22 +43,24 @@ const MATERIAL_CARDS_BANNER = [
 
 // Fixed defaults (not inputs unless you add them)
 const DEFAULTS = {
-  ro_default: 0.0023, // g/mm^3 (your requirement)
+  ro_default: 0.0023, // g/mm^3
   pr_default: 0.18,
 
   qh0: 0.30,
 
-  // Line 2
-  strflg: 0.0,
+  // rate defaults
+  strflg_default: 0.0,
   hp_qs: 0.01,
   hp_rate: 0.5,
+  fc0_default_when_rate: 10.0, // MPa (recommended when STRFLG=1)
+
+  // Line 2 (other parameters)
   ah: 0.08,
   bh: 0.003,
   ch: 2.0,
   dh: 1.0e-6,
   as: 15.0,
   df: 0.85,
-  fc0: 0.0,
 
   // Line 3
   type: 1.0,
@@ -81,6 +85,21 @@ export const FIELDS = [
 
   { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank/0 to auto-compute. Enter value to override." },
 
+  {
+    key: "strflg",
+    label: "STRFLG (strain-rate flag)",
+    unit: "-",
+    default: 0,
+    hint: "0 = no strain-rate dependency, 1 = strain-rate dependent",
+  },
+  {
+    key: "fc0",
+    label: "FC0 (rate parameter, optional)",
+    unit: "MPa",
+    default: "",
+    hint: "Only used when STRFLG=1. Leave blank/0 to use 10 MPa.",
+  },
+
   { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Blank=cover (EFC=0.005). Type 'core' for confined (EFC=0.010)." },
 
   { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to auto-compute." },
@@ -95,11 +114,11 @@ export function generate(input = {}) {
   const mid = mustIntPositive("mid", inp.mid);
   const fc = mustPositive("fc", inp.fc);
 
-  // RO: blank/0 => 0.0023 g/mm^3
+  // RO: blank/0 => default
   const roOv = readOptionalPositive(inp.ro);
   const ro = roOv != null ? roOv : DEFAULTS.ro_default;
 
-  // PR: blank/0 => 0.18
+  // PR: blank/0 => default
   const prOv = readOptionalNumber(inp.pr);
   const pr = prOv != null ? mustInRange("pr", prOv, 0.0, 0.49) : DEFAULTS.pr_default;
 
@@ -111,7 +130,20 @@ export function generate(input = {}) {
   const ftOv = readOptionalPositive(inp.ft);
   const ft = ftOv != null ? ftOv : calculate_ft_ec2(fc);
 
-  // confinement text
+  // STRFLG: optional numeric (blank/0 -> 0, >=0.5 -> 1)
+  const strIn = readOptionalNumber(inp.strflg);
+  const strflg = (strIn != null && strIn >= 0.5) ? 1.0 : DEFAULTS.strflg_default;
+
+  // HP depends on STRFLG
+  const hp = (strflg >= 0.5) ? DEFAULTS.hp_rate : DEFAULTS.hp_qs;
+
+  // FC0: only used if STRFLG=1
+  const fc0Ov = readOptionalPositive(inp.fc0);
+  const fc0 = (strflg >= 0.5)
+    ? (fc0Ov != null ? fc0Ov : DEFAULTS.fc0_default_when_rate)
+    : 0.0;
+
+  // confinement
   const isCore = normalizeConfinement(inp.confinement) === "core";
 
   // optional overrides (blank/0 => auto)
@@ -130,15 +162,12 @@ export function generate(input = {}) {
   // fixed defaults
   const qh0 = DEFAULTS.qh0;
 
-  const strflg = DEFAULTS.strflg;
-  const hp = (strflg >= 0.5) ? DEFAULTS.hp_rate : DEFAULTS.hp_qs;
   const ah = DEFAULTS.ah;
   const bh = DEFAULTS.bh;
   const ch = DEFAULTS.ch;
   const dh = DEFAULTS.dh;
   const as = DEFAULTS.as;
   const df = DEFAULTS.df;
-  const fc0 = DEFAULTS.fc0;
 
   const type = DEFAULTS.type;
   const bs = DEFAULTS.bs;
@@ -148,7 +177,8 @@ export function generate(input = {}) {
   const tag = isCore ? "CORE(confined)" : "COVER(unconfined)";
   const ftTag = (ftOv != null) ? "FT=manual" : "FT=auto";
   const eTag  = (EOv != null) ? "E=manual"  : "E=auto(EC2)";
-  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}, ${eTag}`;
+  const rateTag = (strflg >= 0.5) ? "rate=on" : "rate=off";
+  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}, ${eTag}, ${rateTag}`;
 
   // keyword
   const lines = [];
