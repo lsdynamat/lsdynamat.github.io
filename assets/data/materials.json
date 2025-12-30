@@ -143,6 +143,7 @@
     {
       "id": "mat159_cscm",
       "mat": "159",
+      "version": "1.0"
       "name": "CSCM Concrete",
       "category": "Concrete",
       "generator": "mat159_cscm",
