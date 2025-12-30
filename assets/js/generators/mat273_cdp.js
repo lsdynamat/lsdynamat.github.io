@@ -3,14 +3,16 @@
 // LS-PrePost V4.8.17 card order (3 numeric lines)
 // Units: mm-ms-g-N-MPa
 //
-// Inputs (minimal, UI-safe):
+// Inputs (UI-safe):
 // - mid (required)
-// - fc  (required)
-// - ft (optional): blank/0 => auto (EC2/fib); >0 => override
+// - fc  (required)  -> treated as f_cm (experimental mean compressive strength)
+// - pr (optional): blank/0 => 0.18
+// - E  (optional):  blank/0 => auto from EC2 using f_cm: E = 22000*(fc/10)^0.3 (MPa)
+// - ft (optional): blank/0 => auto (your function); >0 => override
 // - confinement (optional): blank => cover; "core" => confined (affects EFC)
 // - ecc_override / wf_override / efc_override (optional): blank/0 => auto; >0 => override
 //
-// NOTE: This generator is robust against UI that serializes blank numeric fields as 0.
+// Robust against UI that serializes blank numeric fields as 0.
 
 export const KEY = "mat273_cdp";
 export const ID = 273;
@@ -30,14 +32,11 @@ const MATERIAL_CARDS_BANNER = [
   "$ --+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8",
 ];
 
-// Fixed defaults (not inputs)
+// Fixed defaults (not inputs unless you add them)
 const DEFAULTS = {
-  // Elastic
-  ro: 0.0024,     // g/mm^3
-  E: 30000.0,     // MPa
-  pr: 0.20,
+  ro: 0.0024,       // g/mm^3
+  pr_default: 0.18, // your default
 
-  // Line 1
   qh0: 0.30,
 
   // Line 2
@@ -60,15 +59,18 @@ const DEFAULTS = {
 
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: 1, min: 1, hint: "Unique positive integer" },
-  { key: "fc", label: "Compressive strength FC", unit: "MPa", default: 30.0, min: 1, hint: "f'c in MPa" },
+  { key: "fc", label: "Compressive strength FC (= fcm)", unit: "MPa", default: 30.0, min: 1, hint: "Mean strength from tests (fcm) in MPa" },
 
-  { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank to auto-compute using EC2/fib. Enter a value to override." },
+  { key: "pr", label: "Poisson ratio PR (optional)", unit: "-", default: "", hint: "Typical 0.15–0.22. Leave blank/0 to use 0.18." },
+  { key: "E", label: "Young's modulus E (optional)", unit: "MPa", default: "", hint: "Leave blank/0 to auto-compute (EC2 using fcm). Enter value to override." },
 
-  { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Leave blank for cover (unconfined, EFC=0.005). Type 'core' for confined (EFC=0.010)." },
+  { key: "ft", label: "Tensile strength FT (optional)", unit: "MPa", default: "", hint: "Leave blank/0 to auto-compute. Enter value to override." },
 
-  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to auto-compute from FC and FT." },
-  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Leave blank/0 to auto-compute from fracture energy." },
-  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to use default based on confinement." },
+  { key: "confinement", label: "Confinement (optional)", unit: "-", default: "", hint: "Blank=cover (EFC=0.005). Type 'core' for confined (EFC=0.010)." },
+
+  { key: "ecc_override", label: "ECC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to auto-compute." },
+  { key: "wf_override", label: "WF override (optional)", unit: "mm", default: "", hint: "Leave blank/0 to auto-compute." },
+  { key: "efc_override", label: "EFC override (optional)", unit: "-", default: "", hint: "Leave blank/0 to auto-compute." },
 ];
 
 export function generate(input = {}) {
@@ -78,7 +80,15 @@ export function generate(input = {}) {
   const mid = mustIntPositive("mid", inp.mid);
   const fc = mustPositive("fc", inp.fc);
 
-  // optional FT
+  // PR: blank/0 => 0.18
+  const prOv = readOptionalNumber(inp.pr);
+  const pr = prOv != null ? mustInRange("pr", prOv, 0.0, 0.49) : DEFAULTS.pr_default;
+
+  // E: blank/0 => auto EC2 using fcm (fc)
+  const EOv = readOptionalPositive(inp.E);
+  const E = EOv != null ? EOv : calculate_E_ec2_from_fcm(fc);
+
+  // FT: blank/0 => auto
   const ftOv = readOptionalPositive(inp.ft);
   const ft = ftOv != null ? ftOv : calculate_ft_ec2(fc);
 
@@ -100,8 +110,6 @@ export function generate(input = {}) {
 
   // fixed defaults
   const ro = DEFAULTS.ro;
-  const E  = DEFAULTS.E;
-  const pr = DEFAULTS.pr;
   const qh0 = DEFAULTS.qh0;
 
   const strflg = DEFAULTS.strflg;
@@ -120,8 +128,9 @@ export function generate(input = {}) {
 
   // title
   const tag = isCore ? "CORE(confined)" : "COVER(unconfined)";
-  const ftTag = (ftOv != null) ? "FT=manual" : "FT=auto(EC2)";
-  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}`;
+  const ftTag = (ftOv != null) ? "FT=manual" : "FT=auto";
+  const eTag  = (EOv != null) ? "E=manual"  : "E=auto(EC2)";
+  const titleLine = `MAT_273 CDP fc=${toFixed(fc, 1)}MPa, ft=${toFixed(ft, 3)}MPa (${ftTag}), ${tag}, ${eTag}`;
 
   // keyword
   const lines = [];
@@ -188,6 +197,13 @@ function calculate_ft_ec2(fc) {
 }
 
 // ------------------------
+// Auto E (EC2) using fcm directly (your requirement)
+// E = 22000 * (fcm/10)^0.3   [MPa]
+function calculate_E_ec2_from_fcm(fcm) {
+  return 22000.0 * Math.pow(fcm / 10.0, 0.3);
+}
+
+// ------------------------
 // ECC / WF workflow formulas
 // ------------------------
 function computeEccentricity(fc, ft) {
@@ -246,6 +262,12 @@ function mustIntPositive(name, x) {
   const vi = Math.trunc(v);
   if (vi <= 0) throw new Error(`${name} must be an integer > 0`);
   return vi;
+}
+function mustInRange(name, x, lo, hi) {
+  const v = Number(x);
+  if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
+  if (v < lo || v > hi) throw new Error(`${name} must be in [${lo}, ${hi}]`);
+  return v;
 }
 function toFixed(x, n) {
   const v = Number(x);
