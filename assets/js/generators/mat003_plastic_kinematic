@@ -1,9 +1,8 @@
 // assets/js/generators/mat003_plastic_kinematic.js
-// (Full file, same header style as mat273_cdp.js)
 
 export const KEY = "mat003_plastic_kinematic";
 export const ID = 3;
-export const NAME = "Plastic Kinematic (*MAT_PLASTIC_KINEMATIC)";
+export const NAME = "Plastic Kinematic";
 export const CATEGORY = "Metals";
 export const UNITS = "mm-ms-g-N-MPa";
 
@@ -22,7 +21,6 @@ const MATERIAL_CARDS_BANNER = [
 
 export const DEFAULTS = {
   mid: 1,
-  title: "",
 
   ro: 0.00783,
   E: 2.07e5,
@@ -32,7 +30,7 @@ export const DEFAULTS = {
   etan: 1317.6,
   beta: 0.0,
 
-  // Cowper–Symonds (optional)
+  // Cowper–Symonds (optional): blank/0 => disabled
   src: "",
   srp: "",
   fs: "",
@@ -41,13 +39,12 @@ export const DEFAULTS = {
 
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Unique positive integer" },
-  { key: "title", label: "Title (optional)", unit: "-", default: DEFAULTS.title, hint: "Example: Rebar.D10" },
 
   { key: "ro", label: "Density RO", unit: "g/mm^3", default: DEFAULTS.ro, min: 0, hint: "Steel ≈ 0.00783" },
   { key: "E", label: "Young's modulus E", unit: "MPa", default: DEFAULTS.E, min: 1, hint: "Steel ≈ 2.07e5" },
   { key: "pr", label: "Poisson ratio PR", unit: "-", default: DEFAULTS.pr, min: 0, max: 0.499, hint: "Typical 0.25–0.30" },
 
-  { key: "sigy", label: "Yield stress SIGY", unit: "MPa", default: DEFAULTS.sigy, min: 0, hint: "Example: 390" },
+  { key: "sigy", label: "Yield stress SIGY (fy)", unit: "MPa", default: DEFAULTS.sigy, min: 0, hint: "Example: 390" },
   { key: "etan", label: "Tangent modulus ETAN", unit: "MPa", default: DEFAULTS.etan, min: 0, hint: "Post-yield slope" },
   { key: "beta", label: "Hardening mix BETA", unit: "-", default: DEFAULTS.beta, min: 0, max: 1, hint: "0=isotropic, 1=kinematic" },
 
@@ -74,23 +71,24 @@ export function generate(input = {}) {
   const fs  = readOptionalNumber(inp.fs) ?? 0.0;
   const vp  = mustNonNegInt("vp", inp.vp);
 
-  const titleLine =
-    String(inp.title || "").trim() !== ""
-      ? String(inp.title).trim()
-      : `MAT_003 Plastic Kinematic SIGY=${toFixed(sigy, 1)}MPa`;
+  // ---- title (AUTO as you requested) ----
+  const hardeningText =
+    beta <= 1e-12
+      ? "isotropic hardening"
+      : (Math.abs(beta - 1.0) <= 1e-12 ? "kinematic hardening" : `combined hardening (BETA=${toFixed(beta, 2)})`);
+
+  const titleLine = `MAT_003 fy = ${toFixed(sigy, 1)} MPa, Etan = ${toFixed(etan, 1)} MPa, ${hardeningText}`;
 
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
   lines.push("*KEYWORD");
   MATERIAL_CARDS_BANNER.forEach(s => lines.push(s));
 
-  // model header
   lines.push(UNITS_LINE);
   lines.push(MODEL_LINE);
   REF_LINES.forEach(s => lines.push(s));
   lines.push(HUB_LINE);
 
-  // keyword
   lines.push("*MAT_PLASTIC_KINEMATIC_TITLE");
   lines.push(titleLine);
 
@@ -116,7 +114,7 @@ export function generate(input = {}) {
   lines.push("*END");
   lines.push("");
 
-  const filename = `MAT_003_PLASTIC_KINEMATIC_mid=${mid}.k`;
+  const filename = `MAT_003_PLASTIC_KINEMATIC_mid=${mid}_fy=${toFixed(sigy, 1)}MPa.k`;
   return { filename, keyword: lines.join("\n") };
 }
 
