@@ -1,5 +1,6 @@
 // assets/js/generators/mat024_piecewise_linear_plasticity.js
-// Yun & Gardner (2017) based curve for MAT_024 with post-peak plateau point.
+// MAT_024: Yun & Gardner (2017) envelope -> true conversion -> curve: true stress vs true plastic strain
+// Adds a horizontal tail after peak stress ending at eps_p(peak) + tail_d_epsp (default 0.1) to prevent extrapolation.
 // DOI (Yun & Gardner): 10.1016/j.jcsr.2017.01.024
 // Ref (Han et al.):    10.1016/j.istruc.2024.107930
 // Units: mm-ms-g-N-MPa
@@ -39,13 +40,13 @@ export const DEFAULTS = {
   fy: 235,
   fu: 360,
 
-  // curve smoothness
-  n_elastic: 30,
-  n_plateau: 20,
-  n_hardening: 80,
+  // Reduced points (lighter curve)
+  n_elastic: 12,
+  n_plateau: 6,
+  n_hardening: 25,
 
-  // add one point after peak: eps += delta, sigma = constant
-  delta_eps_post: 0.02,
+  // NEW: tail length in TRUE PLASTIC STRAIN (end = eps_p(peak) + tail_d_epsp)
+  tail_d_epsp: 0.1,
 
   // Optional Cowper–Symonds (blank/0 => disabled)
   c: "",
@@ -53,23 +54,23 @@ export const DEFAULTS = {
 };
 
 export const FIELDS = [
-  { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Unique positive integer material ID (e.g., 1, 12, 1001)." },
+  { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Unique positive integer material ID." },
 
-  { key: "ro", label: "Density RO", unit: "g/mm^3", default: DEFAULTS.ro, min: 0, hint: "Steel typical: 0.00785 g/mm^3 (≈7850 kg/m^3)." },
+  { key: "ro", label: "Density RO", unit: "g/mm^3", default: DEFAULTS.ro, min: 0, hint: "Steel typical: 0.00785 g/mm^3." },
   { key: "E", label: "Young's modulus E", unit: "MPa", default: DEFAULTS.E, min: 1, hint: "Typical steels: 200000–210000 MPa." },
-  { key: "pr", label: "Poisson ratio PR", unit: "-", default: DEFAULTS.pr, min: 0, max: 0.499, hint: "Metals typically 0.25–0.33. Keep <0.5." },
+  { key: "pr", label: "Poisson ratio PR", unit: "-", default: DEFAULTS.pr, min: 0, max: 0.499, hint: "Metals typically 0.25–0.33." },
 
   { key: "fy", label: "Yield stress Fy", unit: "MPa", default: DEFAULTS.fy, min: 0, hint: "Yield / 0.2% proof stress from tensile test." },
   { key: "fu", label: "Ultimate stress Fu", unit: "MPa", default: DEFAULTS.fu, min: 0, hint: "Ultimate tensile strength (engineering)." },
 
-  { key: "n_elastic", label: "Points: elastic", unit: "-", default: DEFAULTS.n_elastic, min: 5, hint: "Number of points for elastic segment (smoothness only)." },
-  { key: "n_plateau", label: "Points: yield plateau", unit: "-", default: DEFAULTS.n_plateau, min: 3, hint: "Number of points for yield plateau (smoothness only)." },
-  { key: "n_hardening", label: "Points: hardening", unit: "-", default: DEFAULTS.n_hardening, min: 10, hint: "Number of points for hardening segment (smoothness only)." },
+  { key: "n_elastic", label: "Points: elastic", unit: "-", default: DEFAULTS.n_elastic, min: 5, hint: "Curve smoothness only. 8–20 is usually enough." },
+  { key: "n_plateau", label: "Points: yield plateau", unit: "-", default: DEFAULTS.n_plateau, min: 3, hint: "Curve smoothness only. 4–10 is usually enough." },
+  { key: "n_hardening", label: "Points: hardening", unit: "-", default: DEFAULTS.n_hardening, min: 10, hint: "Curve smoothness only. 20–60 is usually enough." },
 
-  { key: "delta_eps_post", label: "Post-peak plateau Δε", unit: "-", default: DEFAULTS.delta_eps_post, min: 0, hint: "Adds one extra point after peak: ε += Δε, σ = const (avoid solver extrapolation). Typical 0.01–0.05." },
+  { key: "tail_d_epsp", label: "Tail length Δεp after peak", unit: "-", default: DEFAULTS.tail_d_epsp, min: 0.0, hint: "Horizontal tail ends at eps_p(peak)+Δεp. Typical 0.05–0.30. Default 0.10." },
 
-  { key: "c", label: "Cowper–Symonds C (optional)", unit: "-", default: DEFAULTS.c, hint: "Leave blank/0 to disable. If enabled, choose C,P from literature/test." },
-  { key: "p", label: "Cowper–Symonds P (optional)", unit: "-", default: DEFAULTS.p, hint: "Leave blank/0 to disable. Often P≈5 as a starting point (problem-dependent)." },
+  { key: "c", label: "Cowper–Symonds C (optional)", unit: "-", default: DEFAULTS.c, hint: "Leave blank/0 to disable." },
+  { key: "p", label: "Cowper–Symonds P (optional)", unit: "-", default: DEFAULTS.p, hint: "Leave blank/0 to disable." },
 ];
 
 export function generate(input = {}) {
@@ -89,9 +90,8 @@ export function generate(input = {}) {
   const n_plateau = mustIntMin("n_plateau", inp.n_plateau, 3);
   const n_hardening = mustIntMin("n_hardening", inp.n_hardening, 10);
 
-  const delta_eps_post = mustNonNeg("delta_eps_post", inp.delta_eps_post);
+  const tail_d_epsp = mustNonNeg("tail_d_epsp", inp.tail_d_epsp);
 
-  // Optional Cowper–Symonds
   const c = readOptionalPositive(inp.c) ?? 0.0;
   const p = readOptionalPositive(inp.p) ?? 0.0;
 
@@ -104,24 +104,20 @@ export function generate(input = {}) {
   const eps_u_formula = 0.6 * (1.0 - fy / fu);
   let eps_u = Math.max(eps_u_formula, 0.06);
 
-  // Safety
   if (eps_sh <= eps_y) eps_sh = eps_y + 1e-4;
   if (eps_u <= eps_sh) eps_u = eps_sh + 1e-3;
 
-  // ---- Build engineering curve (envelope) ----
-  // Elastic: [0, eps_y)
+  // ---- Build engineering envelope ----
   let eps_el = linspace(0, eps_y, n_elastic);
   let sig_el = eps_el.map(eps => E * eps);
   eps_el = eps_el.slice(0, -1);
   sig_el = sig_el.slice(0, -1);
 
-  // Plateau: [eps_y, eps_sh)
   let eps_pl = linspace(eps_y, eps_sh, n_plateau);
   let sig_pl = eps_pl.map(() => fy);
   eps_pl = eps_pl.slice(0, -1);
   sig_pl = sig_pl.slice(0, -1);
 
-  // Hardening: [eps_sh, eps_u]
   const eps_h = linspace(eps_sh, eps_u, n_hardening);
   const sig_h = eps_h.map(eps => {
     const C = (eps - eps_sh) / (eps_u - eps_sh);
@@ -129,57 +125,72 @@ export function generate(input = {}) {
     return fy + (fu - fy) * (0.4 * C + 2 * C / D);
   });
 
-  let eng_eps = eps_el.concat(eps_pl, eps_h);
-  let eng_sig = sig_el.concat(sig_pl, sig_h);
+  const eng_eps = eps_el.concat(eps_pl, eps_h);
+  const eng_sig = sig_el.concat(sig_pl, sig_h);
 
-  // ---- Add ONE post-peak plateau point (constant stress) ----
-  // robust peak finding (even if future curve changes)
-  let ipk = 0;
-  for (let i = 1; i < eng_sig.length; i++) if (eng_sig[i] > eng_sig[ipk]) ipk = i;
-
-  const eps_pk = eng_eps[ipk];
-  const sig_pk = eng_sig[ipk];
-
-  eng_eps = eng_eps.slice(0, ipk + 1).concat([eps_pk + delta_eps_post]);
-  eng_sig = eng_sig.slice(0, ipk + 1).concat([sig_pk]);
-
-  // ---- True conversion (uniform assumption; paper equations) ----
+  // ---- True conversion ----
   const tru_eps = eng_eps.map(eps => Math.log1p(eps));
   const tru_sig = eng_sig.map((sig, i) => sig * (1 + eng_eps[i]));
 
-  // ---- True plastic strain for curve input: eps_p = eps_true - sigma_true/E ----
+  // ---- True plastic strain ----
   let eps_p = tru_eps.map((epsT, i) => {
     const ep = epsT - (tru_sig[i] / E);
     return ep < 0 ? 0 : ep;
   });
 
-  // Start at first index where engineering stress reaches fy (robust)
+  // Start at yield (robust)
   let i0 = eng_sig.findIndex(s => s >= fy);
   if (i0 < 0) i0 = 0;
 
   eps_p = eps_p.slice(i0);
-  const sig_true_in = tru_sig.slice(i0);
+  let sig_true = tru_sig.slice(i0);
 
-  // Shift so first plastic strain = 0
+  // Shift so first eps_p = 0
   const ep0 = eps_p[0] ?? 0.0;
   eps_p = eps_p.map((v, idx) => (idx === 0 ? 0.0 : v - ep0));
 
-  // Ensure monotonic eps_p (numerical safety)
+  // Ensure monotonic eps_p
+  for (let i = 1; i < eps_p.length; i++) {
+    if (eps_p[i] <= eps_p[i - 1]) eps_p[i] = eps_p[i - 1] + 1e-12;
+  }
+
+  // ---- Peak stress in output domain ----
+  let ipk = 0;
+  for (let i = 1; i < sig_true.length; i++) if (sig_true[i] > sig_true[ipk]) ipk = i;
+  const sig_pk = sig_true[ipk];
+
+  // Keep only up to peak, then force horizontal tail
+  eps_p = eps_p.slice(0, ipk + 1);
+  sig_true = sig_true.slice(0, ipk + 1);
+
+  // ---- Horizontal tail ends at eps_p(peak) + tail_d_epsp ----
+  const eps_p_peak = eps_p[eps_p.length - 1];
+  const eps_p_tail = eps_p_peak + tail_d_epsp;
+
+  if (tail_d_epsp > 0) {
+    // Add ONE plateau point. Solver will not extrapolate beyond it.
+    eps_p.push(eps_p_tail);
+    sig_true.push(sig_pk);
+  } else {
+    // Still enforce last stress = peak (robustness)
+    sig_true[sig_true.length - 1] = sig_pk;
+  }
+
+  // Final monotonic safety
   for (let i = 1; i < eps_p.length; i++) {
     if (eps_p[i] <= eps_p[i - 1]) eps_p[i] = eps_p[i - 1] + 1e-12;
   }
 
   // ---- Keyword output ----
-  // Convention: LCSS = MID*1000 + 24
   const lcss = mid * 1000 + 24;
 
   const titleLine =
     `MAT_024 YunGardner fy=${toFixed(fy, 1)}MPa fu=${toFixed(fu, 1)}MPa ` +
-    `plateau_dEps=${toFixed(delta_eps_post, 3)} ` +
+    `tail_d_epsp=${toFixed(tail_d_epsp, 3)} (peak+Δεp) ` +
     `(DOI:10.1016/j.jcsr.2017.01.024)`;
 
   const curveTitle =
-    `LCSS_${lcss} YunGardner true_plastic_vs_true_stress (DOI:10.1016/j.jcsr.2017.01.024;10.1016/j.istruc.2024.107930)`;
+    `LCSS_${lcss} YunGardner true_stress_vs_true_plastic (tail=peak+${toFixed(tail_d_epsp, 3)})`;
 
   const lines = [];
   lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
@@ -191,7 +202,6 @@ export function generate(input = {}) {
   REF_LINES.forEach(s => lines.push(s));
   lines.push(HUB_LINE);
 
-  // *DEFINE_CURVE: x=true plastic strain, y=true stress
   lines.push("*DEFINE_CURVE_TITLE");
   lines.push(curveTitle);
   lines.push("$#    LCID      SIDR       SFA       SFO      OFFA      OFFO");
@@ -205,10 +215,9 @@ export function generate(input = {}) {
   );
   lines.push("$#                a               o");
   for (let i = 0; i < eps_p.length; i++) {
-    lines.push(`${fmt20(eps_p[i], 8)}${fmt20(sig_true_in[i], 6)}`);
+    lines.push(`${fmt20(eps_p[i], 8)}${fmt20(sig_true[i], 6)}`);
   }
 
-  // MAT_024
   lines.push("*MAT_PIECEWISE_LINEAR_PLASTICITY_TITLE");
   lines.push(titleLine);
 
@@ -222,7 +231,7 @@ export function generate(input = {}) {
     `${fmt10(E, 1)}` +
     `${fmt10(pr, 6)}` +
     `${fmt10(fy, 6)}` +
-    `${fmt10(0.0, 6)}` +     // ETAN not used when LCSS hardening curve is provided
+    `${fmt10(0.0, 6)}` +     // ETAN not used when LCSS curve is provided
     `${fmt10(fail, 6)}` +
     `${fmt10(tdel, 6)}`
   );
@@ -239,7 +248,7 @@ export function generate(input = {}) {
   lines.push("*END");
   lines.push("");
 
-  const filename = `MAT_024_YunGardner_mid=${mid}_fy=${toFixed(fy, 1)}_fu=${toFixed(fu, 1)}.k`;
+  const filename = `MAT_024_YunGardner_mid=${mid}_fy=${toFixed(fy, 1)}_fu=${toFixed(fu, 1)}_tail=${toFixed(tail_d_epsp, 3)}.k`;
   return { filename, keyword: lines.join("\n") };
 }
 
