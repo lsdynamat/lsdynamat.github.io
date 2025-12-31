@@ -156,7 +156,7 @@
       "mat": "024",
       "name": "Piecewise Linear Plasticity",
       "category": "Metals",
-      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true stress vs true plastic strain (*DEFINE_CURVE). Discretization controlled by plateau/hardening points; adds a horizontal tail at peak stress ending at eps_p(peak)+Δeps_p to avoid solver extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930",
+      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true stress vs true plastic strain (*DEFINE_CURVE).",
       "version": "1.0",
       "updatedAt": "2025-12-31",
       "generator": "mat024_piecewise_linear_plasticity",
