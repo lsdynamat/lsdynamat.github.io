@@ -52,7 +52,7 @@
           "unit": "MPa",
           "default": 390,
           "min": 0,
-          "hint": "Yield / 0.2% proof stress from tensile test (keep consistent engineering vs true stress in your workflow)."
+          "hint": "Yield / 0.2% proof stress from tensile test."
         },
         {
           "key": "etan",
@@ -60,7 +60,7 @@
           "unit": "MPa",
           "default": 1317.6,
           "min": 0,
-          "hint": "Post-yield linear hardening slope. Typical steel: ETAN ≈ 0.2%–2% of E (0.002E–0.02E). Prefer calibration to test stress–strain or cyclic hysteresis."
+          "hint": "Post-yield linear hardening slope. Typical steel: ETAN ≈ 0.2%–2% of E. Prefer calibration to test stress–strain or cyclic hysteresis."
         },
         {
           "key": "beta",
