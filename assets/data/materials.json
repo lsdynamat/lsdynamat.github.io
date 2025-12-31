@@ -58,7 +58,7 @@
           "key": "etan",
           "label": "Tangent modulus ETAN",
           "unit": "MPa",
-          "default": 1317.6,
+          "default": 10350,
           "min": 0,
           "hint": "Post-yield linear hardening slope. Typical steel: ETAN ≈ 0.2%–2% of E. Prefer calibration to test stress–strain or cyclic hysteresis."
         },
