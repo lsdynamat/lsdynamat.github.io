@@ -1,5 +1,54 @@
 {
   "materials": [
+    
+    {
+      "id": "mat003_plastic_kinematic",
+      "mat": "003",
+      "name": "Plastic Kinematic (*MAT_PLASTIC_KINEMATIC)",
+      "category": "Metals",
+      "summary": "Elastic–plastic with linear hardening; isotropic/kinematic/combined via BETA. Common for rebar and structural steel.",
+      "version": "1.0",
+      "updatedAt": "2025-12-31",
+      "generator": "mat003_plastic_kinematic",
+      "doc": "./assets/docs/mat003_plastic_kinematic.md",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "-", "default": 1, "min": 1, "hint": "Example: 12" },
+        { "key": "title", "label": "Title", "unit": "-", "default": "Rebar.D10", "hint": "Example: Rebar.D10" },
+    
+        { "key": "ro", "label": "Density (RO)", "unit": "g/mm^3", "default": 0.00783, "min": 0, "hint": "Steel ≈ 0.00785" },
+        { "key": "E", "label": "Young's modulus (E)", "unit": "MPa", "default": 207000, "min": 1, "hint": "Steel ≈ 2.0e5" },
+        { "key": "pr", "label": "Poisson ratio (PR)", "unit": "-", "default": 0.26, "min": 0, "max": 0.499, "hint": "0.25–0.30" },
+    
+        { "key": "sigy", "label": "Yield stress (SIGY)", "unit": "MPa", "default": 390, "min": 0, "hint": "Example: 390" },
+        { "key": "etan", "label": "Tangent modulus (ETAN)", "unit": "MPa", "default": 1317.6, "min": 0, "hint": "Post-yield slope" },
+        { "key": "beta", "label": "Hardening mix (BETA)", "unit": "-", "default": 0.0, "min": 0, "max": 1, "hint": "0=isotropic, 1=kinematic" },
+    
+        { "key": "src", "label": "Cowper-Symonds C (SRC)", "unit": "-", "default": 0.0, "min": 0, "hint": "0 disables rate effect" },
+        { "key": "srp", "label": "Cowper-Symonds P (SRP)", "unit": "-", "default": 0.0, "min": 0, "hint": "0 disables rate effect" },
+        { "key": "fs", "label": "Scale factor (FS)", "unit": "-", "default": 0.0, "min": 0, "hint": "Often 0 or 1 depending on workflow" },
+        { "key": "vp", "label": "Rate formulation (VP)", "unit": "-", "default": 0, "min": 0, "hint": "0=scale yield stress; 1=viscoplastic" }
+      ],
+      "samples": [
+        {
+          "id": "rebar_d10_example",
+          "title": "Rebar D10 example (fc=390 MPa)",
+          "source": "Example setup",
+          "path": "./assets/samples/mat003/rebar_d10.k.txt",
+          "updatedAt": "2025-12-31",
+          "tags": ["rebar", "example"]
+        }
+      ]
+    },
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
     {
       "id": "mat015_johnson_cook",
       "mat": "015",
