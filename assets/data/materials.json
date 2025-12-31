@@ -150,6 +150,51 @@
       ]
     },
 
+
+    {
+      "id": "mat024_piecewise_linear_plasticity",
+      "mat": "024",
+      "name": "Piecewise Linear Plasticity",
+      "category": "Metals",
+      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true plastic strain vs true stress (*DEFINE_CURVE). Adds one post-peak plateau point to avoid solver extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930",
+      "version": "1.0",
+      "updatedAt": "2025-12-31",
+      "generator": "mat024_piecewise_linear_plasticity",
+      "doc": "./assets/docs/mat024_piecewise_linear_plasticity.md",
+      "inputs": [
+        { "key": "mid", "label": "Material ID (MID)", "unit": "-", "default": 1, "min": 1, "hint": "Unique positive integer material ID (e.g., 1, 12, 1001)." },
+    
+        { "key": "ro", "label": "Density RO", "unit": "g/mm^3", "default": 0.00785, "min": 0, "hint": "Steel typical: 0.00785 g/mm^3 (≈7850 kg/m^3)." },
+        { "key": "E", "label": "Young's modulus E", "unit": "MPa", "default": 210000, "min": 1, "hint": "Typical steels: 200000–210000 MPa." },
+        { "key": "pr", "label": "Poisson ratio PR", "unit": "-", "default": 0.30, "min": 0, "max": 0.499, "hint": "Metals typically 0.25–0.33. Keep <0.5." },
+    
+        { "key": "fy", "label": "Yield stress Fy", "unit": "MPa", "default": 235, "min": 0, "hint": "Yield / 0.2% proof stress from tensile test." },
+        { "key": "fu", "label": "Ultimate stress Fu", "unit": "MPa", "default": 360, "min": 0, "hint": "Ultimate tensile strength (engineering)." },
+    
+        { "key": "n_elastic", "label": "Points: elastic", "unit": "-", "default": 30, "min": 5, "hint": "Number of points for elastic segment (smoothness only)." },
+        { "key": "n_plateau", "label": "Points: yield plateau", "unit": "-", "default": 20, "min": 3, "hint": "Number of points for yield plateau (smoothness only)." },
+        { "key": "n_hardening", "label": "Points: hardening", "unit": "-", "default": 80, "min": 10, "hint": "Number of points for hardening segment (smoothness only)." },
+    
+        { "key": "delta_eps_post", "label": "Post-peak plateau Δε", "unit": "-", "default": 0.02, "min": 0, "hint": "Adds one extra point after peak: ε += Δε, σ = const (avoid solver extrapolation). Typical 0.01–0.05." },
+    
+        { "key": "c", "label": "Cowper–Symonds C (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable. If enabled, choose C,P from literature/test." },
+        { "key": "p", "label": "Cowper–Symonds P (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable. Often P≈5 as a starting point (problem-dependent)." }
+      ]
+    },
+
+
+
+
+    
+
+
+
+
+
+
+
+
+    
     {
       "id": "mat027_mooney_rivlin",
       "mat": "027",
