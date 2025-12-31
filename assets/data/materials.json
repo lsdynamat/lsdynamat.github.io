@@ -156,7 +156,7 @@
       "mat": "024",
       "name": "Piecewise Linear Plasticity",
       "category": "Metals",
-      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true stress vs true plastic strain (*DEFINE_CURVE).",
+      "summary": "MAT_024 using the Yun & Gardner (2017) engineering stress–strain envelope provides a rational material curve for steels when experimental data are unavailable.",
       "version": "1.0",
       "updatedAt": "2025-12-31",
       "generator": "mat024_piecewise_linear_plasticity",
