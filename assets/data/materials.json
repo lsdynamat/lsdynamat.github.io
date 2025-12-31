@@ -11,22 +11,99 @@
       "generator": "mat003_plastic_kinematic",
       "doc": "./assets/docs/mat003_plastic_kinematic.md",
       "inputs": [
-        { "key": "mid", "label": "Material ID (MID)", "unit": "-", "default": 1, "min": 1, "hint": "Unique positive integer" },
+        {
+          "key": "mid",
+          "label": "Material ID (MID)",
+          "unit": "-",
+          "default": 1,
+          "min": 1,
+          "hint": "Unique positive integer material ID (e.g., 1, 12, 1001)."
+        },
     
-        { "key": "ro", "label": "Density RO", "unit": "g/mm^3", "default": 0.00783, "min": 0, "hint": "Steel ≈ 0.00783" },
-        { "key": "E",  "label": "Young's modulus E", "unit": "MPa", "default": 207000, "min": 1, "hint": "Steel ≈ 2.07e5" },
-        { "key": "pr", "label": "Poisson ratio PR", "unit": "-", "default": 0.26, "min": 0, "max": 0.499, "hint": "Typical 0.25–0.30" },
+        {
+          "key": "ro",
+          "label": "Density RO",
+          "unit": "g/mm^3",
+          "default": 0.00785,
+          "min": 0,
+          "hint": "Steel typical: 0.00785 g/mm^3 (≈7850 kg/m^3). Use your test/spec value if known."
+        },
+        {
+          "key": "E",
+          "label": "Young's modulus E",
+          "unit": "MPa",
+          "default": 207000,
+          "min": 1,
+          "hint": "Typical steels: 200000–210000 MPa. Use coupon/test value when possible."
+        },
+        {
+          "key": "pr",
+          "label": "Poisson ratio PR",
+          "unit": "-",
+          "default": 0.26,
+          "min": 0,
+          "max": 0.499,
+          "hint": "Metals typically 0.25–0.33. Keep <0.5 for stability."
+        },
     
-        { "key": "sigy", "label": "Yield stress SIGY (fy)", "unit": "MPa", "default": 390, "min": 0, "hint": "Example: 390" },
-        { "key": "etan", "label": "Tangent modulus ETAN", "unit": "MPa", "default": 1317.6, "min": 0, "hint": "Post-yield slope" },
-        { "key": "beta", "label": "Hardening mix BETA", "unit": "-", "default": 0.0, "min": 0, "max": 1, "hint": "0=isotropic, 1=kinematic" },
+        {
+          "key": "sigy",
+          "label": "Yield stress SIGY (fy)",
+          "unit": "MPa",
+          "default": 390,
+          "min": 0,
+          "hint": "Yield / 0.2% proof stress from tensile test (keep consistent engineering vs true stress in your workflow)."
+        },
+        {
+          "key": "etan",
+          "label": "Tangent modulus ETAN",
+          "unit": "MPa",
+          "default": 1317.6,
+          "min": 0,
+          "hint": "Post-yield linear hardening slope. Typical steel: ETAN ≈ 0.2%–2% of E (0.002E–0.02E). Prefer calibration to test stress–strain or cyclic hysteresis."
+        },
+        {
+          "key": "beta",
+          "label": "Hardening mix BETA",
+          "unit": "-",
+          "default": 0.0,
+          "min": 0,
+          "max": 1,
+          "hint": "0=isotropic hardening, 1=kinematic hardening, 0–1=combined. For cyclic steel, start ~0.5–0.8 and calibrate to Bauschinger/hysteresis."
+        },
     
-        { "key": "src", "label": "SRC (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable rate effect" },
-        { "key": "srp", "label": "SRP (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable rate effect" },
-        { "key": "fs",  "label": "FS (optional)",  "unit": "-", "default": "", "hint": "Often left blank/0" },
-        { "key": "vp",  "label": "VP", "unit": "-", "default": 0, "min": 0, "hint": "0=scale yield stress; 1=viscoplastic" }
+        {
+          "key": "src",
+          "label": "SRC (optional)",
+          "unit": "-",
+          "default": "",
+          "hint": "Cowper–Symonds C (rate effect). Leave blank/0 to disable. If enabled, choose C,P from literature or dynamic test data."
+        },
+        {
+          "key": "srp",
+          "label": "SRP (optional)",
+          "unit": "-",
+          "default": "",
+          "hint": "Cowper–Symonds P (rate effect). A common starting point for mild steel is P≈5, with C calibrated (problem dependent)."
+        },
+        {
+          "key": "fs",
+          "label": "FS (optional)",
+          "unit": "-",
+          "default": "",
+          "hint": "Scale factor for rate effect (often unused). Keep blank/0 unless your workflow explicitly uses it."
+        },
+        {
+          "key": "vp",
+          "label": "VP",
+          "unit": "-",
+          "default": 0,
+          "min": 0,
+          "hint": "Rate formulation selector (project convention). 0 is commonly used with Cowper–Symonds scaling."
+        }
       ]
-    },
+    }
+
     
     
     {
