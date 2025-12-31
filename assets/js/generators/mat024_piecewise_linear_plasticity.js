@@ -1,6 +1,7 @@
 // assets/js/generators/mat024_piecewise_linear_plasticity.js
 // MAT_024: Yun & Gardner (2017) envelope -> true conversion -> curve: true stress vs true plastic strain
-// Adds a horizontal tail after peak stress ending at eps_p(peak) + tail_d_epsp (default 0.1) to prevent extrapolation.
+// Minimal inputs: n_plateau + n_hardening only (elastic points are internal).
+// Adds a horizontal tail after peak stress ending at eps_p(peak) + tail_d_epsp (default 0.1).
 // DOI (Yun & Gardner): 10.1016/j.jcsr.2017.01.024
 // Ref (Han et al.):    10.1016/j.istruc.2024.107930
 // Units: mm-ms-g-N-MPa
@@ -30,6 +31,9 @@ const MATERIAL_CARDS_BANNER = [
   "$ --+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8",
 ];
 
+// Internal elastic discretization (hidden from UI)
+const N_ELASTIC_INTERNAL = 12;
+
 export const DEFAULTS = {
   mid: 1,
 
@@ -40,17 +44,12 @@ export const DEFAULTS = {
   fy: 235,
   fu: 360,
 
-  // Reduced points (lighter curve)
-  n_elastic: 12,
+  // USER inputs (keep only what you asked)
   n_plateau: 6,
   n_hardening: 25,
 
-  // NEW: tail length in TRUE PLASTIC STRAIN (end = eps_p(peak) + tail_d_epsp)
+  // Tail length in TRUE PLASTIC STRAIN (end = eps_p(peak) + tail_d_epsp)
   tail_d_epsp: 0.1,
-
-  // Optional Cowper–Symonds (blank/0 => disabled)
-  c: "",
-  p: "",
 };
 
 export const FIELDS = [
@@ -63,14 +62,31 @@ export const FIELDS = [
   { key: "fy", label: "Yield stress Fy", unit: "MPa", default: DEFAULTS.fy, min: 0, hint: "Yield / 0.2% proof stress from tensile test." },
   { key: "fu", label: "Ultimate stress Fu", unit: "MPa", default: DEFAULTS.fu, min: 0, hint: "Ultimate tensile strength (engineering)." },
 
-  { key: "n_elastic", label: "Points: elastic", unit: "-", default: DEFAULTS.n_elastic, min: 5, hint: "Curve smoothness only. 8–20 is usually enough." },
-  { key: "n_plateau", label: "Points: yield plateau", unit: "-", default: DEFAULTS.n_plateau, min: 3, hint: "Curve smoothness only. 4–10 is usually enough." },
-  { key: "n_hardening", label: "Points: hardening", unit: "-", default: DEFAULTS.n_hardening, min: 10, hint: "Curve smoothness only. 20–60 is usually enough." },
+  {
+    key: "n_plateau",
+    label: "Points: yield plateau",
+    unit: "-",
+    default: DEFAULTS.n_plateau,
+    min: 3,
+    hint: "Discretization only: number of points on the yield plateau (σ = Fy). More points = smoother curve, not a different material.",
+  },
+  {
+    key: "n_hardening",
+    label: "Points: hardening",
+    unit: "-",
+    default: DEFAULTS.n_hardening,
+    min: 10,
+    hint: "Discretization only: number of points for the nonlinear hardening part (Fy → Fu). More points = smoother curve.",
+  },
 
-  { key: "tail_d_epsp", label: "Tail length Δεp after peak", unit: "-", default: DEFAULTS.tail_d_epsp, min: 0.0, hint: "Horizontal tail ends at eps_p(peak)+Δεp. Typical 0.05–0.30. Default 0.10." },
-
-  { key: "c", label: "Cowper–Symonds C (optional)", unit: "-", default: DEFAULTS.c, hint: "Leave blank/0 to disable." },
-  { key: "p", label: "Cowper–Symonds P (optional)", unit: "-", default: DEFAULTS.p, hint: "Leave blank/0 to disable." },
+  {
+    key: "tail_d_epsp",
+    label: "Tail length Δεp after peak",
+    unit: "-",
+    default: DEFAULTS.tail_d_epsp,
+    min: 0.0,
+    hint: "Adds one final point at εp(peak)+Δεp with constant peak stress to avoid solver extrapolation. Typical 0.05–0.30.",
+  },
 ];
 
 export function generate(input = {}) {
@@ -86,14 +102,10 @@ export function generate(input = {}) {
   const fu = mustNonNeg("fu", inp.fu);
   if (fu < fy) throw new Error("fu must be >= fy");
 
-  const n_elastic = mustIntMin("n_elastic", inp.n_elastic, 5);
   const n_plateau = mustIntMin("n_plateau", inp.n_plateau, 3);
   const n_hardening = mustIntMin("n_hardening", inp.n_hardening, 10);
 
   const tail_d_epsp = mustNonNeg("tail_d_epsp", inp.tail_d_epsp);
-
-  const c = readOptionalPositive(inp.c) ?? 0.0;
-  const p = readOptionalPositive(inp.p) ?? 0.0;
 
   // ---- Yun & Gardner strains (engineering) ----
   const eps_y = fy / E;
@@ -108,16 +120,19 @@ export function generate(input = {}) {
   if (eps_u <= eps_sh) eps_u = eps_sh + 1e-3;
 
   // ---- Build engineering envelope ----
-  let eps_el = linspace(0, eps_y, n_elastic);
+  // Elastic is internal discretization (not exposed to UI)
+  let eps_el = linspace(0, eps_y, N_ELASTIC_INTERNAL);
   let sig_el = eps_el.map(eps => E * eps);
   eps_el = eps_el.slice(0, -1);
   sig_el = sig_el.slice(0, -1);
 
+  // Yield plateau (user-controlled discretization)
   let eps_pl = linspace(eps_y, eps_sh, n_plateau);
   let sig_pl = eps_pl.map(() => fy);
   eps_pl = eps_pl.slice(0, -1);
   sig_pl = sig_pl.slice(0, -1);
 
+  // Hardening (user-controlled discretization)
   const eps_h = linspace(eps_sh, eps_u, n_hardening);
   const sig_h = eps_h.map(eps => {
     const C = (eps - eps_sh) / (eps_u - eps_sh);
@@ -132,7 +147,7 @@ export function generate(input = {}) {
   const tru_eps = eng_eps.map(eps => Math.log1p(eps));
   const tru_sig = eng_sig.map((sig, i) => sig * (1 + eng_eps[i]));
 
-  // ---- True plastic strain ----
+  // ---- True plastic strain (for curve x-axis) ----
   let eps_p = tru_eps.map((epsT, i) => {
     const ep = epsT - (tru_sig[i] / E);
     return ep < 0 ? 0 : ep;
@@ -163,16 +178,14 @@ export function generate(input = {}) {
   eps_p = eps_p.slice(0, ipk + 1);
   sig_true = sig_true.slice(0, ipk + 1);
 
-  // ---- Horizontal tail ends at eps_p(peak) + tail_d_epsp ----
+  // Horizontal tail ends at eps_p(peak) + tail_d_epsp
   const eps_p_peak = eps_p[eps_p.length - 1];
   const eps_p_tail = eps_p_peak + tail_d_epsp;
 
   if (tail_d_epsp > 0) {
-    // Add ONE plateau point. Solver will not extrapolate beyond it.
     eps_p.push(eps_p_tail);
     sig_true.push(sig_pk);
   } else {
-    // Still enforce last stress = peak (robustness)
     sig_true[sig_true.length - 1] = sig_pk;
   }
 
@@ -186,7 +199,7 @@ export function generate(input = {}) {
 
   const titleLine =
     `MAT_024 YunGardner fy=${toFixed(fy, 1)}MPa fu=${toFixed(fu, 1)}MPa ` +
-    `tail_d_epsp=${toFixed(tail_d_epsp, 3)} (peak+Δεp) ` +
+    `plateauPts=${n_plateau} hardPts=${n_hardening} tail_d_epsp=${toFixed(tail_d_epsp, 3)} ` +
     `(DOI:10.1016/j.jcsr.2017.01.024)`;
 
   const curveTitle =
@@ -221,8 +234,11 @@ export function generate(input = {}) {
   lines.push("*MAT_PIECEWISE_LINEAR_PLASTICITY_TITLE");
   lines.push(titleLine);
 
+  // Rate effect disabled (no C,P in UI): output C=P=0
   const fail = 0.0;
   const tdel = 0.0;
+  const c = 0.0;
+  const p = 0.0;
 
   lines.push("$#     MID        RO         E        PR      SIGY      ETAN      FAIL      TDEL");
   lines.push(
@@ -231,7 +247,7 @@ export function generate(input = {}) {
     `${fmt10(E, 1)}` +
     `${fmt10(pr, 6)}` +
     `${fmt10(fy, 6)}` +
-    `${fmt10(0.0, 6)}` +     // ETAN not used when LCSS curve is provided
+    `${fmt10(0.0, 6)}` +
     `${fmt10(fail, 6)}` +
     `${fmt10(tdel, 6)}`
   );
@@ -248,7 +264,9 @@ export function generate(input = {}) {
   lines.push("*END");
   lines.push("");
 
-  const filename = `MAT_024_YunGardner_mid=${mid}_fy=${toFixed(fy, 1)}_fu=${toFixed(fu, 1)}_tail=${toFixed(tail_d_epsp, 3)}.k`;
+  const filename =
+    `MAT_024_YunGardner_mid=${mid}_fy=${toFixed(fy, 1)}_fu=${toFixed(fu, 1)}_p${n_plateau}_h${n_hardening}_tail=${toFixed(tail_d_epsp, 3)}.k`;
+
   return { filename, keyword: lines.join("\n") };
 }
 
@@ -267,19 +285,6 @@ function normalizeInput(obj) {
   const out = { ...obj };
   for (const k of Object.keys(out)) if (out[k] === "") out[k] = "";
   return out;
-}
-function readOptionalNumber(x) {
-  if (x === undefined || x === null) return null;
-  const s = String(x).trim();
-  if (s === "" || s === "0") return null;
-  const v = Number(s);
-  if (!Number.isFinite(v) || v === 0) return null;
-  return v;
-}
-function readOptionalPositive(x) {
-  const v = readOptionalNumber(x);
-  if (v == null || v <= 0) return null;
-  return v;
 }
 function mustPositive(name, x) {
   const v = Number(x);
