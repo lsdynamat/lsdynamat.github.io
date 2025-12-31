@@ -72,7 +72,7 @@ export const FIELDS = [
     unit: "-",
     default: 6,
     min: 3,
-    hint: "Number of interpolation points on the yield plateau (σ = Fy). Affects smoothness only.",
+    hint: "Number of interpolation points on the yield plateau (σ = Fy). Affects smoothness only."
   },
   {
     key: "n_hardening",
@@ -80,7 +80,7 @@ export const FIELDS = [
     unit: "-",
     default: 25,
     min: 10,
-    hint: "Number of interpolation points for nonlinear hardening (Fy → Fu). Affects smoothness only.",
+    hint: "Number of interpolation points for nonlinear hardening (Fy → Fu). Affects smoothness only."
   },
   {
     key: "tail_d_epsp",
@@ -88,41 +88,40 @@ export const FIELDS = [
     unit: "-",
     default: 0.1,
     min: 0,
-    hint: "Adds one final point at εp(peak)+Δεp with constant peak stress to avoid extrapolation.",
-  },
+    hint: "Adds one final point at εp(peak)+Δεp with constant peak stress to avoid extrapolation."
+  }
 ];
 
 export function generate(input = {}) {
-  const inp = { ...DEFAULTS, ...normalizeInput(input) };
+  const inp = { ...DEFAULTS, ...input };
 
-  const mid = mustIntPositive("mid", inp.mid);
-  const ro = mustPositive("ro", inp.ro);
-  const E = mustPositive("E", inp.E);
-  const pr = mustInRange("pr", inp.pr, 0.0, 0.49);
+  const mid = +inp.mid;
+  const ro = +inp.ro;
+  const E  = +inp.E;
+  const pr = +inp.pr;
+  const fy = +inp.fy;
+  const fu = +inp.fu;
 
-  const fy = mustNonNeg("fy", inp.fy);
-  const fu = mustNonNeg("fu", inp.fu);
-  if (fu < fy) throw new Error("fu must be >= fy");
-
-  const n_plateau = mustIntMin("n_plateau", inp.n_plateau, 3);
-  const n_hardening = mustIntMin("n_hardening", inp.n_hardening, 10);
-  const tail_d_epsp = mustNonNeg("tail_d_epsp", inp.tail_d_epsp);
+  const n_plateau   = Math.max(3, Math.trunc(inp.n_plateau));
+  const n_hardening = Math.max(10, Math.trunc(inp.n_hardening));
+  const tail_d_epsp = Math.max(0, +inp.tail_d_epsp);
 
   // --- Yun & Gardner parameters (engineering strain) ---
   const eps_y = fy / E;
 
-  const eps_sh_formula = 0.1 * (fy / fu) - 0.055;
-  let eps_sh = clamp(eps_sh_formula, 0.015, 0.03);
+  const eps_sh = Math.min(
+    0.03,
+    Math.max(0.015, 0.1 * (fy / fu) - 0.055)
+  );
 
-  const eps_u_formula = 0.6 * (1.0 - fy / fu);
-  let eps_u = Math.max(eps_u_formula, 0.06);
-
-  if (eps_sh <= eps_y) eps_sh = eps_y + 1e-4;
-  if (eps_u <= eps_sh) eps_u = eps_sh + 1e-3;
+  const eps_u = Math.max(
+    0.06,
+    0.6 * (1.0 - fy / fu)
+  );
 
   // --- Elastic (internal) ---
   let eps_el = linspace(0, eps_y, N_ELASTIC_INTERNAL).slice(0, -1);
-  let sig_el = eps_el.map((e) => E * e);
+  let sig_el = eps_el.map(e => E * e);
 
   // --- Yield plateau ---
   let eps_pl = linspace(eps_y, eps_sh, n_plateau).slice(0, -1);
@@ -130,184 +129,83 @@ export function generate(input = {}) {
 
   // --- Hardening ---
   let eps_h = linspace(eps_sh, eps_u, n_hardening);
-  let sig_h = eps_h.map((e) => {
+  let sig_h = eps_h.map(e => {
     const C = (e - eps_sh) / (eps_u - eps_sh);
-    const D = Math.pow(1 + 400 * Math.pow(C, 5), 0.2); // (1/5)
-    return fy + (fu - fy) * (0.4 * C + (2 * C) / D);
+    const D = Math.pow(1 + 400 * Math.pow(C, 5), 0.2);
+    return fy + (fu - fy) * (0.4 * C + 2 * C / D);
   });
 
   const eng_eps = eps_el.concat(eps_pl, eps_h);
   const eng_sig = sig_el.concat(sig_pl, sig_h);
 
   // --- True stress / strain ---
-  const tru_eps = eng_eps.map((e) => Math.log1p(e));
+  const tru_eps = eng_eps.map(e => Math.log1p(e));
   const tru_sig = eng_sig.map((s, i) => s * (1 + eng_eps[i]));
 
   // --- True plastic strain ---
   let eps_p = tru_eps.map((e, i) => Math.max(0, e - tru_sig[i] / E));
 
-  // Start from yield (robust)
-  let i0 = eng_sig.findIndex((s) => s >= fy);
-  if (i0 < 0) i0 = 0;
-
+  const i0 = eng_sig.findIndex(s => s >= fy);
   eps_p = eps_p.slice(i0);
   let sig_true = tru_sig.slice(i0);
 
-  // Shift so first eps_p = 0
-  const ep0 = eps_p[0] ?? 0.0;
-  eps_p = eps_p.map((v, i) => (i === 0 ? 0.0 : v - ep0));
-
-  // Enforce monotonic eps_p
-  for (let i = 1; i < eps_p.length; i++) {
-    if (eps_p[i] <= eps_p[i - 1]) eps_p[i] = eps_p[i - 1] + 1e-12;
-  }
+  const ep0 = eps_p[0];
+  eps_p = eps_p.map((v, i) => (i === 0 ? 0 : v - ep0));
 
   // --- Peak stress ---
-  let ipk = 0;
-  for (let i = 1; i < sig_true.length; i++) if (sig_true[i] > sig_true[ipk]) ipk = i;
+  let ipk = sig_true.indexOf(Math.max(...sig_true));
   const sig_pk = sig_true[ipk];
 
-  // Keep only up to peak
   eps_p = eps_p.slice(0, ipk + 1);
   sig_true = sig_true.slice(0, ipk + 1);
 
   // --- Horizontal tail ---
-  if (tail_d_epsp > 0) {
-    eps_p.push(eps_p[eps_p.length - 1] + tail_d_epsp);
-    sig_true.push(sig_pk);
-  } else {
-    sig_true[sig_true.length - 1] = sig_pk;
-  }
+  eps_p.push(eps_p[eps_p.length - 1] + tail_d_epsp);
+  sig_true.push(sig_pk);
 
   // --- Output ---
   const lcss = mid * 1000 + 24;
 
-  // ✅ SHORT TITLE (only Fy & Fu)
-  const titleLine = `MAT_024 YunGardner fy=${toFixed(fy, 1)}MPa fu=${toFixed(fu, 1)}MPa`;
-
-  // Keep curve title short too
-  const curveTitle = `LCSS_${lcss} fy=${toFixed(fy, 1)} fu=${toFixed(fu, 1)}`;
+  const titleLine = `MAT_024 YunGardner Fy=${fy}MPa Fu=${fu}MPa`;
+  const curveTitle = `LCSS_${lcss} Fy=${fy} Fu=${fu}`;
 
   const lines = [];
-  lines.push("$# LS-DYNA Keyword file created by LS-PrePost");
   lines.push("*KEYWORD");
-  MATERIAL_CARDS_BANNER.forEach((l) => lines.push(l));
+  MATERIAL_CARDS_BANNER.forEach(l => lines.push(l));
   lines.push(UNITS_LINE);
   lines.push(MODEL_LINE);
-  REF_LINES.forEach((l) => lines.push(l));
+  REF_LINES.forEach(l => lines.push(l));
   lines.push(HUB_LINE);
 
   lines.push("*DEFINE_CURVE_TITLE");
   lines.push(curveTitle);
   lines.push("$#    LCID      SIDR       SFA       SFO      OFFA      OFFO");
-  lines.push(
-    `${fmt10(lcss)}` +
-      `${fmt10(0)}` +
-      `${fmt10(1.0, 6)}` +
-      `${fmt10(1.0, 6)}` +
-      `${fmt10(0.0, 6)}` +
-      `${fmt10(0.0, 6)}`
-  );
+  lines.push(fmt(lcss) + fmt(0) + fmt(1) + fmt(1) + fmt(0) + fmt(0));
   lines.push("$#                a               o");
-  for (let i = 0; i < eps_p.length; i++) {
-    lines.push(`${fmt20(eps_p[i], 8)}${fmt20(sig_true[i], 6)}`);
-  }
+  eps_p.forEach((e, i) => lines.push(fmt20(e) + fmt20(sig_true[i])));
 
   lines.push("*MAT_PIECEWISE_LINEAR_PLASTICITY_TITLE");
   lines.push(titleLine);
-
-  // Rate effect disabled: output C=P=0
-  const fail = 0.0;
-  const tdel = 0.0;
-  const c = 0.0;
-  const p = 0.0;
-
   lines.push("$#     MID        RO         E        PR      SIGY      ETAN      FAIL      TDEL");
-  lines.push(
-    `${fmt10(mid)}` +
-      `${fmt10(ro, 7)}` +
-      `${fmt10(E, 1)}` +
-      `${fmt10(pr, 6)}` +
-      `${fmt10(fy, 6)}` +
-      `${fmt10(0.0, 6)}` +
-      `${fmt10(fail, 6)}` +
-      `${fmt10(tdel, 6)}`
-  );
-
+  lines.push(fmt(mid) + fmt(ro) + fmt(E) + fmt(pr) + fmt(fy) + fmt(0) + fmt(0) + fmt(0));
   lines.push("$#       C        P      LCSS      LCSR        VP");
-  lines.push(`${fmt10(c, 6)}${fmt10(p, 6)}${fmt10(lcss)}${fmt10(0)}${fmt10(0)}`);
+  lines.push(fmt(0) + fmt(0) + fmt(lcss) + fmt(0) + fmt(0));
 
   lines.push("*END");
-  lines.push("");
 
-  // Keep filename short too
-  const filename = `MAT_024_YunGardner_mid=${mid}_fy=${toFixed(fy, 1)}_fu=${toFixed(fu, 1)}.k`;
-
-  return { filename, keyword: lines.join("\n") };
+  return {
+    filename: `MAT_024_YunGardner_Fy${fy}_Fu${fu}.k`,
+    keyword: lines.join("\n")
+  };
 }
 
-// ---------------- helpers ----------------
-function clamp(x, lo, hi) {
-  return Math.max(lo, Math.min(hi, x));
-}
+/* helpers */
 function linspace(a, b, n) {
-  if (n <= 1) return [a];
-  const arr = new Array(n);
-  const step = (b - a) / (n - 1);
-  for (let i = 0; i < n; i++) arr[i] = a + step * i;
-  return arr;
+  return Array.from({ length: n }, (_, i) => a + (b - a) * i / (n - 1));
 }
-function normalizeInput(obj) {
-  const out = { ...obj };
-  for (const k of Object.keys(out)) if (out[k] === "") out[k] = "";
-  return out;
+function fmt(v) {
+  return String(v).padStart(10, " ");
 }
-function mustPositive(name, x) {
-  const v = Number(x);
-  if (!Number.isFinite(v) || v <= 0) throw new Error(`${name} must be > 0`);
-  return v;
-}
-function mustNonNeg(name, x) {
-  const v = Number(x);
-  if (!Number.isFinite(v) || v < 0) throw new Error(`${name} must be >= 0`);
-  return v;
-}
-function mustIntPositive(name, x) {
-  const v = Number(x);
-  if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
-  const vi = Math.trunc(v);
-  if (vi <= 0) throw new Error(`${name} must be an integer > 0`);
-  return vi;
-}
-function mustIntMin(name, x, min) {
-  const v = Number(x);
-  if (!Number.isFinite(v)) throw new Error(`${name} must be a number`);
-  const vi = Math.trunc(v);
-  if (vi < min) throw new Error(`${name} must be an integer >= ${min}`);
-  return vi;
-}
-function mustInRange(name, x, lo, hi) {
-  const v = Number(x);
-  if (!Number.isFinite(v) || v < lo || v > hi) throw new Error(`${name} must be in [${lo}, ${hi}]`);
-  return v;
-}
-function toFixed(x, n) {
-  const v = Number(x);
-  if (!Number.isFinite(v)) return String(x);
-  return v.toFixed(n);
-}
-function fmt10(x, decimals = 6) {
-  if (Number.isInteger(x)) return String(x).padStart(10, " ");
-  const v = Number(x);
-  if (!Number.isFinite(v)) return String(x).padStart(10, " ");
-  const av = Math.abs(v);
-  if (av !== 0 && (av >= 1e6 || av < 1e-4)) return v.toExponential(3).replace("e", "E").padStart(10, " ");
-  return v.toFixed(decimals).padStart(10, " ");
-}
-function fmt20(x, decimals = 6) {
-  const v = Number(x);
-  if (!Number.isFinite(v)) return String(x).padStart(20, " ");
-  const av = Math.abs(v);
-  if (av !== 0 && (av >= 1e8 || av < 1e-8)) return v.toExponential(6).replace("e", "E").padStart(20, " ");
-  return v.toFixed(decimals).padStart(20, " ");
+function fmt20(v) {
+  return String(v.toExponential(6).replace("e", "E")).padStart(20, " ");
 }
