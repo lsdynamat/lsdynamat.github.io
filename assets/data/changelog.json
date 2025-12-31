@@ -17,6 +17,19 @@
     "model": "MAT_015 Johnson–Cook",
     "change": "Initial generator + details + sample."
   },
+
+  {
+    "id": "mat024_piecewise_linear_plasticity",
+    "date": "2025-12-31",
+    "version": "1.0",
+    "model": "MAT_024 Piecewise Linear Plasticity",
+    "change": "Initial generator using Yun & Gardner (2017) engineering envelope; converted to true stress/strain and exported as true plastic strain vs true stress (*DEFINE_CURVE). Adds one post-peak plateau point to prevent extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930."
+  },
+
+
+
+
+  
   {
     "id": "mat027_mooney_rivlin",
     "date": "2025-12-26",
