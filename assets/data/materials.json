@@ -1,6 +1,5 @@
 {
   "materials": [
-    
     {
       "id": "mat003_plastic_kinematic",
       "mat": "003",
@@ -28,15 +27,6 @@
         { "key": "vp",  "label": "VP", "unit": "-", "default": 0, "min": 0, "hint": "0=scale yield stress; 1=viscoplastic" }
       ]
     },
-
-
-    
-    
-    
-    
-    
-    
-    
     
     
     {
