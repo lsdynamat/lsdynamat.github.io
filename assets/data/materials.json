@@ -156,7 +156,7 @@
       "mat": "024",
       "name": "Piecewise Linear Plasticity",
       "category": "Metals",
-      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true stress vs true plastic strain (*DEFINE_CURVE). Adds a horizontal tail at peak stress ending at eps_p(peak)+Δeps_p to avoid solver extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930",
+      "summary": "MAT_024 using Yun & Gardner (2017) engineering stress–strain envelope converted to true stress/strain and tabulated as true stress vs true plastic strain (*DEFINE_CURVE). Discretization controlled by plateau/hardening points; adds a horizontal tail at peak stress ending at eps_p(peak)+Δeps_p to avoid solver extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930",
       "version": "1.0",
       "updatedAt": "2025-12-31",
       "generator": "mat024_piecewise_linear_plasticity",
@@ -171,16 +171,34 @@
         { "key": "fy", "label": "Yield stress Fy", "unit": "MPa", "default": 235, "min": 0, "hint": "Yield / 0.2% proof stress from tensile test." },
         { "key": "fu", "label": "Ultimate stress Fu", "unit": "MPa", "default": 360, "min": 0, "hint": "Ultimate tensile strength (engineering)." },
     
-        { "key": "n_elastic", "label": "Points: elastic", "unit": "-", "default": 12, "min": 5, "hint": "Curve smoothness only. 8–20 is usually enough." },
-        { "key": "n_plateau", "label": "Points: yield plateau", "unit": "-", "default": 6, "min": 3, "hint": "Curve smoothness only. 4–10 is usually enough." },
-        { "key": "n_hardening", "label": "Points: hardening", "unit": "-", "default": 25, "min": 10, "hint": "Curve smoothness only. 20–60 is usually enough." },
+        {
+          "key": "n_plateau",
+          "label": "Points: yield plateau",
+          "unit": "-",
+          "default": 6,
+          "min": 3,
+          "hint": "Discretization only: number of points on yield plateau (σ = Fy). More points = smoother curve, not different material."
+        },
+        {
+          "key": "n_hardening",
+          "label": "Points: hardening",
+          "unit": "-",
+          "default": 25,
+          "min": 10,
+          "hint": "Discretization only: number of points for nonlinear hardening (Fy → Fu). More points = smoother curve."
+        },
     
-        { "key": "tail_d_epsp", "label": "Tail length Δεp after peak", "unit": "-", "default": 0.1, "min": 0.0, "hint": "Horizontal tail ends at eps_p(peak)+Δεp. Typical 0.05–0.30. Default 0.10." },
-    
-        { "key": "c", "label": "Cowper–Symonds C (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable." },
-        { "key": "p", "label": "Cowper–Symonds P (optional)", "unit": "-", "default": "", "hint": "Leave blank/0 to disable." }
+        {
+          "key": "tail_d_epsp",
+          "label": "Tail length Δεp after peak",
+          "unit": "-",
+          "default": 0.1,
+          "min": 0.0,
+          "hint": "Adds one final point at εp(peak)+Δεp with constant peak stress to avoid solver extrapolation. Typical 0.05–0.30."
+        }
       ]
     },
+
 
 
 
