@@ -411,3 +411,18 @@ body.lsd-modal-open{ overflow: hidden; }
   border: 1px solid rgba(255,255,255,.10);
   color: rgba(255,255,255,.85);
 }
+
+/* TikZJax: center SVG and keep it responsive */
+.tikzjax svg,
+svg.tikzjax {
+  display: block;
+  margin: 1rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+/* If a diagram is wide, allow horizontal scroll instead of breaking layout */
+.tikzjax {
+  overflow-x: auto;
+}
+
