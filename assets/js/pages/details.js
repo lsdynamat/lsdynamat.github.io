@@ -133,6 +133,62 @@ function renderSamplesTab(m){
   box.appendChild(openAll);
 }
 
+/** -------- DOC RENDERER (MD + PDF) -------- */
+function isPdf(url){
+  return /\.pdf(\?|#|$)/i.test(url || "");
+}
+function isMd(url){
+  return /\.md(\?|#|$)/i.test(url || "");
+}
+
+/**
+ * Convert a possibly relative URL (like "./assets/docs/a.pdf") into a safe URL
+ * relative to the current page URL.
+ */
+function resolveUrl(url){
+  try{
+    return new URL(url, location.href).toString();
+  }catch{
+    return url;
+  }
+}
+
+async function renderDoc(docPath){
+  const docBox = getEl("docBox");
+  if (!docBox) return;
+
+  if (!docPath){
+    docBox.textContent = "No documentation provided for this model.";
+    return;
+  }
+
+  const docUrl = resolveUrl(docPath);
+
+  try{
+    if (isPdf(docUrl)){
+      docBox.innerHTML = `
+        <div class="row between wrapline" style="margin-bottom:10px;">
+          <div class="item-meta">PDF document</div>
+          <a class="btn" href="${docUrl}" target="_blank" rel="noopener">Open</a>
+        </div>
+        <iframe
+          src="${docUrl}"
+          style="width:100%; height:80vh; border:1px solid #ddd; border-radius:10px;"
+          loading="lazy"
+        ></iframe>
+      `;
+      return;
+    }
+
+    // Default: treat as markdown/text
+    const md = await loadText(docUrl);
+    docBox.innerHTML = mdToHtml(md);
+  }catch(e){
+    docBox.textContent = `Could not load doc: ${docPath}`;
+    console.error(e);
+  }
+}
+
 (async function main(){
   setupTabs();
 
@@ -175,14 +231,8 @@ function renderSamplesTab(m){
     });
   };
 
-  // doc
-  const docBox = getEl("docBox");
-  try{
-    const md = await loadText(m.doc);
-    docBox.innerHTML = mdToHtml(md);
-  }catch{
-    docBox.textContent = `Could not load doc: ${m.doc}`;
-  }
+  // doc (MD or PDF)
+  await renderDoc(m.doc);
 
   renderInputs(m.inputs);
 
