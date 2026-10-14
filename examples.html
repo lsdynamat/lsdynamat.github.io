@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Examples · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="./assets/css/styles.css?v=20261014d" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-row">
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
+      <nav class="nav">
+        <a href="./library.html">Library</a>
+        <a href="./generator.html">Generator</a>
+        <a class="active" href="./examples.html">Examples</a>
+        <a href="./about.html">About</a>
+        <a href="./contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="pagehead">
+      <div>
+        <h1>Worked examples</h1>
+        <p class="lead">Standard concrete and steel test specimens, run with the material cards generated on this site. Each example lists the setup, the full keyword deck, the computed curves and what to take from them.</p>
+        <div class="small" id="exMeta" style="margin-top:8px;">—</div>
+      </div>
+    </div>
+    <ol class="small" id="toc" style="margin:0 0 24px; padding-left:18px;"></ol>
+    <div id="examples"></div>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
+  </footer>
+
+  <script type="module" src="./assets/js/pages/examples.js?v=20261014d"></script>
+</body>
+</html>

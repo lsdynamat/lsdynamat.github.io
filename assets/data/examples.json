@@ -1,0 +1,235 @@
+{
+  "solver": "LS-DYNA R13.1 MPP (double precision), INSA Rennes cluster",
+  "units": "mm · ms · g · N · MPa",
+  "builder": "tools/examples/build_examples.py",
+  "examples": [
+    {
+      "id": "cyl",
+      "title": "Concrete cylinder 150 × 300 mm — uniaxial compression",
+      "sketch": "./assets/examples/sketch-cyl.svg",
+      "setup": [
+        "Full cylinder, O-grid mesh of 16 000 hexahedra (≈ 7.5 mm), ELFORM 1 with Flanagan–Belytschko stiffness hourglass control (IHQ 4, QM 0.05).",
+        "Bottom face fixed in z; one centre node and one edge node fix rigid-body motion. Top face pushed down 3 mm (1 % strain) in 30 ms with a 0.5 ms smooth start. Platens are frictionless, so the stress state is uniaxial.",
+        "Stress = bottom reaction / (π · 75²); strain = platen displacement / 300 mm.",
+        "Every material card is the site's generator output for f'c = 30 MPa, d_max = 16 mm, ρ = 2.3 t/m³."
+      ],
+      "chart": {
+        "x": "strain",
+        "y": "stress_MPa",
+        "xScale": 1000,
+        "xLabel": "axial strain (‰)",
+        "yLabel": "axial stress (MPa)",
+        "ref": [
+          {
+            "y": 30,
+            "label": "f'c = 30 MPa"
+          }
+        ]
+      },
+      "summary": [
+        {
+          "key": "peak_stress_MPa",
+          "label": "Peak stress (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "strain_at_peak",
+          "label": "Strain at peak (‰)",
+          "scale": 1000,
+          "digits": 2
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "CYL-KCC",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (DIF curve on)",
+          "slot": 1
+        },
+        {
+          "case": "CYL-KCC-NR",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (no rate)",
+          "slot": 5
+        },
+        {
+          "case": "CYL-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "CYL-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        },
+        {
+          "case": "CYL-CDP",
+          "model": "mat273_cdp",
+          "label": "CDP",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "With rate effects off, KCC, CSCM and CDP peak at 30.1, 30.3 and 30.0 MPa: the generated cards reproduce the input f'c within 1 %. The initial modulus is 31–35 GPa, close to the EN 1992-1-1 value Ecm ≈ 33 GPa.",
+        "KCC with its DIF curve peaks at 42.4 MPa (+41 %). The explicit test runs at about 0.3–1 s⁻¹, where the CEB-FIP MC90 compressive DIF for f'c = 30 MPa is 1.34–1.40, so the solver is doing what the curve asks. For quasi-static analyses set dif_model = 0 (LCRATE = 0), or use the lower fib MC2010 curve (dif_model = 2).",
+        "Winfrith has no softening branch in compression: the stress keeps rising slowly to 31.9 MPa at 1 % strain. Use it where tensile cracking governs, not for crushing.",
+        "Post-peak behaviour differs widely at 1 % strain: CDP keeps 34 % of its peak, KCC 64 %, CSCM 96 %. With frictionless platens the strain field stays uniform, so these branches are a material response rather than a localisation, and they depend on the compressive softening parameters (EFC for CDP, GFC for CSCM, b1 for KCC).",
+        "Hourglass and kinetic energy stay below 0.2 % of the external work in all five runs."
+      ]
+    },
+    {
+      "id": "beam",
+      "title": "Notched concrete prism 150 × 150 × 550 mm — three-point bending",
+      "sketch": "./assets/examples/sketch-beam.svg",
+      "setup": [
+        "EN 14651 geometry: span 500 mm, central notch 25 mm deep and one element (4.95 mm) wide. 99 750 hexahedra of ≈ 5 mm, fully integrated (ELFORM 2). A first run with ELFORM 1 + hourglass control lost 20–55 % of the external work to hourglass energy once the crack localised, so it was discarded.",
+        "Supports and loading line are rows of nodes (three node lines at each support, two at midspan). Midspan pushed down 1 mm in 40 ms.",
+        "CMOD is the opening of the two bottom nodes at the notch edges. GF = work of the load over the deflection / ligament area (125 × 150 mm²), without the self-weight correction.",
+        "f_ct,L uses EN 14651: 3 F_L l / (2 b h_sp²), with F_L the largest load for CMOD ≤ 0.05 mm.",
+        "KCC is run without the DIF curve so that all four models are compared quasi-statically."
+      ],
+      "chart": {
+        "x": "cmod_mm",
+        "y": "force_N",
+        "yScale": 0.001,
+        "xLabel": "CMOD (mm)",
+        "yLabel": "load (kN)"
+      },
+      "summary": [
+        {
+          "key": "peak_force_kN",
+          "label": "Peak load (kN)",
+          "digits": 2
+        },
+        {
+          "key": "cmod_at_peak_mm",
+          "label": "CMOD at peak (mm)",
+          "digits": 3
+        },
+        {
+          "key": "fct_L_MPa",
+          "label": "f_ct,L (MPa)",
+          "digits": 2
+        },
+        {
+          "key": "GF_Nmm",
+          "label": "G_F from test (N/mm)",
+          "digits": 3
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "BEAM-KCC-NR",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (no rate)",
+          "slot": 5
+        },
+        {
+          "case": "BEAM-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "BEAM-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        },
+        {
+          "case": "BEAM-CDP",
+          "model": "mat273_cdp",
+          "label": "CDP",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "Winfrith and CSCM give f_ct,L = 4.6 and 4.4 MPa, in the range expected for a notched prism of C30 concrete (EN 1992-1-1 flexural strength ≈ 1.45 f_ctm ≈ 4.2 MPa). KCC without rate effects peaks much lower, at 2.9 MPa, and dissipates only 0.048 N/mm: the generated tensile damage parameters (b2, b3 with the internal crack-band width) make it more brittle than the other two at this mesh size; see the open RSIZE issue in the KCC documentation. fib MC2010 would expect G_F ≈ 0.14 N/mm for f_cm = 38 MPa.",
+        "Energy from the load–deflection curve exceeds the fracture energy in the cards: Winfrith 0.125 vs 0.075 N/mm (×1.66), CSCM 0.113 vs GFT 0.08 N/mm (×1.41). The crack is one element wide in both runs, so part of the excess is damage that spreads outside the crack band and part is support indentation; the curve is not corrected for either. Calibrate G_F against a test like this one rather than trusting the input value.",
+        "The crack runs straight up from the notch tip in all models. CSCM erodes the cracked elements (ERODE = 1.05), which shows as a gap in the fringe plot; KCC and Winfrith keep the elements and localise the strain.",
+        "With ELFORM 2 the hourglass energy is zero for KCC and CSCM. Winfrith is implemented only in the one-point element (the manual says ELFORM = 1), so it keeps hourglass modes and reports 5.6 % hourglass energy. Kinetic energy stays below 0.9 % of the external work, so the 40 ms loading is quasi-static.",
+        "The CDP run is still in progress; its curve will be added when it finishes."
+      ]
+    },
+    {
+      "id": "bar",
+      "title": "Round steel bar d₀ = 10 mm — tensile test (ISO 6892-1 proportional specimen)",
+      "sketch": "./assets/examples/sketch-bar.svg",
+      "setup": [
+        "Parallel length 80 mm, gauge L₀ = 50 mm = 5.65 √S₀. O-grid mesh of 8 000 hexahedra (≈ 1 mm), ELFORM 2. The diameter is reduced by 0.5 % at mid-length, so the neck forms in the gauge length.",
+        "One end fixed, the other pulled 24 mm in 60 ms (about 5 s⁻¹ in the gauge length). Mass scaling to Δt = 1E-4 ms affects only the smallest elements.",
+        "Engineering stress = reaction / (π · 5²); engineering strain = change in the gauge length / 50 mm.",
+        "All three models describe the same S355 steel: MAT_024 uses the Yun & Gardner (2017) curve for f_y = 355 and f_u = 510 MPa. MAT_003 (SIGY 355.6, ETAN 1646) and MAT_015 (A 355.6, B 1137, n 0.822, C 0) are least-squares fits to that curve, made for this example."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": [
+          {
+            "y": 510,
+            "label": "f_u = 510 MPa (input)"
+          }
+        ]
+      },
+      "summary": [
+        {
+          "key": "Rm_MPa",
+          "label": "Max. eng. stress R_m (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "Ag_strain",
+          "label": "Strain at R_m, A_g (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "BAR-M024",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "Yun & Gardner curve",
+          "slot": 1
+        },
+        {
+          "case": "BAR-M003",
+          "model": "mat003_plastic_kinematic",
+          "label": "bilinear fit",
+          "slot": 2
+        },
+        {
+          "case": "BAR-M015",
+          "model": "mat015_johnson_cook",
+          "label": "Johnson–Cook fit",
+          "slot": 3
+        }
+      ],
+      "notes": [
+        "All three fits start yielding at 351–353 MPa at 0.2 % strain, so the elastic–plastic transition is consistent.",
+        "MAT_024 with the Yun & Gardner curve gives R_m = 504 MPa (input f_u = 510) at A_g = 17.9 % (Yun & Gardner predict 18.2 %). The neck forms at the reduced section and the load then drops, as in a real test.",
+        "MAT_003 (bilinear) and MAT_015 (Johnson–Cook) never neck within 30 % strain: their hardening stays above the Considère limit (dσ/dε ≥ σ), so the engineering stress keeps rising to 606 and 546 MPa. A least-squares fit that matches the curve well up to f_u still over-predicts strength beyond it. Use MAT_024 with a measured true-stress curve when necking or ductile failure matters, or fit MAT_003/MAT_015 only up to A_g and add a failure criterion.",
+        "No failure strain is defined, so the neck in MAT_024 thins without fracture. Add FAIL (MAT_024) or a damage model (e.g. *MAT_ADD_DAMAGE_GISSMO) to predict elongation at fracture A."
+      ]
+    }
+  ]
+}

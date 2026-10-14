@@ -1,0 +1,8 @@
+{
+ "case": "BAR-M015",
+ "Rm_MPa": 545.8759900143062,
+ "Ag_strain": 0.327636,
+ "stress_at_eps_0p002_MPa": 353.03225167830794,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.00016449225529685302
+}

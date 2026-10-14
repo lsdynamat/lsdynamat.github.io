@@ -1,0 +1,8 @@
+{
+ "case": "CYL-CSCM",
+ "peak_stress_MPa": 30.265752804717973,
+ "strain_at_peak": 0.0008645965586460158,
+ "peak_force_kN": 534.84,
+ "hourglass_pct": 0.09740214778428094,
+ "kinetic_pct": 0.007109570965719064
+}

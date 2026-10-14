@@ -1,0 +1,5 @@
+   37721 t 3.0000E+01 dt 8.00E-04 write d3plot file            10/14/26 16:20:24
+ N o r m a l    t e r m i n a t i o n                          10/14/26 16:20:24
+ N o r m a l    t e r m i n a t i o n                          10/14/26 16:20:24
+      1  *** Warning 21329 (STR+1329)
+ Elapsed time     203 seconds for   37721 cycles using     8 MPP procs

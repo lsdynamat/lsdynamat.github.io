@@ -1,0 +1,12 @@
+{
+ "case": "BEAM-WIN",
+ "peak_force_kN": 14.4648969010989,
+ "defl_at_peak_mm": 0.070511,
+ "cmod_at_peak_mm": 0.041729,
+ "work_Nmm": 2338.6156535011864,
+ "GF_Nmm": 0.12472616818672995,
+ "final_force_ratio": 0.047116823898566695,
+ "fct_L_MPa": 4.628767008351648,
+ "hourglass_pct": 5.593920765027322,
+ "kinetic_pct": 0.31536501024590163
+}

@@ -1,0 +1,12 @@
+{
+ "case": "BEAM-CSCM",
+ "peak_force_kN": 13.76636497273278,
+ "defl_at_peak_mm": 0.057675,
+ "cmod_at_peak_mm": 0.0322426,
+ "work_Nmm": 2114.6958511258404,
+ "GF_Nmm": 0.11278377872671148,
+ "final_force_ratio": 0.036689423896607315,
+ "fct_L_MPa": 4.405236791274491,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.35155799341965516
+}

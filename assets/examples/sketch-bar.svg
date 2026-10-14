@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 150" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="none" stroke="currentColor">
+  <title>Round steel tensile bar d0 = 10 mm, L0 = 50 mm</title>
+  <!-- grips -->
+  <rect x="14" y="52" width="26" height="40" fill="currentColor" fill-opacity=".15" stroke-width="1"/>
+  <rect x="300" y="52" width="26" height="40" fill="currentColor" fill-opacity=".15" stroke-width="1"/>
+  <!-- bar: slight waist at mid-length -->
+  <path d="M40 60 C 120 60, 140 61.5, 170 61.5 C 200 61.5, 220 60, 300 60" stroke-width="1.5"/>
+  <path d="M40 84 C 120 84, 140 82.5, 170 82.5 C 200 82.5, 220 84, 300 84" stroke-width="1.5"/>
+  <!-- gauge marks -->
+  <path d="M107 54 v36 M233 54 v36" stroke-width="1" stroke-dasharray="3 2"/>
+  <path d="M107 104 h126 M107 99 v10 M233 99 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="118" text-anchor="middle" fill="currentColor" stroke="none">L0 = 50 (gauge)</text>
+  <path d="M40 130 h260 M40 125 v10 M300 125 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="144" text-anchor="middle" fill="currentColor" stroke="none">parallel length 80</text>
+  <!-- load -->
+  <path d="M326 72 h12" stroke-width="1.5"/><path d="M332 67 l7 5 l-7 5" stroke-width="1.5"/>
+  <text x="250" y="40" fill="currentColor" stroke="none">u(t), 24 mm in 60 ms</text>
+  <text x="14" y="40" fill="currentColor" stroke="none">fixed</text>
+  <text x="140" y="40" fill="currentColor" stroke="none">d0 = 10</text>
+  <text x="14" y="14" fill="currentColor" stroke="none" font-size="10" opacity=".8">8 000 hexa, ~1 mm, ELFORM 2; −0.5 % diameter at mid-length</text>
+</svg>

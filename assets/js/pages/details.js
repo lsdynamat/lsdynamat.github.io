@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261014c";
+import { mdToHtml } from "../core/md.js?v=20261014d";
 import { openSamples } from "../core/sampleViewer.js";
 
 setText("year", new Date().getFullYear());
@@ -244,4 +244,34 @@ async function renderDoc(docPath){
 
   // samples tab
   renderSamplesTab(m);
+
+  // examples tab
+  renderExamplesTab(m).catch(console.error);
 })().catch(console.error);
+
+async function renderExamplesTab(m){
+  const box = getEl("examplesBox");
+  const data = await loadJSON("./assets/data/examples.json");
+  const exs = (data.examples || []).filter(e => e.runs.some(r => r.model === m.id));
+  if (!exs.length){
+    box.innerHTML = `<div class="rowitem"><div class="item-meta">No worked example for this model yet.</div></div>`;
+    return;
+  }
+  const rows = await Promise.all(exs.map(async e => {
+    const runs = e.runs.filter(r => r.model === m.id);
+    const sums = await Promise.all(runs.map(r => loadJSON(`./assets/examples/${r.case}/summary.json`).catch(() => null)));
+    const vals = runs.map((r, i) => {
+      const s = sums[i];
+      const txt = e.summary.map(f => {
+        const v = s?.[f.key];
+        return `${escapeHtml(f.label)}: <b>${v == null ? "—" : (v * (f.scale || 1)).toFixed(f.digits ?? 2)}</b>`;
+      }).join(" · ");
+      return `<div class="item-meta">${escapeHtml(r.label)} — ${txt}</div>`;
+    }).join("");
+    return `<div class="rowitem">
+      <div class="item-title"><a href="./examples.html#${e.id}">${escapeHtml(e.title)}</a></div>
+      ${vals}
+    </div>`;
+  }));
+  box.innerHTML = rows.join("");
+}

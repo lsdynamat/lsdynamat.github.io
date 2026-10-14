@@ -1,0 +1,12 @@
+{
+ "case": "BEAM-KCC-NR",
+ "peak_force_kN": 9.13655854907539,
+ "defl_at_peak_mm": 0.037158,
+ "cmod_at_peak_mm": 0.01796606,
+ "work_Nmm": 898.8148956337114,
+ "GF_Nmm": 0.04793679443379795,
+ "final_force_ratio": 0.04193701577480455,
+ "fct_L_MPa": 2.923698735704125,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.8724749375653128
+}
