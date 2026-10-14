@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Contact • LS-DYNA Material Hub</title>
+  <title>Contact · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
@@ -21,27 +23,25 @@
   </header>
 
   <main class="wrap">
-    <div class="card">
-      <h1>Contact</h1>
-      <p>If you found an issue or want to request a new model, please submit the form below.</p>
-      <p class="small">Google Forms is used for easier maintenance and spam protection.</p>
+    <div class="pagehead">
+      <div>
+        <h1>Contact</h1>
+        <p class="lead">Use the form to report a wrong parameter, request a new model or send a sample deck.</p>
+      </div>
     </div>
-
-    <div class="card" style="padding:0; margin-top:16px;">
+    <div class="tablewrap" style="overflow:hidden;">
       <iframe
         src="https://docs.google.com/forms/d/e/1FAIpQLSebLNGa8pjvNXe8Ow1WyhZxSIbCDrUB8ntDXzGClXstg_aTPQ/viewform?embedded=true"
-        width="100%"
-        height="1200"
-        frameborder="0"
-        marginheight="0"
-        marginwidth="0"
-        style="border:0; border-radius:16px;"
-      >Loading…</iframe>
+        width="100%" height="1200" frameborder="0" marginheight="0" marginwidth="0"
+        style="border:0; display:block;" title="Contact form">Loading…</iframe>
     </div>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script>

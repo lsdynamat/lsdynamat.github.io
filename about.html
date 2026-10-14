@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>About • LS-DYNA Material Hub</title>
+  <title>About · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a class="active" href="./about.html">About</a>
@@ -21,23 +23,33 @@
   </header>
 
   <main class="wrap">
-    <div class="card">
-      <h1>About</h1>
-      <p>
-        LS-DYNA Material Hub is a small project to help users quickly find LS-DYNA material models and define keywords
-        using (1) short theory notes, (2) runnable keyword samples, and (3) parameterized generators.
-      </p>
+    <div class="pagehead">
+      <div>
+        <h1>About</h1>
+        <p class="lead">A small, open reference for setting up LS-DYNA material models without retyping the same cards from the manual.</p>
+      </div>
+    </div>
+    <div class="doc">
+      <h2>What is here</h2>
       <ul>
-        <li><b>Library</b>: searchable list of models</li>
-        <li><b>Details</b>: theory + workflow + update history</li>
-        <li><b>Generator</b>: edit inputs (with defaults) and export keyword</li>
+        <li><b><a href="./library.html">Library</a></b>: the list of supported models with short theory notes.</li>
+        <li><b><a href="./generator.html">Generator</a></b>: each model has default inputs. The generator derives the remaining parameters and writes a fixed-format keyword card.</li>
+        <li><b>Samples</b>: keyword decks you can download and run as-is, for some models.</li>
       </ul>
-      <p class="small"></p>
+      <h2>Conventions</h2>
+      <p>All generators use the <code>mm · ms · g · N · MPa</code> unit system. Density is in g/mm³ and time is in ms.</p>
+      <h2>Disclaimer</h2>
+      <p>Generated cards are a starting point. Check them against the LS-DYNA Keyword User's Manual for your solver version, and calibrate them against test data before use in design or research.
+      LS-DYNA is a trademark of Ansys, Inc. This site is not affiliated with Ansys or LST.</p>
+      <p>Source code: <a href="https://github.com/lsdynamat/lsdynamat.github.io">github.com/lsdynamat/lsdynamat.github.io</a></p>
     </div>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script>

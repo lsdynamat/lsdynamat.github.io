@@ -1,66 +1,51 @@
 import { loadJSON } from "../core/fetch.js";
-import { getEl, setText, escapeHtml } from "../core/dom.js";
+import { getEl, setText, on } from "../core/dom.js";
+import { renderModelRows, matchesQuery, byMat } from "../core/modelTable.js";
 
 setText("year", new Date().getFullYear());
-
-function uniq(arr){ return [...new Set(arr)]; }
-
-function renderCats(cats){
-  const grid = getEl("catGrid");
-  if (!grid) return;
-  grid.innerHTML = "";
-  for (const c of cats) {
-    const div = document.createElement("div");
-    div.className = "cat";
-    div.innerHTML = `<div class="t">${escapeHtml(c)}</div><div class="m">Open filtered library</div>`;
-    div.onclick = () => { window.location.href = `./library.html?cat=${encodeURIComponent(c)}`; };
-    grid.appendChild(div);
-  }
-}
 
 function renderUpdates(updates){
   const box = getEl("updatesBox");
   if (!box) return;
   box.innerHTML = "";
-  updates.slice(0,6).forEach(u => {
-    const div = document.createElement("div");
-    div.className = "rowitem";
-    div.innerHTML = `
-      <div class="item-title">${escapeHtml(u.model)} <span class="tag info">v${escapeHtml(u.version || "—")}</span></div>
-      <div class="item-meta">${escapeHtml(u.date)} • ${escapeHtml(u.change)}</div>
-    `;
-    box.appendChild(div);
+  updates.slice(0, 6).forEach(u => {
+    const li = document.createElement("li");
+    const time = document.createElement("time");
+    time.textContent = u.date || "—";
+    const body = document.createElement("div");
+    const what = document.createElement("div");
+    what.className = "what";
+    what.textContent = u.model + (u.version ? ` · v${u.version}` : "");
+    const why = document.createElement("div");
+    why.className = "why";
+    why.textContent = u.change || "";
+    body.append(what, why);
+    li.append(time, body);
+    box.appendChild(li);
   });
 }
 
 (async function main(){
   const data = await loadJSON("./assets/data/materials.json");
-  const materials = data.materials || [];
+  const materials = (data.materials || []).slice().sort(byMat);
 
-  const cats = uniq(materials.map(m => m.category).filter(Boolean)).sort();
-  setText("statModels", materials.length);
-  setText("statCats", cats.length);
+  const tbody = getEl("modelRows");
+  const qEl = getEl("q");
+  const metaEl = getEl("resultMeta");
 
-  const last = materials.map(m => m.updatedAt).filter(Boolean).sort().at(-1) || "—";
-  setText("statLast", last);
-
-  const samples = materials.filter(m => !!m.sample).length;
-  setText("statSamples", samples);
-
-  // ✅ count keyword generators (model nào có generator key thì tính)
-  const genCount = materials.filter(m => (m.generator || "").toString().trim() !== "").length;
-  setText("statKeywordGenerators", genCount);
-
-  renderCats(cats);
+  function apply(){
+    const items = materials.filter(m => matchesQuery(m, qEl.value));
+    metaEl.textContent = `${items.length} of ${materials.length} models`;
+    renderModelRows(tbody, items);
+  }
+  on(qEl, "input", apply);
+  apply();
 
   const changelog = await loadJSON("./assets/data/changelog.json");
   changelog.sort((a,b)=> (b.date||"").localeCompare(a.date||""));
   renderUpdates(changelog);
-
 })().catch(err => {
   console.error(err);
-  setText("statModels","—");
-  setText("statCats","—");
-  setText("statLast","—");
-  setText("statGenerators","—");
+  const tbody = getEl("modelRows");
+  if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="small">Could not load the model list.</td></tr>`;
 });

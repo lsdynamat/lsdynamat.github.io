@@ -3,16 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Details • LS-DYNA Material Hub</title>
+  <title>Details · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a href="./index.html">Home</a>
-        <a href="./library.html">Library</a>
+        <a class="active" href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
         <a href="./contact.html">Contact</a>
@@ -21,56 +23,51 @@
   </header>
 
   <main class="wrap">
-    <div class="card">
-      <div class="row between wrapline">
-        <div>
-          <h1 id="dTitle" style="margin:0;">—</h1>
-          <div class="small" id="dMeta">—</div>
-          <div class="small" id="dSummary" style="margin-top:6px;">—</div>
-          <div class="tagrow" id="dTags" style="margin-top:10px;"></div>
-        </div>
-        <div class="row gap">
-          <a class="btn" href="./library.html">Back</a>
-          <a class="btn primary" id="btnGen" href="./generator.html">Generator</a>
-          <button class="btn" id="btnSample">Keyword sample</button>
-        </div>
+    <div class="pagehead">
+      <div>
+        <div class="eyebrow"><a href="./library.html">Library</a> /</div>
+        <h1 id="dTitle">—</h1>
+        <p class="lead" id="dSummary">—</p>
+        <div class="small" id="dMeta" style="margin-top:8px;">—</div>
+        <div class="tagrow hidden" id="dTags"></div>
+      </div>
+      <div class="row gap">
+        <button class="btn" id="btnSample">Keyword samples</button>
+        <a class="btn primary" id="btnGen" href="./generator.html">Open in generator</a>
       </div>
     </div>
 
-
-    <div class="tabs">
-      <button class="tab active" data-tab="theory">Theory / Guide</button>
+    <div class="tabs" style="margin-top:0;">
+      <button class="tab active" data-tab="theory">Theory</button>
       <button class="tab" data-tab="inputs">Inputs</button>
-      <button class="tab" data-tab="samples">Keyword samples</button>
-      <button class="tab" data-tab="updates">Updates</button>
+      <button class="tab" data-tab="samples">Samples</button>
+      <button class="tab" data-tab="updates">History</button>
     </div>
-
 
     <section class="card tabpanel" id="tab-theory">
       <div id="docBox" class="doc">Loading…</div>
     </section>
 
     <section class="card tabpanel hidden" id="tab-inputs">
-      <h2 class="h2">Generator inputs</h2>
       <div id="inputsBox" class="list"></div>
     </section>
 
     <section class="card tabpanel hidden" id="tab-samples">
-      <h2 class="h2">Keyword samples</h2>
       <div id="samplesBox" class="list"></div>
     </section>
 
-    <section class="card tabpanel hidden" id="tab-samples">
-      <h2 class="h2">Keyword samples</h2>
-      <div id="samplesBox" class="list"></div>
+    <section class="card tabpanel hidden" id="tab-updates">
+      <div id="updatesBox" class="list"></div>
     </section>
-
 
     <div id="modalRoot"></div>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script type="module" src="./assets/js/pages/details.js"></script>
