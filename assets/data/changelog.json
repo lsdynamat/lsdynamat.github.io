@@ -1,5 +1,46 @@
 [
-
+  {
+    "id": "mat015_johnson_cook",
+    "date": "2026-10-14",
+    "version": "2.0",
+    "model": "MAT_015 Johnson–Cook",
+    "change": "Rewrote the generator to the R13 card layout (MID RO G E PR / A B N C M TM TR EPS0 / CP PC SPALL IT D1–D4 / D5 EROD EFMIN NUMINT) with 10-column fields. Adds G, the *EOS_LINEAR_POLYNOMIAL required for solids, EPS0 converted from 1/s to 1/ms, CP, PC and optional D1–D5. Checked against the analytical JC curve in a single-element LS-DYNA R13 test."
+  },
+  {
+    "id": "mat027_mooney_rivlin",
+    "date": "2026-10-14",
+    "version": "2.0",
+    "model": "MAT_027 Mooney–Rivlin",
+    "change": "Rewrote the generator to the R13 card layout (MID RO PR A B REF / SGL SW ST LCID). Removed the K input, which is not a MAT_027 field; PR now limited to 0.49–0.4999 as the manual recommends. Checked against the analytical uniaxial response in LS-DYNA R13."
+  },
+  {
+    "id": "mat003_plastic_kinematic",
+    "date": "2026-10-14",
+    "version": "1.1",
+    "model": "MAT_003 Plastic Kinematic",
+    "change": "BETA labels corrected (0 = kinematic, 1 = isotropic, per the manual). FS is now written blank when not given (LS-DYNA default: no erosion); FS = 0 behaved the same in R13. SRC hint now states 1/ms units."
+  },
+  {
+    "id": "mat084_winfrith",
+    "date": "2026-10-14",
+    "version": "1.0",
+    "model": "MAT_084 Winfrith",
+    "change": "Theory notes converted from PDF to a page, with the formulas the generator uses."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-14",
+    "version": "1.0",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "Theory notes added."
+  },
+  {
+    "id": "mat273_cdp",
+    "date": "2026-10-14",
+    "version": "1.0",
+    "model": "MAT_273 CDP",
+    "change": "Theory notes added."
+  },
   {
     "id": "mat003_plastic_kinematic",
     "date": "2025-12-31",
@@ -7,17 +48,6 @@
     "model": "MAT_003 Plastic Kinematic",
     "change": "Initial generator + auto title (fy, Etan, hardening type) + materials entry."
   },
-
-
-  
-  {
-    "id": "mat015_johnson_cook",
-    "date": "2025-12-26",
-    "version": "1.0",
-    "model": "MAT_015 Johnson–Cook",
-    "change": "Initial generator + details + sample."
-  },
-
   {
     "id": "mat024_piecewise_linear_plasticity",
     "date": "2025-12-31",
@@ -25,11 +55,34 @@
     "model": "MAT_024 Piecewise Linear Plasticity",
     "change": "Initial generator using Yun & Gardner (2017) engineering envelope; converted to true stress/strain and exported as true plastic strain vs true stress (*DEFINE_CURVE). Adds one post-peak plateau point to prevent extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930."
   },
-
-
-
-
-  
+  {
+    "id": "mat273_cdp",
+    "date": "2025-12-29",
+    "version": "1.0",
+    "model": "MAT_273 CDP",
+    "change": "Initial CDP generator. Derives E (EC2), FT, ECC (Jirásek & Bažant) and the bilinear softening WF from fc; RO, PR, E, FT, WF, EFC and STRFLG can be overridden."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2025-12-27",
+    "version": "1.0",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "Initial generator (ported from Python): scaled failure surfaces, DIF curve and tabulated compaction EOS."
+  },
+  {
+    "id": "mat159_cscm",
+    "date": "2025-12-27",
+    "version": "1.0",
+    "model": "MAT_159 CSCM",
+    "change": "Initial generator + details + sample."
+  },
+  {
+    "id": "mat015_johnson_cook",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_015 Johnson–Cook",
+    "change": "Initial generator + details + sample."
+  },
   {
     "id": "mat027_mooney_rivlin",
     "date": "2025-12-26",
@@ -43,31 +96,5 @@
     "version": "1.0",
     "model": "MAT_084 Winfrith",
     "change": "Initial generator + details + sample."
-  },
-  {
-    "id": "mat159_cscm",
-    "date": "2025-12-27",
-    "version": "1.0",
-    "model": "MAT_159 CSCM",
-    "change": "Initial generator + details + sample."
-  },
-
-
-  {
-    "date": "2025-12-29",
-    "type": "added",
-    "model": "MAT_273 CDP",
-    "version": "1.0",
-    "details": "Added CDP generator with confinement dropdown (cover/core) and FT method dropdown (auto EC2 or manual). Auto-derives ECC and WF using paper-style formulas.",
-    "files": [
-      "assets/js/generators/mat273_cdp.js",
-      "assets/js/generators/index.js",
-      "assets/data/materials.json",
-      "assets/docs/mat273_cdp.md"
-    ]
   }
-
-
-
-  
 ]

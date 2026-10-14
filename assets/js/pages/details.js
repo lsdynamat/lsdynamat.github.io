@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261014";
+import { mdToHtml } from "../core/md.js?v=20261014b";
 import { openSamples } from "../core/sampleViewer.js";
 
 setText("year", new Date().getFullYear());
