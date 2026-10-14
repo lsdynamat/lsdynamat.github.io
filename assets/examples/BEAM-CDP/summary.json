@@ -1,0 +1,12 @@
+{
+ "case": "BEAM-CDP",
+ "peak_force_kN": 13.418276052735143,
+ "defl_at_peak_mm": 0.060251,
+ "cmod_at_peak_mm": 0.0307868,
+ "work_Nmm": 2556.0770088788427,
+ "GF_Nmm": 0.13632410714020493,
+ "final_force_ratio": 0.02579243403845861,
+ "fct_L_MPa": 4.2938483368752465,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.2894820944388445
+}
