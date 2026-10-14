@@ -27,17 +27,18 @@ function setupTabs(){
 
 function renderInputs(inputs){
   const box = getEl("inputsBox");
-  box.innerHTML = "";
-  (inputs || []).forEach(inp=>{
-    const div = document.createElement("div");
-    div.className = "rowitem";
-    div.innerHTML = `
-      <div class="item-title">${escapeHtml(inp.key)} — ${escapeHtml(inp.label || "")}</div>
-      <div class="item-meta">Default: ${escapeHtml(inp.default)} ${escapeHtml(inp.unit || "")}</div>
-      ${inp.hint ? `<div class="small">${escapeHtml(inp.hint)}</div>` : ""}
-    `;
-    box.appendChild(div);
-  });
+  const rows = (inputs || []).map(inp => `
+    <tr>
+      <td class="mat">${escapeHtml(inp.key)}</td>
+      <td><div class="name">${escapeHtml(inp.label || "")}</div>${inp.hint ? `<div class="desc">${escapeHtml(inp.hint)}</div>` : ""}</td>
+      <td class="num">${escapeHtml(inp.default === "" ? "auto" : inp.default)}</td>
+      <td class="num">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</td>
+    </tr>`).join("");
+  box.innerHTML = `
+    <div class="tablewrap"><table class="data">
+      <thead><tr><th>Key</th><th>Parameter</th><th>Default</th><th>Unit</th></tr></thead>
+      <tbody>${rows || `<tr><td colspan="4" class="small">No inputs.</td></tr>`}</tbody>
+    </table></div>`;
 }
 
 function renderUpdates(changelog, modelId){
@@ -207,8 +208,9 @@ async function renderDoc(docPath){
     return;
   }
 
-  setText("dTitle", `${m.name} (MAT_${m.mat})`);
-  setText("dMeta", `${m.category} • Updated ${m.updatedAt} • v${m.version}`);
+  setText("dTitle", `MAT_${m.mat} — ${m.name}`);
+  document.title = `MAT_${m.mat} ${m.name} · LS-DYNA Material Hub`;
+  setText("dMeta", `${m.category} · v${m.version} · updated ${m.updatedAt}`);
   setText("dSummary", m.summary || "—");
 
   const tagBox = getEl("dTags");
@@ -223,6 +225,7 @@ async function renderDoc(docPath){
   const n = Array.isArray(m.samples) ? m.samples.length : 0;
   const btnSamples = getEl("btnSample");
   btnSamples.textContent = `Keyword samples (${n})`;
+  if (!n) btnSamples.classList.add("hidden");
   btnSamples.onclick = async () => {
     await openSamples({
       modelId: m.id,

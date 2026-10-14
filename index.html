@@ -4,14 +4,17 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>LS-DYNA Material Hub</title>
+  <meta name="description" content="Parameterised keyword generators, theory notes and sample decks for LS-DYNA material models." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a class="active" href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
@@ -21,69 +24,57 @@
   </header>
 
   <main class="wrap">
-    <section class="hero">
-      <div class="hero-left">
-        <div class="badge">Beta</div>
-        <h1>LS-DYNA Material Hub</h1>
+    <div class="pagehead">
+      <div>
+        <h1>Material cards for LS-DYNA, from a few inputs</h1>
         <p class="lead">
-          A lightweight library for LS-DYNA material models: theory notes, keyword samples, and generators.
+          Enter f'c, aggregate size or a yield stress and get a fixed-format <code>*MAT</code> card
+          with the derived parameters written out. Each model links to its theory notes and a sample deck.
         </p>
-        <div class="row gap">
-          <a class="btn primary" href="./library.html">Open library</a>
-          <a class="btn" href="./generator.html">Open generator</a>
-        </div>
-
-        <div class="hero-note small">
-          Suggested flow: <b>Library</b> → pick a model → <b>Details</b> (theory + sample) → <b>Generator</b>.
-        </div>
       </div>
+      <a class="btn primary" href="./generator.html">Open generator</a>
+    </div>
 
-      <div class="hero-right">
-        <div class="statgrid">
-          <div class="card stat">
-            <div class="stat-k">Models</div>
-            <div class="stat-v" id="statModels">—</div>
-          </div>
-          <div class="card stat">
-            <div class="stat-k">Categories</div>
-            <div class="stat-v" id="statCats">—</div>
-          </div>
-          <div class="card stat">
-            <div class="stat-k">Last update</div>
-            <div class="stat-v" id="statLast">—</div>
-          </div>
-          <div class="card stat">
-            <div class="stat-k">Keyword generators</div>
-            <div class="stat-v" id="statKeywordGenerators">—</div>
-          </div>
-        </div>
+    <div class="toolbar">
+      <div class="field grow">
+        <label for="q">Filter</label>
+        <input id="q" placeholder="MAT number, name or category" autocomplete="off" />
       </div>
-    </section>
+      <div class="small" id="resultMeta" style="padding-bottom:7px;">—</div>
+    </div>
+
+    <div class="tablewrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>MAT</th>
+            <th>Model</th>
+            <th class="hide-sm">Category</th>
+            <th class="hide-sm">Inputs</th>
+            <th class="hide-sm">Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="modelRows">
+          <tr><td colspan="6" class="small">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
 
     <section class="section">
       <div class="section-title">
-        <h2>Popular categories</h2>
-        <div class="small">Click to open the library filtered</div>
+        <h2>Changelog</h2>
+        <a class="small" href="./library.html">All models →</a>
       </div>
-      <div class="catgrid" id="catGrid"></div>
-    </section>
-
-    <section class="section">
-      <div class="section-title">
-        <h2>Recent updates</h2>
-        <div class="small">From changelog</div>
-      </div>
-      <div class="card">
-        <div id="updatesBox" class="list"></div>
-        <div class="small" style="margin-top:10px;">
-          Per-model update history is shown on the <b>Details</b> page.
-        </div>
-      </div>
+      <ul class="log" id="updatesBox"></ul>
     </section>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script type="module" src="./assets/js/pages/home.js"></script>

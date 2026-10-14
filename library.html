@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Library • LS-DYNA Material Hub</title>
+  <title>Library · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a href="./index.html">Home</a>
         <a class="active" href="./library.html">Library</a>
         <a href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
@@ -24,45 +26,55 @@
     <div class="pagehead">
       <div>
         <h1>Material library</h1>
-        <div class="small">Find a model → open Details / sample / generator.</div>
+        <p class="lead">Every model has a generator, theory notes and, where available, keyword samples you can open or download.</p>
       </div>
     </div>
 
-    <div class="toolbar card">
-      <div class="row gap wrapline">
-        <div class="field">
-          <label>Search</label>
-          <input id="q" placeholder="e.g., Johnson-Cook, MAT_015, concrete, rubber..." />
-        </div>
-
-        <div class="field">
-          <label>Category</label>
-          <select id="cat">
-            <option value="">All</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Sort</label>
-          <select id="sort">
-            <option value="mat">MAT number</option>
-            <option value="name">Name</option>
-            <option value="updatedAt">Updated</option>
-          </select>
-        </div>
-
-        <div class="row gap" style="align-items:flex-end;">
-          <button class="btn" id="btnReset">Reset</button>
-        </div>
+    <div class="toolbar">
+      <div class="field grow">
+        <label for="q">Search</label>
+        <input id="q" placeholder="Johnson-Cook, MAT_015, concrete…" autocomplete="off" />
       </div>
+      <div class="field">
+        <label for="cat">Category</label>
+        <select id="cat">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="sort">Sort by</label>
+        <select id="sort">
+          <option value="mat">MAT number</option>
+          <option value="name">Name</option>
+          <option value="updatedAt">Last updated</option>
+        </select>
+      </div>
+      <button class="btn" id="btnReset">Reset</button>
     </div>
 
-    <div id="resultMeta" class="small" style="margin:10px 0 8px;">—</div>
-    <div id="list" class="grid"></div>
+    <div id="resultMeta" class="small" style="margin:0 0 8px;">—</div>
+    <div class="tablewrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th>MAT</th>
+            <th>Model</th>
+            <th class="hide-sm">Category</th>
+            <th class="hide-sm">Inputs</th>
+            <th class="hide-sm">Updated</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script type="module" src="./assets/js/pages/library.js"></script>

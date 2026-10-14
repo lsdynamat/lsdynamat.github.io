@@ -5,6 +5,8 @@ import { getGenerator } from "../generators/index.js";
 
 setText("year", new Date().getFullYear());
 
+const RULER = "$---+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8";
+
 function getParam(name){
   const u = new URL(location.href);
   return u.searchParams.get(name);
@@ -21,10 +23,14 @@ function renderForm(formEl, inputs, values){
   (inputs || []).forEach(inp=>{
     const div = document.createElement("div");
     div.className = "inputbox";
+    const id = `in_${escapeHtml(inp.key)}`;
 
     div.innerHTML = `
-      <div class="k">${escapeHtml(inp.label || inp.key)} <span class="small">${escapeHtml(inp.unit || "")}</span></div>
-      <input id="in_${escapeHtml(inp.key)}" type="text" value="${escapeHtml(values[inp.key])}" />
+      <label class="k" for="${id}">
+        <span>${escapeHtml(inp.label || inp.key)}</span>
+        <span class="unit">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</span>
+      </label>
+      <input id="${id}" type="text" inputmode="decimal" spellcheck="false" value="${escapeHtml(values[inp.key])}" />
       ${inp.hint ? `<div class="h">${escapeHtml(inp.hint)}</div>` : ""}
     `;
 
@@ -32,6 +38,8 @@ function renderForm(formEl, inputs, values){
   });
 }
 
+// Empty fields fall back to the default (without overwriting what the user is typing).
+// Non-numeric defaults (e.g. optional strings) are passed through as text.
 function validateAndCollect(inputs){
   const out = {};
   let ok = true;
@@ -40,25 +48,41 @@ function validateAndCollect(inputs){
     const el = getEl(`in_${inp.key}`);
     if (!el) return;
 
-    if ((el.value ?? "").toString().trim() === ""){
-      el.value = inp.default;
+    const raw = (el.value ?? "").toString().trim();
+    if (raw === ""){
+      el.classList.remove("invalid");
+      out[inp.key] = inp.default;
+      return;
     }
-
-    const n = asNum(el.value);
-    if (n === null){
-      el.classList.add("invalid");
-      ok = false;
+    if (typeof inp.default === "string" && asNum(raw) === null){
+      el.classList.remove("invalid");
+      out[inp.key] = raw;
       return;
     }
 
-    if (typeof inp.min === "number" && n < inp.min) { el.classList.add("invalid"); ok = false; return; }
-    if (typeof inp.max === "number" && n > inp.max) { el.classList.add("invalid"); ok = false; return; }
-
-    el.classList.remove("invalid");
+    const n = asNum(raw);
+    const bad = n === null
+      || (typeof inp.min === "number" && n < inp.min)
+      || (typeof inp.max === "number" && n > inp.max);
+    el.classList.toggle("invalid", bad);
+    if (bad){ ok = false; return; }
     out[inp.key] = n;
   });
 
   return { ok, values: out };
+}
+
+// Light syntax colouring for LS-DYNA keyword text
+function highlight(text){
+  const lines = text.split(/\r?\n/);
+  return [`<span class="ln ruler">${escapeHtml(RULER)}</span>`].concat(lines.map(line => {
+    const e = escapeHtml(line);
+    let cls = "";
+    if (line.startsWith("*")) cls = "kw";
+    else if (line.startsWith("$#")) cls = "hd";
+    else if (line.startsWith("$")) cls = "cm";
+    return `<span class="ln${cls ? " " + cls : ""}">${e || " "}</span>`;
+  })).join("");
 }
 
 function downloadText(filename, text){
@@ -81,11 +105,13 @@ function downloadText(filename, text){
   const sel = getEl("modelSel");
   const formEl = getEl("form");
   const outEl = getEl("out");
+  const nameEl = getEl("outName");
+  const statusEl = getEl("outStatus");
 
   materials.forEach(m=>{
     const opt = document.createElement("option");
     opt.value = m.id;
-    opt.textContent = `MAT_${m.mat} • ${m.name}`;
+    opt.textContent = `MAT_${m.mat} — ${m.name}`;
     sel.appendChild(opt);
   });
 
@@ -93,73 +119,85 @@ function downloadText(filename, text){
   if (preId && materials.some(m=>m.id===preId)) sel.value = preId;
 
   let cur = materials.find(m => m.id === sel.value) || materials[0];
-  let curValues = buildDefaultValues(cur.inputs);
+  let lastText = "";
+  let lastName = "";
 
-  function syncUI(){
-    cur = materials.find(m => m.id === sel.value) || materials[0];
-    curValues = buildDefaultValues(cur.inputs);
-    renderForm(formEl, cur.inputs, curValues);
-
-    getEl("btnDetails").href = `./details.html?id=${encodeURIComponent(cur.id)}`;
-    outEl.textContent = "Click Generate.";
+  function setStatus(msg, isErr){
+    statusEl.textContent = msg ? `· ${msg}` : "";
+    statusEl.classList.toggle("err", !!isErr);
   }
-
 
   function generate(){
     const g = getGenerator(cur.generator);
     if (!g || typeof g.generate !== "function"){
-      outEl.textContent = `Generator not found: ${cur.generator}`;
+      outEl.innerHTML = `<span class="ln msg err">Generator not found: ${escapeHtml(cur.generator)}</span>`;
       return;
     }
-  
+
     const { ok, values } = validateAndCollect(cur.inputs);
     if (!ok){
-      outEl.textContent = "Invalid inputs. Please fix highlighted fields.";
+      // keep the last valid card visible, just flag it
+      setStatus("fix highlighted inputs", true);
       return;
     }
-  
+
     let out;
     try{
       out = g.generate(values);
     }catch(e){
-      outEl.textContent = `Generate failed: ${e?.message || e}`;
+      setStatus(e?.message || String(e), true);
       return;
     }
-  
-    // ✅ support both:
-    // - old generators: return string
-    // - new generators (MAT_159): return { filename, keyword }
+
+    // generators return either a string or { filename, keyword }
     if (typeof out === "string"){
-      outEl.textContent = out;
-      outEl.dataset.filename = `${cur.id}.k`;
+      lastText = out;
+      lastName = `${cur.id}.k`;
     } else if (out && typeof out === "object"){
-      outEl.textContent = out.keyword || "";
-      outEl.dataset.filename = out.filename || `${cur.id}.k`;
+      lastText = out.keyword || "";
+      lastName = out.filename || `${cur.id}.k`;
     } else {
-      outEl.textContent = "";
-      outEl.dataset.filename = `${cur.id}.k`;
+      lastText = "";
+      lastName = `${cur.id}.k`;
     }
-  
-    curValues = values;
+
+    outEl.innerHTML = highlight(lastText);
+    nameEl.textContent = lastName;
+    setStatus("");
   }
 
+  function syncUI(){
+    cur = materials.find(m => m.id === sel.value) || materials[0];
+    renderForm(formEl, cur.inputs, buildDefaultValues(cur.inputs));
+    getEl("btnDetails").href = `./details.html?id=${encodeURIComponent(cur.id)}`;
 
+    const u = new URL(location.href);
+    u.searchParams.set("id", cur.id);
+    history.replaceState(null, "", u);
 
+    generate();
+  }
+
+  let t = 0;
+  on(formEl, "input", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
   on(sel, "change", syncUI);
 
   on(getEl("btnResetDefaults"), "click", ()=>{
-    curValues = buildDefaultValues(cur.inputs);
-    renderForm(formEl, cur.inputs, curValues);
+    renderForm(formEl, cur.inputs, buildDefaultValues(cur.inputs));
+    generate();
   });
 
-  on(getEl("btnGenerate"), "click", generate);
-
-  on(getEl("btnCopy"), "click", async ()=>{
-    try{ await navigator.clipboard.writeText(outEl.textContent || ""); }catch{}
+  on(getEl("btnCopy"), "click", async (e)=>{
+    try{
+      await navigator.clipboard.writeText(lastText);
+      const b = e.currentTarget, old = b.textContent;
+      b.textContent = "Copied";
+      setTimeout(()=>{ b.textContent = old; }, 1200);
+    }catch{}
   });
 
   on(getEl("btnDownload"), "click", ()=>{
-    downloadText(`${cur.id}.k`, outEl.textContent || "");
+    if (lastText) downloadText(lastName || `${cur.id}.k`, lastText);
   });
 
   syncUI();

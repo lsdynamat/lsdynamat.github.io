@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Generator • LS-DYNA Material Hub</title>
+  <title>Generator · LS-DYNA Material Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
   <link rel="stylesheet" href="./assets/css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="wrap topbar-row">
-      <a class="logo" href="./index.html">LS-DYNA Material Hub</a>
+      <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
-        <a href="./index.html">Home</a>
         <a href="./library.html">Library</a>
         <a class="active" href="./generator.html">Generator</a>
         <a href="./about.html">About</a>
@@ -24,48 +26,46 @@
     <div class="pagehead">
       <div>
         <h1>Keyword generator</h1>
-        <div class="small">Every input has a default value to guide users.</div>
+        <p class="lead">Pick a model and edit the inputs. The keyword card updates as you type.</p>
       </div>
     </div>
 
-    <div class="card">
-      <div class="row gap wrapline">
-        <div class="field" style="min-width:320px;">
-          <label>Select model</label>
-          <select id="modelSel"></select>
-        </div>
-        <div class="row gap" style="align-items:flex-end;">
-          <a class="btn" id="btnDetails" href="./details.html">Details</a>
-          <button class="btn" id="btnResetDefaults">Reset defaults</button>
-          <button class="btn primary" id="btnGenerate">Generate</button>
-        </div>
+    <div class="genbar">
+      <div class="field">
+        <label for="modelSel">Model</label>
+        <select id="modelSel"></select>
       </div>
+      <a class="btn" id="btnDetails" href="./details.html">Theory notes</a>
+      <button class="btn" id="btnResetDefaults">Reset to defaults</button>
     </div>
 
     <div class="layout2">
-      <section class="card">
+      <section>
         <h2 class="h2">Inputs</h2>
         <div id="form" class="formgrid"></div>
-        <div class="small" style="margin-top:10px;">
-          Defaults are “typical” values for guidance only. You should calibrate based on your material and test data.
-        </div>
+        <p class="small" style="margin-top:14px;">
+          Defaults are typical values to start from. Calibrate against your own material and test data.
+        </p>
       </section>
 
-      <section class="card">
-        <div class="row between wrapline">
-          <h2 class="h2" style="margin:0;">Output keyword</h2>
+      <section class="outpanel">
+        <div class="outhead">
+          <div><span class="fname" id="outName">—</span><span class="status" id="outStatus"></span></div>
           <div class="row gap">
-            <button class="btn" id="btnCopy">Copy</button>
-            <button class="btn" id="btnDownload">Download .k</button>
+            <button class="btn sm" id="btnCopy">Copy</button>
+            <button class="btn sm primary" id="btnDownload">Download .k</button>
           </div>
         </div>
-        <pre class="preview" id="out">Select a model → Generate.</pre>
+        <pre class="preview" id="out"></pre>
       </section>
     </div>
   </main>
 
   <footer class="footer">
-    <div class="wrap small">© <span id="year"></span> LS-DYNA Material Hub</div>
+    <div class="wrap">
+      <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
+      <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
+    </div>
   </footer>
 
   <script type="module" src="./assets/js/pages/generator.js"></script>
