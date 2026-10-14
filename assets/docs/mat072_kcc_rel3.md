@@ -23,12 +23,16 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 
 ## Strain-rate curve (DIF)
 
-- Compression, CEB-FIP MC90: `DIF = (ε̇/ε̇s)^(1.026α)` with `α = 1/(5 + 9 f_c/f_co)`, `ε̇s = 30·10⁻⁶`, `f_co = 10 MPa`; the steeper branch `γ(ε̇/ε̇s)^(1/3)` with `log γ = 6.156α − 2` is applied only to the last point
-- Tension, Malvar & Ross (1998): `DIF = (ε̇/ε̇s)^δ` up to ε̇ = 1, then `β(ε̇/ε̇s)^(1/3)`, with `δ = 1/(1 + 8 f_c/f_co)`, `log β = 6δ − 2`, `ε̇s = 10⁻⁶`
+The DIF formulas are written with reference rates in s⁻¹. The curve abscissa is then multiplied by 10⁻³, so that it is in **ms⁻¹** like the rest of the model:
+
+- Compression, CEB-FIP MC90: `DIF = (ε̇/ε̇s)^(1.026α)` up to ε̇ = 30 s⁻¹, then `γ(ε̇/ε̇s)^(1/3)`, with `α = 1/(5 + 9 f_c/f_co)`, `log γ = 6.156α − 2`, `ε̇s = 30·10⁻⁶ s⁻¹`, `f_co = 10 MPa`
+- Tension, Malvar & Ross (1998): `DIF = (ε̇/ε̇s)^δ` up to ε̇ = 1 s⁻¹, then `β(ε̇/ε̇s)^(1/3)`, with `δ = 1/(1 + 8 f_c/f_co)`, `log β = 6δ − 2`, `ε̇s = 10⁻⁶ s⁻¹`
+
+For f_c = 45.4 MPa, all 18 points of the sample curve in the LS-DYNA manual are reproduced, from −0.3 to 0.3 ms⁻¹. In a single-element compression test at 10⁻³ ms⁻¹ (LS-DYNA R13), the peak stress was 57.7 MPa, compared with DIF × f_c = 1.26 × 45.4 = 57.2 MPa.
 
 ## Points to check before use
 
-- **Strain-rate unit of the DIF curve.** The reference rates above are the published values in s⁻¹, and the curve abscissa is written without conversion. The model's time unit is ms. The manual's own sample curve for this unit system has the tensile DIF of 4.50 at 3·10⁻² ms⁻¹, while the generator puts the same value at 30. Check the curve against your rates.
+- **Curve end points.** The last points (−30 and 300 ms⁻¹) follow the formulas and reach DIF ≈ 45 in tension and ≈ 29 in compression. The manual's sample keeps DIF constant beyond ±0.3 ms⁻¹ (9.70 and 2.94). LS-DYNA also warns that the very wide range of the curve causes a discretization error. Capping the end points is recommended if your model has high local strain rates.
 - **RSIZE.** 1 inch / 1 mm = 1/25.4 = 3.937·10⁻², which is the 3.94E-2 used in the manual sample. The generator writes 3.972E-2.
 - **Element size input.** Element size currently appears only in the title and file name. It does not change LOCWID or b2.
 - **EOS.** The compaction curve is the 45.4 MPa reference curve converted to MPa. It is not rescaled for other strengths.

@@ -138,7 +138,8 @@ export function generate(input = {}) {
   // compression DIF part
   for (let idx = est.length; idx < est.length + esc.length; idx++) {
     const val = esc[idx - est.length];
-    if (val <= 1e5) DIF[idx] = Math.pow(val / esco, (1.026 * alpha_DIF));
+    // CEB-FIP MC90: steep branch above 30 1/s
+    if (val <= 30) DIF[idx] = Math.pow(val / esco, (1.026 * alpha_DIF));
     else DIF[idx] = gamma * Math.pow(val / esco, (1 / 3));
   }
   DIF[est.length] = 1.0;
@@ -184,7 +185,7 @@ export function generate(input = {}) {
   const W_conv = W * INCH;
 
   // --- Title exactly like you did for CSCM style
-  const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, dmax=${elm_size_mm.toFixed(0)}mm`;
+  const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, element size=${elm_size_mm.toFixed(0)}mm`;
 
   // --- Keyword render (match your Python writing layout)
   const lines = [];
@@ -263,9 +264,11 @@ export function generate(input = {}) {
     `${padInt(0, 10)}` +
     `${padInt(0, 10)}`
   );
+  // DIF formulas use reference rates in 1/s; the model time unit is ms -> abscissa x 1e-3
+  lines.push(`$ abscissa = strain rate in 1/ms (DIF formulas use 1/s, converted x 1e-3)`);
   lines.push(`$#                a1                  o1`);
   for (let i = 0; i < es_DIF.length; i++) {
-    lines.push(`${fmtE(es_DIF[i], 20, 3)}${fmtE(DIF[i], 20, 3)}`);
+    lines.push(`${fmtE(es_DIF[i] * 1e-3, 20, 3)}${fmtE(DIF[i], 20, 3)}`);
   }
 
   lines.push(`$`);
@@ -275,24 +278,24 @@ export function generate(input = {}) {
   lines.push(`${padInt(eosid, 10)}${fmtE(GAMMA, 10, 3)}${fmtE(EO, 10, 3)}${fmtE(VO, 10, 3)}`);
 
   lines.push(`$           EV01            EV02            EV03            EV04            EV05`);
-  lines.push(ev.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(ev.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$           EV06            EV07            EV08            EV09            EV10`);
-  lines.push(ev.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(ev.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            P01             P02             P03             P04             P05`);
-  lines.push(Pv.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Pv.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            P06             P07             P08             P09             P10`);
-  lines.push(Pv.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Pv.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            T01             T02             T03             T04             T05`);
-  lines.push([0,0,0,0,0].map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push([0,0,0,0,0].map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            T06             T07             T08             T09             T10`);
-  lines.push([0,0,0,0,0].map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push([0,0,0,0,0].map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            K01             K02             K03             K04             K05`);
-  lines.push(Kun.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Kun.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            K06             K07             K08             K09             K10`);
-  lines.push(Kun.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Kun.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$`);
   lines.push(`*END`);
@@ -334,7 +337,7 @@ function padInt(v, width) {
 function fmtE(v, width = 10, sig = 3) {
   const n = Number(v);
   if (!Number.isFinite(n)) return String(v).padStart(width, " ");
-  // mimic python's 10.3E / 10.1E etc
-  const s = n.toExponential(sig).replace("e", "E");
+  // mimic python's 10.3E / 16.8E: two-digit exponent (E+00)
+  const s = n.toExponential(sig).replace(/e([+-])(\d+)$/, (m, sg, d) => "E" + sg + d.padStart(2, "0"));
   return s.padStart(width, " ");
 }

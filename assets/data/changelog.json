@@ -30,9 +30,9 @@
   {
     "id": "mat072_kcc_rel3",
     "date": "2026-10-14",
-    "version": "1.0",
+    "version": "1.1",
     "model": "MAT_072R3 K&C Damage Rel. 3",
-    "change": "Theory notes added."
+    "change": "DIF curve abscissa converted from 1/s to 1/ms (the model runs in ms; rate effects were shifted by a factor of 1000). Compressive DIF now switches to the steep CEB-FIP branch at 30 1/s instead of 1e5. *EOS_TABULATED_COMPACTION written with 16-character fields; LS-DYNA could not read the EOS before. Matches the manual's 45.4 MPa sample curve; checked in LS-DYNA R13. Theory notes added."
   },
   {
     "id": "mat273_cdp",
