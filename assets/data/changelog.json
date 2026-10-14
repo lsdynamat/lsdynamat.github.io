@@ -1,5 +1,19 @@
 [
   {
+    "id": "mat024_piecewise_linear_plasticity",
+    "date": "2026-10-14",
+    "version": "1.1",
+    "model": "MAT_024 Piecewise Linear Plasticity",
+    "change": "Cards 3 and 4 (EPS1–8, ES1–8) are now written. LS-DYNA requires them even when LCSS is used; without them the deck stopped with an input error. Checked in an LS-DYNA R13 tensile-bar run."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-14",
+    "version": "1.2",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "New inputs: dif_model (0 = rate effects off, 1 = CEB-FIP MC90 + Malvar & Ross, 2 = fib MC2010) and rate_cap (DIF held constant above it, default 300 1/s, as in the manual's sample curve). Checked in LS-DYNA R13: peak/f_c = 0.998, 1.270 and 1.156 at 1 1/s."
+  },
+  {
     "id": "mat015_johnson_cook",
     "date": "2026-10-14",
     "version": "2.0",

@@ -26,6 +26,8 @@ export const DEFAULTS = {
   omega: 0.5,      // -
   ro: 0.0023,      // g/mm^3 (typical concrete)
   pr: 0.16,        // Poisson in your Python used as phr=0.16
+  dif_model: 1,    // 0 = no rate effects, 1 = CEB-FIP MC90 (comp.) + Malvar & Ross (tension), 2 = fib MC2010
+  rate_cap: 300,   // 1/s: DIF held constant above this strain rate
 };
 
 // If your UI reads "inputs" from materials.json, this is optional.
@@ -48,6 +50,8 @@ export function generate(input = {}) {
   const omega = mustInRange("omega", inp.omega, 0.0, 1.0);
   const ro = mustPositive("ro", inp.ro);
   const pr = mustInRange("pr", inp.pr, 0.0, 0.49);
+  const difModel = Math.round(mustInRange("dif_model", inp.dif_model, 0, 2));
+  const rateCap = mustPositive("rate_cap", inp.rate_cap);
 
   // --- Python constants / conversions
   // In python:
@@ -61,8 +65,9 @@ export function generate(input = {}) {
   const mesh_size_in = elm_size_mm / INCH; // mm -> inch
 
   // --- Python per-material constants
-  const lcrate = 1000 + mid;
-  const eosid = lcrate;
+  const lcid_dif = 1000 + mid;
+  const eosid = 1000 + mid;
+  const lcrate = difModel === 0 ? 0 : lcid_dif;
 
   // In python:
   // phr = 0.16
@@ -122,38 +127,38 @@ export function generate(input = {}) {
     0.000e+0, 0.000e+0, 0.000e+0
   ];
 
-  // --- DIF curve (ported exactly)
-  const fco = 1450;
-  const esco = 0.00003;
-
+  // --- DIF curves (strain rate in 1/s here; converted to 1/ms when written)
+  const fco = 1450;                       // psi (10 MPa)
   const alpha_DIF = 1 / (5 + 9 * fc_psi / fco);
   const gamma = Math.pow(10, (6.156 * alpha_DIF - 2));
-
-  const esc = [0, 3e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 3, 10, 30, 100, 300, 3.0e+5];
-  const est = [3.0e+4, 3.0e+2, 1.0e+2, 3.0e+1, 1.0e+1, 3.0, 1.0, 1.0e-1, 1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5];
-
-  const es_DIF = [...est.map(v => -v), ...esc];
-  const DIF = new Array(es_DIF.length).fill(0);
-
-  // compression DIF part
-  for (let idx = est.length; idx < est.length + esc.length; idx++) {
-    const val = esc[idx - est.length];
-    // CEB-FIP MC90: steep branch above 30 1/s
-    if (val <= 30) DIF[idx] = Math.pow(val / esco, (1.026 * alpha_DIF));
-    else DIF[idx] = gamma * Math.pow(val / esco, (1 / 3));
-  }
-  DIF[est.length] = 1.0;
-
-  // tension DIF part
-  const esto = 1.0e-6;
   const delta = 1 / (1 + 8 * fc_psi / fco);
   const beta = Math.pow(10, (6 * delta - 2));
 
-  for (let idx = 0; idx < est.length; idx++) {
-    const val = est[idx];
-    if (val <= 1.0) DIF[idx] = Math.pow(val / esto, delta);
-    else DIF[idx] = beta * Math.pow(val / esto, (1 / 3));
-  }
+  // compression, rate r > 0 (1/s)
+  const difC = r => {
+    if (r <= 0) return 1.0;
+    if (difModel === 2) {                 // fib MC2010 (5.1-104/105), eps0 = 30e-6 1/s
+      return r <= 30 ? Math.pow(r / 30e-6, 0.014) : 0.012 * Math.pow(r / 30e-6, 1 / 3);
+    }
+    // CEB-FIP MC90: steep branch above 30 1/s
+    return r <= 30 ? Math.pow(r / 30e-6, 1.026 * alpha_DIF) : gamma * Math.pow(r / 30e-6, 1 / 3);
+  };
+  // tension, rate r > 0 (1/s)
+  const difT = r => {
+    if (difModel === 2) {                 // fib MC2010 (5.1-106/107), eps0 = 1e-6 1/s
+      return r <= 10 ? Math.pow(r / 1e-6, 0.018) : 0.0062 * Math.pow(r / 1e-6, 1 / 3);
+    }
+    // Malvar & Ross (1998)
+    return r <= 1 ? Math.pow(r / 1e-6, delta) : beta * Math.pow(r / 1e-6, 1 / 3);
+  };
+
+  // abscissa points (1/s), capped at rateCap; beyond it DIF is held constant (as in the manual's sample curve)
+  const esc = [0, 3e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 3, 10, 30, 100, 300].filter(r => r < rateCap);
+  const est = [300, 100, 30, 10, 3, 1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5].filter(r => r < rateCap);
+  const tensPts = [100 * rateCap, rateCap, ...est].map(r => [-r, Math.max(1, difT(Math.min(r, rateCap)))]);
+  const compPts = [...esc, rateCap, 100 * rateCap].map(r => [r, Math.max(1, difC(Math.min(r, rateCap)))]);
+  const curve = [...tensPts, ...compPts];
+  curve.find(p => p[0] === 0)[1] = 1.0;
 
   // --- EOS table (defaults then converted to MPa)
   const ev = [0, -1.5e-3, -4.3e-3, -1.01e-2, -3.05e-2, -5.13e-2, -7.26e-2, -9.43e-2, -1.74e-1, -2.08e-1];
@@ -251,24 +256,18 @@ export function generate(input = {}) {
     `${fmtE(a2yn, 10, 3)}`
   );
 
-  lines.push(`$`);
-  lines.push(`*DEFINE_CURVE_TITLE`);
-  lines.push(`Dynamic Impact Factors for Tension and Compression`);
-  lines.push(`$#    lcid      sidr       sfa       sfo      offa      offo    dattyp`);
-  lines.push(
-    `${padInt(lcrate, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(1, 10)}` +
-    `${padInt(1, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(0, 10)}`
-  );
-  // DIF formulas use reference rates in 1/s; the model time unit is ms -> abscissa x 1e-3
-  lines.push(`$ abscissa = strain rate in 1/ms (DIF formulas use 1/s, converted x 1e-3)`);
-  lines.push(`$#                a1                  o1`);
-  for (let i = 0; i < es_DIF.length; i++) {
-    lines.push(`${fmtE(es_DIF[i] * 1e-3, 20, 3)}${fmtE(DIF[i], 20, 3)}`);
+  const difName = ["none", "CEB-FIP MC90 (compression) + Malvar & Ross 1998 (tension)", "fib Model Code 2010"][difModel];
+  if (difModel === 0) {
+    lines.push(`$ Rate effects off: LCRATE = 0 (no DIF curve written)`);
+  } else {
+    lines.push(`$`);
+    lines.push(`*DEFINE_CURVE_TITLE`);
+    lines.push(`DIF: ${difName}, capped at ${rateCap} 1/s`);
+    lines.push(`$#    lcid      sidr       sfa       sfo      offa      offo    dattyp`);
+    lines.push([lcid_dif, 0, 1, 1, 0, 0, 0].map(v => padInt(v, 10)).join(""));
+    lines.push(`$ abscissa = strain rate in 1/ms (negative = tension); formulas use 1/s, converted x 1e-3`);
+    lines.push(`$#                a1                  o1`);
+    for (const [r, d] of curve) lines.push(`${fmtE(r * 1e-3, 20, 3)}${fmtE(d, 20, 3)}`);
   }
 
   lines.push(`$`);

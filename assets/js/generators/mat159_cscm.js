@@ -1,16 +1,16 @@
 // assets/js/generators/mat159_cscm.js
 // CSCM Generator (LS-DYNA *MAT_CSCM, MAT_159)
-// Units: mm-s-g-N-MPa
+// Units: mm-ms-g-N-MPa (density g/mm^3, stress MPa)
 
 export const KEY = "mat159_cscm";
 export const ID = 159;
 export const NAME = "CSCM Concrete (*MAT_CSCM)";
 export const CATEGORY = "Concrete";
-export const UNITS = "mm-s-g-N-MPa";
+export const UNITS = "mm-ms-g-N-MPa";
 
 // --- Header lines (match screenshot)
 const PREPOST_LINE = "$# LS-DYNA Keyword file created by LS-PrePost(R) V4.8.17 - 24Jun2021";
-const UNITS_LINE = "$ Units: mm-s-g-N-MPa";
+const UNITS_LINE = "$ Units: mm-ms-g-N-MPa (rate parameters ETA0C/ETA0T not converted; IRATE = 0)";
 const MODEL_LINE = "$ Model: Continuous Surface Cap Model (CSCM) - MAT 159";
 const REF_LINE_1 = "$ Reference: Novozhilov Y.V., Dmitriev A.N., Mikhaluk D.S. Precise Calibration";
 const REF_LINE_2 = "$ of the Continuous Surface Cap Model for Concrete Simulation. Buildings. 2022.";
