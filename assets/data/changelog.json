@@ -2,6 +2,34 @@
   {
     "id": "mat072_kcc_rel3",
     "date": "2026-10-15",
+    "version": "1.4",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "Fracture energy is now regularised to the element-size input: λ6–λ10 are stretched so that one cracked element dissipates G_F (fib MC2010 by default, or the new optional G_F input). Checked by single-element tension in LS-DYNA R13: within 2.5 % of the target for h = 5–50 mm and f_c = 20–60 MPa. The compressive peak is unchanged."
+  },
+  {
+    "id": "mat159_cscm",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_159 CSCM",
+    "change": "f_c is now treated as the measured mean cylinder strength: the modulus no longer adds 8 MPa twice (E was computed from f_c + 16) and G_F uses f_c directly. GFT/GFS are written with 5 decimals (0.0753 was written as 0.08). ETA0C/ETA0T converted from s to ms and ETA0T now uses f_c in psi; both match *MAT_CSCM_CONCRETE in LS-DYNA R13. New IRATE input (default 0)."
+  },
+  {
+    "id": "mat273_cdp",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_273 CDP",
+    "change": "FT now follows EN 1992-1-1 with f_c as the mean cylinder strength: fctm = 0.30 (f_c − 8)^(2/3) (2.35 MPa at f_c = 30 MPa, was 2.90)."
+  },
+  {
+    "id": "mat084_winfrith",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_084 Winfrith",
+    "change": "f_c is now the mean cylinder strength (fcm = f_c, no longer f_c + 8): TM and GFt use f_c, UTS = 0.30 (f_c − 8)^(2/3) per EN 1992-1-1."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-15",
     "version": "1.3",
     "model": "MAT_072R3 K&C Damage Rel. 3",
     "change": "RSIZE is now 1/25.4 = 3.937E-2 (was 3.972E-2). Documentation adds single-element tension tests showing that the dissipated fracture energy scales with element size below LOCWID (0.05 N/mm at 5 mm, 0.26 N/mm at 25 mm for f_c = 30 MPa)."

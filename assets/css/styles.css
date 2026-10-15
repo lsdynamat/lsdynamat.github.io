@@ -167,6 +167,20 @@ h2{font-size:15px; font-weight:600; margin:0}
   margin-bottom:24px;
 }
 .section{margin-top:40px}
+.pagehead-side{display:flex; flex-direction:column; align-items:flex-end; gap:14px}
+
+/* ---------- illustrations (core/illus.js) ---------- */
+.il-icon{flex:none; color:var(--muted); margin-top:1px}
+.namecell{display:flex; gap:12px; align-items:flex-start}
+.il-fig{margin:0; color:var(--muted); max-width:100%}
+.il-fig svg{display:block; max-width:100%; height:auto}
+.il-fig figcaption{font-size:12px; color:var(--muted); text-align:right; margin-top:2px}
+.il-t{font:italic 13px var(--font-sans, inherit); fill:currentColor}
+.il-s{font-size:10px; fill:currentColor; opacity:.85}
+@media (max-width:640px){
+  .pagehead-side{align-items:stretch; width:100%}
+  .il-fig figcaption{text-align:left}
+}
 .section-title{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:10px}
 
 /* ---------- forms ---------- */
@@ -336,6 +350,7 @@ table.data .actions .small{margin-left:12px}
 .doc h3{font-size:15px}
 .doc p,.doc ul,.doc ol{margin:0 0 12px}
 .doc code{font-size:.9em; background:var(--sunken); border:1px solid var(--rule); padding:1px 5px; border-radius:3px}
+.doc :not(pre) > code{overflow-wrap:anywhere}
 .doc pre{background:var(--code-bg); border:1px solid var(--rule); padding:12px; border-radius:var(--r); overflow:auto; font-size:13px}
 .doc pre code{border:0; background:none; padding:0}
 .doc table{border-collapse:collapse; margin:12px 0; font-size:14px}

@@ -1,12 +1,12 @@
 {
  "case": "BEAM-KCC-NR",
- "peak_force_kN": 9.13655854907539,
- "defl_at_peak_mm": 0.037158,
- "cmod_at_peak_mm": 0.01796606,
- "work_Nmm": 898.8148956337114,
- "GF_Nmm": 0.04793679443379795,
- "final_force_ratio": 0.04193701577480455,
- "fct_L_MPa": 2.923698735704125,
+ "peak_force_kN": 10.919182226640158,
+ "defl_at_peak_mm": 0.058974,
+ "cmod_at_peak_mm": 0.037488,
+ "work_Nmm": 1906.0798240746203,
+ "GF_Nmm": 0.10165759061731308,
+ "final_force_ratio": 0.05003671416592115,
+ "fct_L_MPa": 3.4941383125248504,
  "hourglass_pct": 0.0,
- "kinetic_pct": 0.8724749375653128
+ "kinetic_pct": 0.402972012415663
 }

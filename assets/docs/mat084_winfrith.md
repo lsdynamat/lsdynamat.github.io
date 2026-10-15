@@ -16,17 +16,17 @@ From the LS-DYNA R13 manual (Vol. II, p. 2-574):
 
 ## What the generator computes from f_c and d_max
 
-The generator treats the input f_c as a characteristic strength and uses `fcm = f_c + 8 MPa`:
+The input f_c is the measured cylinder strength of the concrete you model, i.e. its mean strength (`fcm = f_c`). The characteristic strength `fck = f_c − 8 MPa` is used only inside the Eurocode tensile-strength formula:
 
-- `TM = 21 500 · (fcm / 10)^(1/3)` (MPa): CEB-FIP MC90 tangent modulus
+- `TM = 21 500 · (f_c / 10)^(1/3)` (MPa): CEB-FIP MC90 tangent modulus
 - `UCS = f_c`
-- `UTS = 0.30 · f_c^(2/3)` for f_c ≤ 50 MPa, otherwise `2.12 · ln(1 + fcm / 10)`
+- `UTS = fctm = 0.30 · fck^(2/3)` for fck ≤ 50 MPa, otherwise `2.12 · ln(1 + f_c / 10)` (EN 1992-1-1, Table 3.1)
 - `GF0 = 0.021 + 5.357·10⁻⁴ · d_max` (N/mm, d_max in mm)
-- `GFt = GF0 · (fcm / 10)^0.7`
+- `GFt = GF0 · (f_c / 10)^0.7` (CEB-FIP MC90)
 - `FE = wc = 2 · GFt / UTS` (mm): linear softening, crack opening at zero stress
 - `ASIZE = d_max / 2`: the manual defines ASIZE as the aggregate **radius**
 
-For f_c = 30 MPa and d_max = 16 mm this gives TM ≈ 33 551 MPa, UTS ≈ 2.90 MPa and FE ≈ 0.052 mm.
+For f_c = 38 MPa (C30/37) and d_max = 16 mm this gives TM ≈ 33 551 MPa, UTS ≈ 2.90 MPa, GFt ≈ 0.075 N/mm and FE ≈ 0.052 mm. For f_c = 30 MPa: TM ≈ 31 008 MPa, UTS ≈ 2.35 MPa, FE ≈ 0.054 mm.
 
 ## Tensile law (RATE = 1)
 
@@ -42,7 +42,9 @@ Winfrith converts crack-normal strain to an opening with a characteristic length
 
 ## Differences from the PDF note
 
-The PDF writes the Eurocode 2 relations with f_c taken as **fcm**: `Ecm = 22 000 (fcm/10)^0.3`, `fctm = 0.30 fck^(2/3)` with `fck = fcm − 8`, and `ASIZE ≈ d_max`. The generator instead takes **f_c as fck**, uses the MC90 modulus, and sets ASIZE = d_max/2, following the manual's definition of ASIZE as a radius. Before using the output, check which interpretation of f_c matches your data.
+Like the PDF, the generator now takes f_c as the mean cylinder strength fcm and computes `fctm = 0.30 fck^(2/3)` with `fck = fcm − 8` (until 2026-10-15 it treated f_c as fck and added 8 MPa). Two differences remain: the generator uses the MC90 tangent modulus instead of the EC2 secant modulus `Ecm = 22 000 (fcm/10)^0.3`, and it sets ASIZE = d_max/2, following the manual's definition of ASIZE as a radius (the PDF uses ASIZE ≈ d_max).
+
+In the notched-prism example the energy dissipated by Winfrith was 1.66 × GFt even with a one-element-wide crack, so check G_F against a test if tensile cracking governs.
 
 ## References
 

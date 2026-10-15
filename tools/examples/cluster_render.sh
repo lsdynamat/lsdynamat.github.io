@@ -12,9 +12,14 @@ rz 30";  LAST=32; CAP="effective plastic strain field at the end of the test (3 
     BEAM-*) VIEW="rx -90";        LAST=42; CAP="effective plastic strain at the end of the test (1 mm deflection), side view";;
     BAR-*)  VIEW="rx -90
 ry 90";  LAST=32; CAP="effective plastic strain at 24 mm elongation of the 80 mm parallel length";;
+    CYL-CDP)  CAP="value MAT_273 writes in the plastic-strain slot at the end of the test (3 mm shortening): an internal softening measure, not a strain, but it shows where the cylinder crushes";;
   esac
   FR=7
-  case $c in *-WIN) FR=77; CAP="maximum principal strain at the end of the test (Winfrith stores cracks as strain, not as plastic strain), side view";; esac
+  case $c in
+    BEAM-WIN) FR=77; CAP="maximum principal strain at the end of the test (Winfrith stores cracks as strain, not as plastic strain), side view";;
+    BEAM-CDP) FR=77; CAP="maximum principal strain at the end of the test, side view";;
+    CYL-CDP)  CAP="value MAT_273 writes in the plastic-strain slot at the end of the test (3 mm shortening): an internal softening measure, not a strain, but it shows where the cylinder crushes";;
+  esac
   ssh -o BatchMode=yes $H "mkdir -p ~/$R/$c/img && cd ~/$R/$c/img && rm -f *.png && cat > end.cfile <<EOF
 open d3plot \"../d3plot\"
 ac

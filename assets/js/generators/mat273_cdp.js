@@ -55,7 +55,7 @@ export const DEFAULTS = {
 
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Unique positive integer" },
-  { key: "fc",  label: "Compressive strength FC (= fcm)", unit: "MPa", default: 30, min: 1, hint: "Mean compressive strength from tests (MPa)" },
+  { key: "fc",  label: "Cylinder compressive strength FC (= f_cm)", unit: "MPa", default: 30, min: 12, hint: "Measured mean cylinder strength, e.g. 38 for C30/37" },
 
   { key: "ro", label: "Density RO (optional)", unit: "g/mm^3", default: DEFAULTS.ro, hint: "Leave blank/0 to use 0.0023" },
   { key: "pr", label: "Poisson ratio PR (optional)", unit: "-", default: DEFAULTS.pr, hint: "Leave blank/0 to use 0.18" },
@@ -174,9 +174,12 @@ export function generate(input = {}) {
 }
 
 // ---- math helpers ----
+// EN 1992-1-1 Table 3.1 with fc = f_cm (measured cylinder strength): f_ck = f_cm - 8,
+// f_ctm = 0.30 f_ck^(2/3) up to C50/60, 2.12 ln(1 + f_cm/10) above
 function calculate_ft_ec2(fc) {
-  if (fc <= 50) return 0.3 * Math.pow(fc, 2 / 3);
-  return 2.12 * Math.log(1 + 0.1 * (fc + 8));
+  const fck = Math.max(fc - 8, 1);
+  if (fck <= 50) return 0.3 * Math.pow(fck, 2 / 3);
+  return 2.12 * Math.log(1 + 0.1 * fc);
 }
 function calculate_E_ec2_from_fcm(fcm) {
   return 22000.0 * Math.pow(fcm / 10.0, 0.3);

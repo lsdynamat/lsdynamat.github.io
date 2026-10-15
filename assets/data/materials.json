@@ -257,8 +257,8 @@
       "name": "Winfrith Concrete",
       "category": "Concrete",
       "summary": "Concrete model with fracture energy based softening; good for impact/crash-style concrete behavior.",
-      "version": "1.0",
-      "updatedAt": "2025-12-27",
+      "version": "1.1",
+      "updatedAt": "2026-10-15",
       "generator": "mat084_winfrith",
       "doc": "./assets/docs/mat084_winfrith.md",
       "inputs": [
@@ -272,11 +272,11 @@
         },
         {
           "key": "fc",
-          "label": "Compressive strength (f_c)",
+          "label": "Cylinder compressive strength (f_c)",
           "unit": "MPa",
           "default": 30,
-          "min": 1,
-          "hint": "Example: 30.0"
+          "min": 12,
+          "hint": "Measured mean cylinder strength of the concrete you model (= f_cm, e.g. 38 for C30/37)."
         },
         {
           "key": "dmax",
@@ -323,16 +323,17 @@
       "name": "CSCM Concrete",
       "category": "Concrete",
       "summary": "Continuous Surface Cap Model (CSCM) concrete material model.",
-      "version": "1.0",
-      "updatedAt": "2025-12-30",
+      "version": "1.1",
+      "updatedAt": "2026-10-15",
       "generator": "mat159_cscm",
       "doc": "./assets/docs/mat159_cscm.md",
       "inputs": [
         { "key": "mid",  "label": "Material ID (MID)", "unit": "-",      "default": 465,  "min": 1,       "hint": "Unique positive integer." },
-        { "key": "fc",   "label": "Compressive strength (fc)", "unit": "MPa", "default": 30.0, "min": 1,   "hint": "Mean compressive strength (MPa)." },
+        { "key": "fc",   "label": "Cylinder compressive strength (f_c)", "unit": "MPa", "default": 30.0, "min": 12, "hint": "Measured mean cylinder strength of the concrete you model (= f_cm, e.g. 38 for C30/37)." },
         { "key": "dmax", "label": "Max aggregate size (dmax)", "unit": "mm",  "default": 16,   "min": 1,   "hint": "Maximum aggregate size (mm)." },
         { "key": "ro",   "label": "Density (RO)", "unit": "g/mm^3", "default": 0.0023, "min": 0.000001, "hint": "Typical: 0.0022–0.0024." },
-        { "key": "pr",   "label": "Poisson ratio (PR)", "unit": "-", "default": 0.20, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." }
+        { "key": "pr",   "label": "Poisson ratio (PR)", "unit": "-", "default": 0.20, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
+        { "key": "irate", "label": "Rate effects (IRATE)", "unit": "-", "default": 0, "min": 0, "max": 1, "hint": "0 = off (quasi-static), 1 = on (Murray 2007 viscoplastic rate model, converted to ms)." }
       ]
     },
 
@@ -343,14 +344,15 @@
       "name": "K&C Damage Release 3",
       "category": "Concrete",
       "summary": "K&C Damage Release III concrete model with DIF curve + tabulated compaction EOS.",
-      "version": "1.3",
+      "version": "1.4",
       "updatedAt": "2026-10-15",
       "generator": "mat072_kcc_rel3",
       "doc": "./assets/docs/mat072_kcc_rel3.md",
       "inputs": [
         { "key": "mid", "label": "Material ID (MID)", "unit": "-", "default": 1, "min": 1, "hint": "Example: 1" },
-        { "key": "fc", "label": "Compressive strength (fc)", "unit": "MPa", "default": 25, "min": 1, "hint": "Example: 25" },
-        { "key": "elm_size", "label": "Element size", "unit": "mm", "default": 25, "min": 1, "hint": "Example: 25" },
+        { "key": "fc", "label": "Cylinder compressive strength (f_c)", "unit": "MPa", "default": 25, "min": 12, "hint": "Measured mean cylinder strength of the concrete you model (= f_cm, e.g. 38 for C30/37)." },
+        { "key": "elm_size", "label": "Element size h", "unit": "mm", "default": 25, "min": 1, "hint": "Edge length of the elements where cracks form. The damage function is scaled so that one cracked element dissipates G_F." },
+        { "key": "gf", "label": "Fracture energy G_F (optional)", "unit": "N/mm", "default": "", "hint": "Blank = fib MC2010: 73 f_cm^0.18 N/m (0.135 N/mm at 30 MPa)." },
         { "key": "omega", "label": "Omega (ω)", "unit": "-", "default": 0.5, "min": 0, "max": 1, "hint": "Example: 0.5" },
         { "key": "ro", "label": "Density (RO)", "unit": "g/mm^3", "default": 0.0023, "min": 0.000001, "hint": "Typical: 0.0023" },
         { "key": "pr", "label": "Poisson ratio (PR)", "unit": "-", "default": 0.16, "min": 0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
@@ -368,13 +370,13 @@
       "name": "CDP Concrete",
       "category": "Concrete",
       "summary": "Concrete Damage Plasticity (MAT_273).",
-      "version": "1.0",
-      "updatedAt": "2025-12-30",
+      "version": "1.1",
+      "updatedAt": "2026-10-15",
       "generator": "mat273_cdp",
       "doc": "./assets/docs/mat273_cdp.md",
       "inputs": [
         { "key": "mid", "default": 1, "label": "Material ID (MID)", "unit": "-", "min": 1, "hint": "Unique positive integer" },
-        { "key": "fc",  "default": 30, "label": "Compressive strength FC (= fcm)", "unit": "MPa", "min": 1, "hint": "Mean compressive strength from tests (MPa)" },
+        { "key": "fc",  "default": 30, "label": "Cylinder compressive strength (f_c)", "unit": "MPa", "min": 12, "hint": "Measured mean cylinder strength of the concrete you model (= f_cm, e.g. 38 for C30/37)." },
     
         { "key": "ro", "default": "", "label": "Density RO (optional)", "unit": "g/mm^3", "hint": "Leave blank/0 to use 0.0023" },
         { "key": "pr", "default": "", "label": "Poisson ratio PR (optional)", "unit": "-", "hint": "Leave blank/0 to use 0.18" },

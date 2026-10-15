@@ -14,10 +14,10 @@ E is written positive, which selects the anisotropic damage formulation (ISOFLAG
 
 ## What the generator computes from f_c
 
-The input f_c is labelled as the mean strength fcm. Unless you override them, these quantities are derived:
+The input f_c is the measured cylinder strength of the concrete you model, i.e. its mean strength fcm. Unless you override them, these quantities are derived:
 
 - `E = 22 000 · (f_c / 10)^0.3` (MPa): EN 1992-1-1 secant modulus
-- `FT = 0.30 · f_c^(2/3)` for f_c ≤ 50 MPa, otherwise `2.12 · ln(1 + (f_c + 8)/10)`
+- `FT = fctm = 0.30 · fck^(2/3)` with `fck = f_c − 8` for fck ≤ 50 MPa, otherwise `2.12 · ln(1 + f_c/10)` (EN 1992-1-1, Table 3.1)
 - `ECC = (1 + ε)/(2 − ε)` with `ε = FT(fbc² − f_c²) / (fbc(f_c² − FT²))` and `fbc = 1.16 f_c` (Jirásek & Bažant)
 - `GF = 73 · f_c^0.18 / 1000` (N/mm): fib Model Code 2010
 - Bilinear softening (`TYPE = 1`) with `WF1 = 0.15 WF` and `FT1 = 0.30 FT`. The area under the law is `0.225 · FT · WF`, so `WF = GF / (0.225 FT) = 4.444 GF / FT`
@@ -33,7 +33,7 @@ Defaults when left blank: `RO = 0.0023 g/mm³`, `PR = 0.18`, `EFC = 1.0E-4`, `ST
 
 ## Notes
 
-- **f_c in the FT formula.** In Eurocode 2, `0.30 f^(2/3)` applies to fck = fcm − 8. Here it is applied to the input f_c, which is labelled fcm, so FT is higher than the EC2 mean tensile strength. For example, at f_c = 30 MPa it gives 2.90 MPa against 2.35 MPa. Enter FT directly if you have a measured or code value.
+- **FT.** Since 2026-10-15 FT follows EN 1992-1-1 with fck = f_c − 8 (2.35 MPa at f_c = 30 MPa; earlier versions applied the formula to f_c directly and gave 2.90 MPa). Enter FT directly if you have a measured splitting or direct tensile strength.
 - **EFC** controls the compressive softening branch. The default 1E-4 suits plain concrete; confined cores need a calibrated, larger value.
 - **Mesh.** WF is a crack opening, so tensile regularisation is automatic. Compressive softening (EFC) is not regularised in the same way.
 

@@ -1,12 +1,12 @@
 {
  "case": "BEAM-WIN",
- "peak_force_kN": 14.4648969010989,
- "defl_at_peak_mm": 0.070511,
- "cmod_at_peak_mm": 0.041729,
- "work_Nmm": 2338.6156535011864,
- "GF_Nmm": 0.12472616818672995,
- "final_force_ratio": 0.047116823898566695,
- "fct_L_MPa": 4.628767008351648,
- "hourglass_pct": 5.593920765027322,
- "kinetic_pct": 0.31536501024590163
+ "peak_force_kN": 12.17282555511022,
+ "defl_at_peak_mm": 0.061511,
+ "cmod_at_peak_mm": 0.034875,
+ "work_Nmm": 2040.3604631851529,
+ "GF_Nmm": 0.10881922470320815,
+ "final_force_ratio": 0.05440232401276728,
+ "fct_L_MPa": 3.895304177635271,
+ "hourglass_pct": 5.884683873745182,
+ "kinetic_pct": 0.35659550319942085
 }

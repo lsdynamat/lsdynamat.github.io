@@ -1,7 +1,8 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261015a";
+import { mdToHtml } from "../core/md.js?v=20261015d";
 import { openSamples } from "../core/sampleViewer.js";
+import { modelFigure } from "../core/illus.js?v=20261015d";
 
 setText("year", new Date().getFullYear());
 
@@ -212,6 +213,7 @@ async function renderDoc(docPath){
   document.title = `MAT_${m.mat} ${m.name} · LS-DYNA Material Hub`;
   setText("dMeta", `${m.category} · v${m.version} · updated ${m.updatedAt}`);
   setText("dSummary", m.summary || "—");
+  getEl("dFig").innerHTML = modelFigure(m);
 
   const tagBox = getEl("dTags");
   tagBox.innerHTML = `

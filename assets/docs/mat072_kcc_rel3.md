@@ -18,8 +18,26 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 - Residual surface: `a1f = a1`, `a2f = a2`
 - Softening: `b1 = 1.6`, `b3 = 1.15`, `b2 = (0.09W² − 0.98W + 3.06) · (1 − 0.004 F² + 0.097 F − 0.484)`, with `W = 3 · d_agg = 1.5 in` and `F = f_c,psi / 1000`
 - `LOCWID = 3 · d_agg = 38.1 mm` (d_agg = 12.7 mm, fixed)
-- `OMEGA` is an input (default 0.5); λ–η uses the 13-point default damage function
+- `OMEGA` is an input (default 0.5); η1–η13 are the 13-point default damage function, and λ6–λ10 are scaled for the fracture energy (next section)
 - `RSIZE = 1/25.4 = 3.937E-2` (inch per mm), `UCF = 145` (psi per MPa), `NOUT = 2`, `EDROP = 1`, `SLAMBDA = 100`
+
+## Fracture energy and element size
+
+MAT_072R3 regularises its softening only for elements larger than LOCWID. For smaller elements the energy dissipated per unit volume is fixed by the damage function, so the fracture energy grows with the element size h. Single-element uniaxial tension tests (LS-DYNA R13, rate effects off) with the unscaled damage function gave:
+
+- G_F = g0 · min(h, LOCWID), with `g0 = 0.01026 · (f_c/30)^0.42` N/mm² (f_c = 20–60 MPa, within 0.5 %)
+- unscaled card, f_c = 30 MPa: 0.050, 0.103, 0.259, 0.381 and 0.372 N/mm for h = 5, 10, 25, 48 and 96 mm
+- LS-DYNA auto-generation (`A0 = −f_c`, LOCWID 48 mm), for comparison: 0.006, 0.015, 0.037, 0.069 and 0.071 N/mm
+
+G_F is proportional to the post-peak part of λ (scaling λ6–λ10 by 0.5, 2 and 3 gave 0.49, 2.03 and 3.06 times the energy). The generator therefore stretches λ6–λ10 about the peak λ5:
+
+- `λi' = λ5 + k (λi − λ5)`, with `k = G_F,target / (g0 · min(h, LOCWID))`
+- `G_F,target` = the optional G_F input, or fib MC2010 `73 f_c^0.18` N/m (0.135 N/mm at 30 MPa)
+- h = the element-size input: the edge length of the elements where cracks form
+
+Check (single element, uniaxial tension): G_F = 0.133, 0.134, 0.137 and 0.137 N/mm for h = 5, 10, 25 and 50 mm at f_c = 30 MPa (target 0.135); 0.124 (target 0.125) at 20 MPa, 0.149 (0.153) at 60 MPa, 0.145 (0.145) at 45 MPa with h = 15 mm, and 0.079 for an input G_F of 0.08 N/mm.
+
+The compressive peak is unchanged (29.98 against 29.96 MPa, h = 5 mm), but λ is shared by tension and compression, so the compressive softening branch becomes more ductile for small elements (28.1 against 24.2 MPa at 1 % strain, h = 5 mm). This follows the same crack-band logic: crushing energy per unit volume rises as the element shrinks.
 
 ## Strain-rate curve (DIF)
 
@@ -48,14 +66,9 @@ The `dif_model` input selects how rate effects are written:
 ## Points to check before use
 
 - **Curve discretization warning.** LS-DYNA re-samples the DIF curve and reports a discretization difference (Warning 21329), as it does for the manual's own sample curve. In the single-element checks the DIF read by the solver was still correct.
-- **Fracture energy depends on element size.** Single-element uniaxial tension tests (LS-DYNA R13, f_c = 30 MPa, rate effects off) show that MAT_072R3 regularises the tensile softening only for elements larger than LOCWID. Below LOCWID the dissipated energy per unit volume is fixed, so G_F grows with the element size:
-
-  - this card: 0.050, 0.103, 0.259, 0.381 and 0.372 N/mm for 5, 10, 25, 48 and 96 mm elements
-  - LS-DYNA auto-generation (`A0 = −f_c`, LOCWID 48 mm): 0.006, 0.015, 0.037, 0.069 and 0.071 N/mm
-
-  - fib MC2010 gives G_F = 73 f_cm^0.18 ≈ 0.14 N/mm for f_cm = 38 MPa. The card matches that only for elements of about 13 mm. B2 is a weak handle: going from 0.5 to 4 changes G_F by a factor of two at most. The notched-prism example (5 mm mesh) confirms the 0.05 N/mm. Check G_F for your own mesh size before using KCC where tensile cracking governs.
-- **Element size input.** Element size currently appears only in the title and file name. It does not change LOCWID, B2 or the damage function.
-- **LOCWID** is fixed at 38.1 mm (d_agg = 12.7 mm); it does not follow the maximum aggregate size of your mix.
+- **Element size input.** Enter the size of the elements in the cracking zone. With mixed mesh sizes, one card per size range keeps G_F correct.
+- **LOCWID** is fixed at 38.1 mm (d_agg = 12.7 mm); it does not follow the maximum aggregate size of your mix. For elements larger than 38.1 mm, G_F is regularised by LS-DYNA itself and the scaling uses h = 38.1 mm.
+- **f_c** is the measured cylinder strength of the concrete you model (its mean strength).
 - **EOS.** The compaction curve is the 45.4 MPa reference curve converted to MPa. It is not rescaled for other strengths.
 
 ## References

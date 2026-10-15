@@ -28,6 +28,7 @@ export const DEFAULTS = {
   pr: 0.16,        // Poisson in your Python used as phr=0.16
   dif_model: 1,    // 0 = no rate effects, 1 = CEB-FIP MC90 (comp.) + Malvar & Ross (tension), 2 = fib MC2010
   rate_cap: 300,   // 1/s: DIF held constant above this strain rate
+  gf: "",          // N/mm, blank = fib MC2010: 73 fcm^0.18 N/m
 };
 
 // If your UI reads "inputs" from materials.json, this is optional.
@@ -35,7 +36,8 @@ export const DEFAULTS = {
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Example: 1" },
   { key: "fc", label: "Compressive strength (fc)", unit: "MPa", default: DEFAULTS.fc, min: 1, hint: "Example: 25" },
-  { key: "elm_size", label: "Element size", unit: "mm", default: DEFAULTS.elm_size, min: 1, hint: "Example: 25" },
+  { key: "elm_size", label: "Element size", unit: "mm", default: DEFAULTS.elm_size, min: 1, hint: "Element edge length where cracks form; G_F is regularised to it" },
+  { key: "gf", label: "Fracture energy G_F (optional)", unit: "N/mm", default: DEFAULTS.gf, hint: "Blank = fib MC2010" },
   { key: "omega", label: "Omega (ω)", unit: "-", default: DEFAULTS.omega, min: 0, max: 1, hint: "Example: 0.5" },
   { key: "ro", label: "Density (RO)", unit: "g/mm^3", default: DEFAULTS.ro, min: 1e-6, hint: "Typical: 0.0023" },
   { key: "pr", label: "Poisson ratio (PR)", unit: "-", default: DEFAULTS.pr, min: 0.0, max: 0.49, hint: "Python uses 0.16" },
@@ -52,6 +54,7 @@ export function generate(input = {}) {
   const pr = mustInRange("pr", inp.pr, 0.0, 0.49);
   const difModel = Math.round(mustInRange("dif_model", inp.dif_model, 0, 2));
   const rateCap = mustPositive("rate_cap", inp.rate_cap);
+  const gfIn = Number(inp.gf);
 
   // --- Python constants / conversions
   // In python:
@@ -189,6 +192,19 @@ export function generate(input = {}) {
   // W_conv = W * INCH (inch -> mm)
   const W_conv = W * INCH;
 
+  // --- Fracture-energy regularisation (crack band)
+  // Single-element tension tests in LS-DYNA R13 (rate effects off) give, for the default damage
+  // function, a dissipated energy per unit volume g0 = 0.01026 (fc/30)^0.42 N/mm^2 (fc 20-60 MPa),
+  // and G_F = g0 * min(h, LOCWID): MAT_072R3 regularises only above LOCWID. G_F scales linearly
+  // with the post-peak part of lambda, so lambda_i (i >= 6) is stretched about the peak (lambda_5)
+  // by k = G_F,target / (g0 * min(h, LOCWID)).
+  const gfTarget = Number.isFinite(gfIn) && gfIn > 0 ? gfIn : 73 * Math.pow(fc_mpa, 0.18) / 1000; // N/mm
+  const g0 = 0.01026 * Math.pow(fc_mpa / 30, 0.42);
+  const hEff = Math.min(elm_size_mm, W_conv);
+  const kLambda = gfTarget / (g0 * hEff);
+  const lamPeak = lambda_default[4];
+  const lambda_out = lambda_default.map((v, i) => (i < 5 || v >= 1.0) ? v : lamPeak + kLambda * (v - lamPeak));
+
   // --- Title exactly like you did for CSCM style
   const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, element size=${elm_size_mm.toFixed(0)}mm`;
 
@@ -206,6 +222,7 @@ export function generate(input = {}) {
   lines.push(title);
   lines.push(UNITS_LINE);
   REF_LINES.forEach(s => lines.push(s));
+  lines.push(`$ G_F = ${gfTarget.toFixed(4)} N/mm (${Number.isFinite(gfIn) && gfIn > 0 ? "input" : "fib MC2010"}), regularised to h = ${elm_size_mm} mm: post-peak lambda x ${kLambda.toFixed(3)}`);
   lines.push(HUB_LINE);
 
   lines.push(`$#     mid        ro        pr`);
@@ -235,11 +252,11 @@ export function generate(input = {}) {
   );
 
   lines.push(`$# lambda1   lambda2   lambda3   lambda4   lambda5   lambda6   lambda7   lambda8`);
-  lines.push(lambda_default.slice(0, 8).map(v => fmtE(v, 10, 3)).join(""));
+  lines.push(lambda_out.slice(0, 8).map(v => fmtE(v, 10, 3)).join(""));
 
   lines.push(`$#lambda09  lambda10  lambda11  lambda12  lambda13        b3       a0y       a1y`);
   lines.push(
-    lambda_default.slice(8, 13).map(v => fmtE(v, 10, 3)).join("") +
+    lambda_out.slice(8, 13).map(v => fmtE(v, 10, 3)).join("") +
     `${fmtE(b3, 10, 3)}` +
     `${fmtE(a0yn, 10, 3)}` +
     `${fmtE(a1yn, 10, 3)}`

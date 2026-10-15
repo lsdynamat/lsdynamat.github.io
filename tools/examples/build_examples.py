@@ -180,8 +180,10 @@ STEEL = {
 }
 
 
-def concrete_material(key):
+def concrete_material(key, beam=False):
     f, mid, eos, note = CONCRETE[key]
+    if beam and f == "k072":
+        f = "k072_h5"          # KCC is regularised per element size: 5 mm in the beam, 7.5 mm in the cylinder
     blk = material_block(f)
     if key == "KCC-NR":
         # card 3 field 6 (LCRATE) -> 0
@@ -228,7 +230,7 @@ def build_cyl(out, key):
 
 # ----------------------------------------------------------------- BEAM
 def build_beam(out, key):
-    mid, eos, note, mat = concrete_material(key)
+    mid, eos, note, mat = concrete_material(key, beam=True)
     Lb, B, D = 550.0, 150.0, 150.0
     nx, ny, nz = 111, 30, 30                  # odd nx -> one element column centred on midspan
     dx, dy, dz = Lb / nx, B / ny, D / nz
