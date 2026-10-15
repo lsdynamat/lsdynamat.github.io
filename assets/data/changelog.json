@@ -1,5 +1,12 @@
 [
   {
+    "id": "mat084_winfrith",
+    "date": "2026-10-15",
+    "version": "",
+    "model": "MAT_084 Winfrith",
+    "change": "Documentation: RATE also sets the meaning of FE. With RATE = 1 (generator) FE is the crack width wc; with RATE = 0 it is the fracture energy G_F, scaled with strength by the rate factor. Checked by single-element tension in LS-DYNA R13: RATE = 1 dissipates ½·UTS·FE within 0.5 % for 10 and 20 mm elements."
+  },
+  {
     "id": "generator",
     "date": "2026-10-15",
     "version": "",
