@@ -19,7 +19,7 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 - Softening: `b1 = 1.6`, `b3 = 1.15`, `b2 = (0.09W² − 0.98W + 3.06) · (1 − 0.004 F² + 0.097 F − 0.484)`, with `W = 3 · d_agg = 1.5 in` and `F = f_c,psi / 1000`
 - `LOCWID = 3 · d_agg = 38.1 mm` (d_agg = 12.7 mm, fixed)
 - `OMEGA` is an input (default 0.5); λ–η uses the 13-point default damage function
-- `RSIZE = 3.972E-2`, `UCF = 145` (psi per MPa), `NOUT = 2`, `EDROP = 1`, `SLAMBDA = 100`
+- `RSIZE = 1/25.4 = 3.937E-2` (inch per mm), `UCF = 145` (psi per MPa), `NOUT = 2`, `EDROP = 1`, `SLAMBDA = 100`
 
 ## Strain-rate curve (DIF)
 
@@ -48,8 +48,14 @@ The `dif_model` input selects how rate effects are written:
 ## Points to check before use
 
 - **Curve discretization warning.** LS-DYNA re-samples the DIF curve and reports a discretization difference (Warning 21329), as it does for the manual's own sample curve. In the single-element checks the DIF read by the solver was still correct.
-- **RSIZE.** 1 inch / 1 mm = 1/25.4 = 3.937·10⁻², which is the 3.94E-2 used in the manual sample. The generator writes 3.972E-2.
-- **Element size input.** Element size currently appears only in the title and file name. It does not change LOCWID or b2.
+- **Fracture energy depends on element size.** Single-element uniaxial tension tests (LS-DYNA R13, f_c = 30 MPa, rate effects off) show that MAT_072R3 regularises the tensile softening only for elements larger than LOCWID. Below LOCWID the dissipated energy per unit volume is fixed, so G_F grows with the element size:
+
+  - this card: 0.050, 0.103, 0.259, 0.381 and 0.372 N/mm for 5, 10, 25, 48 and 96 mm elements
+  - LS-DYNA auto-generation (`A0 = −f_c`, LOCWID 48 mm): 0.006, 0.015, 0.037, 0.069 and 0.071 N/mm
+
+  - fib MC2010 gives G_F = 73 f_cm^0.18 ≈ 0.14 N/mm for f_cm = 38 MPa. The card matches that only for elements of about 13 mm. B2 is a weak handle: going from 0.5 to 4 changes G_F by a factor of two at most. The notched-prism example (5 mm mesh) confirms the 0.05 N/mm. Check G_F for your own mesh size before using KCC where tensile cracking governs.
+- **Element size input.** Element size currently appears only in the title and file name. It does not change LOCWID, B2 or the damage function.
+- **LOCWID** is fixed at 38.1 mm (d_agg = 12.7 mm); it does not follow the maximum aggregate size of your mix.
 - **EOS.** The compaction curve is the 45.4 MPa reference curve converted to MPa. It is not rescaled for other strengths.
 
 ## References

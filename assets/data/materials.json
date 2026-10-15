@@ -343,8 +343,8 @@
       "name": "K&C Damage Release 3",
       "category": "Concrete",
       "summary": "K&C Damage Release III concrete model with DIF curve + tabulated compaction EOS.",
-      "version": "1.2",
-      "updatedAt": "2026-10-14",
+      "version": "1.3",
+      "updatedAt": "2026-10-15",
       "generator": "mat072_kcc_rel3",
       "doc": "./assets/docs/mat072_kcc_rel3.md",
       "inputs": [

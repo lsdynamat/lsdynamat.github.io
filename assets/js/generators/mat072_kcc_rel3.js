@@ -227,7 +227,7 @@ export function generate(input = {}) {
     `${padInt(100, 10)}` +
     `${padInt(2, 10)}` +
     `${padInt(1, 10)}` +
-    `${fmtE(3.972e-2, 10, 3)}` +
+    `${fmtE(1 / INCH, 10, 3)}` +
     `${fmtE(1.450e+2, 10, 3)}` +
     `${padInt(lcrate, 10)}` +
     `${fmtE(W_conv, 10, 3)}` +
