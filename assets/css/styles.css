@@ -263,6 +263,7 @@ table.data .actions .small{margin-left:12px}
 /* ---------- generator ---------- */
 .genbar{display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap}
 .genbar .field{flex:1 1 320px; max-width:460px}
+.genbar .field.units{flex:0 1 260px}
 
 .layout2{
   display:grid;

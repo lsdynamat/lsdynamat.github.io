@@ -8,6 +8,21 @@ export const NAME = "CSCM Concrete (*MAT_CSCM)";
 export const CATEGORY = "Concrete";
 export const UNITS = "mm-ms-g-N-MPa";
 
+// Dimension of every field written below (see core/units.js); the generator writes mm-ms-g-N-MPa.
+// ETA0C / ETA0T carry time^(1-n), with n the next field (NC / NT)
+const ETA0 = (i) => (vals) => [0, 0, 1 - vals[i + 1]];
+export const UNIT_SPEC = {
+  "*MAT_CSCM": { rows: [
+    ["-", "D", "-", "-", "-", "-", "-", "-"],
+    ["-"],
+    ["S", "S", "S", "-", "S", "1/S", "-", "-"],
+    ["-", "1/S", "-", "1/S", "-", "1/S", "-", "1/S"],
+    ["-", "S", "-", "1/S", "1/S2"],
+    ["-", "G", "-", "G", "G", "-", "-", "-"],
+    [ETA0(0), "-", ETA0(2), "-", "S", "S", "-", "-"],
+  ] },
+};
+
 // --- Header lines (match screenshot)
 const PREPOST_LINE = "$# LS-DYNA Keyword file created by LS-PrePost(R) V4.8.17 - 24Jun2021";
 const UNITS_LINE = "$ Units: mm-ms-g-N-MPa (ETA0C/ETA0T converted from s to ms)";

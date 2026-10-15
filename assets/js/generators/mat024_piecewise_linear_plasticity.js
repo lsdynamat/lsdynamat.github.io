@@ -17,6 +17,17 @@ export const NAME = "Piecewise Linear Plasticity";
 export const CATEGORY = "Metals";
 export const UNITS = "mm-ms-g-N-MPa";
 
+// Dimension of every field written below (see core/units.js); the generator writes mm-ms-g-N-MPa.
+export const UNIT_SPEC = {
+  "*MAT_PIECEWISE_LINEAR_PLASTICITY": { rows: [
+    ["-", "D", "S", "-", "S", "S", "-", "T"],
+    ["R", "-", "-", "-", "-"],
+    "-",
+    "S",
+  ] },
+  curve: ["-", "S"],   // effective plastic strain vs yield stress
+};
+
 const MATERIAL_CARDS_BANNER = [
   "$ --+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8",
   "$                                                                              $",
