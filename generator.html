@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
-  <link rel="stylesheet" href="./assets/css/styles.css?v=20261015d" />
+  <link rel="stylesheet" href="./assets/css/styles.css?v=20261015e" />
 </head>
 <body>
   <header class="topbar">
@@ -36,6 +36,10 @@
         <label for="modelSel">Model</label>
         <select id="modelSel"></select>
       </div>
+      <div class="field units">
+        <label for="unitSel">Output units</label>
+        <select id="unitSel"></select>
+      </div>
       <a class="btn" id="btnDetails" href="./details.html">Theory notes</a>
       <button class="btn" id="btnResetDefaults">Reset to defaults</button>
     </div>
@@ -45,6 +49,7 @@
         <h2 class="h2">Inputs</h2>
         <div id="form" class="formgrid"></div>
         <p class="small" style="margin-top:14px;">
+          Inputs are always in mm, ms, g, N and MPa, as labelled. The card is converted to the output units selected above.
           Defaults are typical values to start from. Calibrate against your own material and test data.
         </p>
       </section>
@@ -69,6 +74,6 @@
     </div>
   </footer>
 
-  <script type="module" src="./assets/js/pages/generator.js?v=20261015d"></script>
+  <script type="module" src="./assets/js/pages/generator.js?v=20261015e"></script>
 </body>
 </html>

@@ -1,5 +1,12 @@
 [
   {
+    "id": "generator",
+    "date": "2026-10-15",
+    "version": "",
+    "model": "Keyword generator",
+    "change": "New output-unit selector: mm·ms·g·N·MPa (default), mm·ms·kg·kN·GPa, mm·s·t·N·MPa, SI m·s·kg·N·Pa, cm·µs·g·Mbar and in·s·lbf·psi. Inputs stay in mm, ms, g, N, MPa; every field of the card is rescaled by its dimension, including Winfrith CONM, KCC RSIZE/UCF and the CSCM rate parameters ETA0C/ETA0T (time^(1−n)). Checked with single-element tension and compression runs in LS-DYNA R13: the same stresses in all systems (within 0.3 % at peak)."
+  },
+  {
     "id": "mat072_kcc_rel3",
     "date": "2026-10-15",
     "version": "1.4",

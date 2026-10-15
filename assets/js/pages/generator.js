@@ -1,7 +1,8 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261015d";
+import { getGenerator } from "../generators/index.js?v=20261015e";
+import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck } from "../core/units.js?v=20261015e";
 
 setText("year", new Date().getFullYear());
 
@@ -107,6 +108,17 @@ function downloadText(filename, text){
   const outEl = getEl("out");
   const nameEl = getEl("outName");
   const statusEl = getEl("outStatus");
+  const unitSel = getEl("unitSel");
+
+  UNIT_SYSTEMS.forEach(u => {
+    const opt = document.createElement("option");
+    opt.value = u.id;
+    opt.textContent = u.label;
+    unitSel.appendChild(opt);
+  });
+  let savedUnits = null;
+  try { savedUnits = localStorage.getItem("lsdynamat.units"); } catch {}
+  unitSel.value = getUnitSystem(getParam("units") || savedUnits).id;
 
   materials.forEach(m=>{
     const opt = document.createElement("option");
@@ -161,6 +173,17 @@ function downloadText(filename, text){
       lastName = `${cur.id}.k`;
     }
 
+    const sys = getUnitSystem(unitSel.value);
+    if (sys.id !== BASE_UNITS.id){
+      try{
+        lastText = convertDeck(lastText, g.UNIT_SPEC, sys);
+      }catch(e){
+        setStatus(e?.message || String(e), true);
+        return;
+      }
+      lastName = lastName.replace(/\.k$/, `_${sys.id}.k`);
+    }
+
     outEl.innerHTML = highlight(lastText);
     nameEl.textContent = lastName;
     setStatus("");
@@ -171,16 +194,27 @@ function downloadText(filename, text){
     renderForm(formEl, cur.inputs, buildDefaultValues(cur.inputs));
     getEl("btnDetails").href = `./details.html?id=${encodeURIComponent(cur.id)}`;
 
-    const u = new URL(location.href);
-    u.searchParams.set("id", cur.id);
-    history.replaceState(null, "", u);
+    syncURL();
 
     generate();
+  }
+
+  function syncURL(){
+    const u = new URL(location.href);
+    u.searchParams.set("id", cur.id);
+    if (unitSel.value === BASE_UNITS.id) u.searchParams.delete("units");
+    else u.searchParams.set("units", unitSel.value);
+    history.replaceState(null, "", u);
   }
 
   let t = 0;
   on(formEl, "input", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
   on(sel, "change", syncUI);
+  on(unitSel, "change", ()=>{
+    try { localStorage.setItem("lsdynamat.units", unitSel.value); } catch {}
+    syncURL();
+    generate();
+  });
 
   on(getEl("btnResetDefaults"), "click", ()=>{
     renderForm(formEl, cur.inputs, buildDefaultValues(cur.inputs));
