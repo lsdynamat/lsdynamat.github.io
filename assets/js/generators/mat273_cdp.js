@@ -1,6 +1,7 @@
 // assets/js/generators/mat273_cdp.js  (ONLY the updated parts shown fully usable)
 // Replace your current file with this full version if you want; it's complete.
 
+import { fitField } from "../core/units.js?v=20261015g";
 export const KEY = "mat273_cdp";
 export const ID = 273;
 export const NAME = "CDP Concrete (*MAT_CONCRETE_DAMAGE_PLASTIC_MODEL)";
@@ -256,6 +257,9 @@ function toFixed(x, n) {
   return v.toFixed(n);
 }
 function fmt10(x, decimals = 6) {
+  return fitW(fmt10Raw(x, decimals), x, 10);
+}
+function fmt10Raw(x, decimals = 6) {
   if (Number.isInteger(x)) return String(x).padStart(10, " ");
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(10, " ");
@@ -264,4 +268,12 @@ function fmt10(x, decimals = 6) {
     return v.toExponential(3).replace("e", "E").padStart(10, " ");
   }
   return v.toFixed(decimals).padStart(10, " ");
+}
+
+// Never let a number overflow its field or touch the previous one (LS-DYNA reads by column).
+function fitW(s, v, w) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return s;
+  if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
+  return s;
 }

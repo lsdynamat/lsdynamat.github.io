@@ -1,6 +1,6 @@
 // Shared model table (home + library)
 import { escapeHtml } from "./dom.js";
-import { specimenIcon } from "./illus.js?v=20261015f";
+import { specimenIcon } from "./illus.js?v=20261015g";
 
 export function byMat(a, b){
   return (a.mat||"").toString().localeCompare((b.mat||"").toString(), undefined, { numeric:true });

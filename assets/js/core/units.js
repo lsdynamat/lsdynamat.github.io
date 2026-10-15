@@ -4,12 +4,13 @@
 
 // L, T, M: size of the base unit (1 mm, 1 ms, 1 g) expressed in the target system's units
 export const UNIT_SYSTEMS = [
-  { id: "mm-ms-g",  label: "mm · ms · g · N · MPa",            L: 1,        T: 1,    M: 1,                 time: "ms", conm: -3 },
-  { id: "mm-ms-kg", label: "mm · ms · kg · kN · GPa",          L: 1,        T: 1,    M: 1e-3,              time: "ms", conm: -5 },
-  { id: "mm-s-t",   label: "mm · s · t · N · MPa",             L: 1,        T: 1e-3, M: 1e-6,              time: "s",  conm: -4 },
-  { id: "m-s-kg",   label: "m · s · kg · N · Pa (SI)",         L: 1e-3,     T: 1e-3, M: 1e-3,              time: "s",  conm: 1, conl: 1, cont: 1 },
-  { id: "cm-us-g",  label: "cm · µs · g · 10⁷ N · Mbar",       L: 0.1,      T: 1e3,  M: 1,                 time: "µs", conm: -2 },
-  { id: "in-s-lbf", label: "in · s · lbf·s²/in · lbf · psi",   L: 1 / 25.4, T: 1e-3, M: 1e-3 / 175.126835, time: "s",  conm: -1 },
+  // label: shown in the page; ascii: written into the keyword file (keyword files must stay plain ASCII)
+  { id: "mm-ms-g",  label: "mm · ms · g · N · MPa",          ascii: "mm-ms-g-N-MPa",           L: 1,        T: 1,    M: 1,                 time: "ms", conm: -3 },
+  { id: "mm-ms-kg", label: "mm · ms · kg · kN · GPa",        ascii: "mm-ms-kg-kN-GPa",         L: 1,        T: 1,    M: 1e-3,              time: "ms", conm: -5 },
+  { id: "mm-s-t",   label: "mm · s · t · N · MPa",           ascii: "mm-s-tonne-N-MPa",        L: 1,        T: 1e-3, M: 1e-6,              time: "s",  conm: -4 },
+  { id: "m-s-kg",   label: "m · s · kg · N · Pa (SI)",       ascii: "m-s-kg-N-Pa (SI)",        L: 1e-3,     T: 1e-3, M: 1e-3,              time: "s",  conm: 1, conl: 1, cont: 1 },
+  { id: "cm-us-g",  label: "cm · µs · g · 10⁷ N · Mbar",     ascii: "cm-us-g-1E7N-Mbar",       L: 0.1,      T: 1e3,  M: 1,                 time: "us", conm: -2 },
+  { id: "in-s-lbf", label: "in · s · lbf·s²/in · lbf · psi", ascii: "in-s-lbf.s2/in-lbf-psi",  L: 1 / 25.4, T: 1e-3, M: 1e-3 / 175.126835, time: "s",  conm: -1 },
 ];
 export const BASE_UNITS = UNIT_SYSTEMS[0];
 
@@ -90,6 +91,41 @@ function convertRow(line, row, sys) {
 }
 
 /**
+ * Column hygiene for every generated deck (any unit system):
+ *  - each "$#" header is rebuilt so that every name ends on the last column of its field,
+ *  - each numeric field of the data line below it keeps a leading blank (no fused numbers).
+ * Field width: 20 for *DEFINE_CURVE points, 16 for the *EOS_TABULATED_COMPACTION arrays, 10 otherwise.
+ */
+const ASCII = { "—": "-", "–": "-", "−": "-", "’": "'", "‘": "'", "“": '"', "”": '"', "·": ".", "×": "x", "µ": "u", "λ": "lambda", "²": "2", "³": "3", "⁷": "7", "≈": "~", "≤": "<=", "≥": ">=", " ": " " };
+
+export function tidyDeck(text) {
+  // plain ASCII only: LS-PrePost and older editors mis-read multi-byte characters
+  text = text.replace(/[^\x00-\x7F]/g, ch => ASCII[ch] ?? "?");
+  const lines = text.split("\n");
+  let kw = "";
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (l.startsWith("*")) { kw = l.trim().toUpperCase(); continue; }
+    if (!l.startsWith("$#") || i + 1 >= lines.length) continue;
+    const d = lines[i + 1];
+    if (!d.trim() || d.startsWith("$") || d.startsWith("*")) continue;
+    const names = l.slice(2).trim().split(/\s+/);
+    if (names.length === 1 && names[0].toLowerCase() === "title") continue;
+    const w = kw.startsWith("*DEFINE_CURVE") && names.length === 2 ? 20 : 10;
+    if (Math.ceil(d.trimEnd().length / w) > names.length + 1) continue;   // header does not describe this line
+    lines[i] = "$#" + names.map((n, k) => n.padStart(k === 0 ? w - 2 : w)).join("");
+    let out = "";
+    for (let k = 0; k * w < d.length; k++) {
+      const f = d.slice(k * w, (k + 1) * w).padStart(w);
+      const v = Number(f.trim());
+      out += f.trim() !== "" && f[0] !== " " && Number.isFinite(v) ? " " + fitField(v, w - 1) : f;
+    }
+    lines[i + 1] = out;
+  }
+  return lines.join("\n");
+}
+
+/**
  * Convert a keyword deck written in mm · ms · g · N · MPa to another unit system.
  * spec: { "<KEYWORD without _TITLE>": { rows: [row, ...], repeat?: row } } where a row is an
  * array of dimension codes (10-character fields) or { w, d } for other field widths, and
@@ -114,7 +150,7 @@ export function convertDeck(text, spec, sys) {
       return line;
     }
     if (line.startsWith("$")) {
-      if (/^\$ Units:/.test(line)) return `$ Units: ${sys.label} (converted from mm-ms-g-N-MPa; values quoted in comments keep their stated units)`;
+      if (/^\$ Units:/.test(line)) return `$ Units: ${sys.ascii} (converted from mm-ms-g-N-MPa; values in comments keep their stated units)`;
       if (/^\$ abscissa/.test(line)) return line.replace(/1\/ms/g, `1/${sys.time}`);
       return line;
     }

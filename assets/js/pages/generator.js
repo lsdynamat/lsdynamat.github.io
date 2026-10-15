@@ -1,8 +1,8 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261015f";
-import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck } from "../core/units.js?v=20261015f";
+import { getGenerator } from "../generators/index.js?v=20261015g";
+import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261015g";
 
 setText("year", new Date().getFullYear());
 
@@ -87,7 +87,7 @@ function highlight(text){
 }
 
 function downloadText(filename, text){
-  const blob = new Blob([text], { type:"text/plain;charset=utf-8" });
+  const blob = new Blob([text], { type:"application/octet-stream" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -95,7 +95,7 @@ function downloadText(filename, text){
   document.body.appendChild(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  setTimeout(()=> URL.revokeObjectURL(url), 2000);   // revoking at once can give an empty file in some browsers
 }
 
 (async function main(){
@@ -167,7 +167,7 @@ function downloadText(filename, text){
       lastName = `${cur.id}.k`;
     } else if (out && typeof out === "object"){
       lastText = out.keyword || "";
-      lastName = out.filename || `${cur.id}.k`;
+      lastName = `${cur.id}.k`;   // short, safe name (no "=", "-" or extra dots) as on the original site
     } else {
       lastText = "";
       lastName = `${cur.id}.k`;
@@ -181,9 +181,10 @@ function downloadText(filename, text){
         setStatus(e?.message || String(e), true);
         return;
       }
-      lastName = lastName.replace(/\.k$/, `_${sys.id}.k`);
+      lastName = `${cur.id}_${sys.id.replace(/[^a-z0-9]+/gi, "_")}.k`;
     }
 
+    lastText = tidyDeck(lastText);
     outEl.innerHTML = highlight(lastText);
     nameEl.textContent = lastName;
     setStatus("");

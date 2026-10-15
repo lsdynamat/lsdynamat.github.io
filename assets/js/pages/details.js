@@ -1,8 +1,8 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261015f";
+import { mdToHtml } from "../core/md.js?v=20261015g";
 import { openSamples } from "../core/sampleViewer.js";
-import { modelFigure } from "../core/illus.js?v=20261015f";
+import { modelFigure } from "../core/illus.js?v=20261015g";
 
 setText("year", new Date().getFullYear());
 
