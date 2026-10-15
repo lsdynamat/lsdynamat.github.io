@@ -2,7 +2,7 @@ import { escapeHtml } from "./dom.js";
 
 // Small line-based Markdown renderer for assets/docs/*.md
 // Supports: # headings, ``` fences, - / * / 1. / 1) lists (nested by indent),
-// > quotes, **bold**, *italic*, `code`, [links](url), bare URLs, paragraphs.
+// > quotes, | pipe | tables |, **bold**, *italic*, `code`, [links](url), bare URLs, paragraphs.
 
 function inline(text){
   const codes = [];
@@ -64,6 +64,20 @@ export function mdToHtml(md){
       // a blank line ends a list unless the next line continues it
       const next = lines[i + 1] || "";
       if (!LIST_RE.test(next) && !/^\s{2,}\S/.test(next)) closeLists();
+      continue;
+    }
+
+    // pipe table: header row, |---| separator, body rows
+    if (/^\s*\|/.test(line) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || "")){
+      flushAll();
+      const cells = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map(c => inline(c.trim()));
+      const head = cells(line).map(c => `<th>${c}</th>`).join("");
+      const body = [];
+      i++;
+      while (i + 1 < lines.length && /^\s*\|/.test(lines[i + 1])){
+        body.push(`<tr>${cells(lines[++i]).map(c => `<td>${c}</td>`).join("")}</tr>`);
+      }
+      out.push(`<div class="tablewrap"><table class="data"><thead><tr>${head}</tr></thead><tbody>${body.join("")}</tbody></table></div>`);
       continue;
     }
 
