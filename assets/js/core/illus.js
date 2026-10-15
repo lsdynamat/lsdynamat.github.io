@@ -12,10 +12,13 @@ function cylinder(x, y, w, h) {
 }
 
 function dogbone(x, y, L, t) {
-  // horizontal flat specimen: grips at both ends, reduced section in between
-  const g = L * 0.22, n = t * 0.55, d = (t - n) / 2, r = L * 0.06;
-  return `<path d="M${x},${y} h${g} q${r},0 ${r},${d} h${L - 2 * g - 2 * r} q0,${-d} ${r},${-d} h${g} v${t} h${-g} q${-r},0 ${-r},${d}
-    h${-(L - 2 * g - 2 * r)} q0,${-d} ${-r},${-d} h${-g} z" fill="var(--accent-soft)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>`;
+  // horizontal flat specimen (ISO 6892-1 shape): wide grips, narrower parallel length,
+  // concave circular fillets tangent to the parallel length
+  const g = L * 0.24, r = L * 0.07, n = t * 0.58, d = (t - n) / 2;
+  const R = (r * r + d * d) / (2 * d), m = L - 2 * g - 2 * r;
+  const a = (dx, dy) => `a${R.toFixed(2)},${R.toFixed(2)} 0 0 0 ${dx.toFixed(2)},${dy.toFixed(2)}`;
+  return `<path d="M${x},${y} h${g} ${a(r, d)} h${m} ${a(r, -d)} h${g} v${t} h${-g} ${a(-r, -d)} h${-m} ${a(-r, d)} h${-g} z"
+    fill="var(--accent-soft)" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>`;
 }
 
 function block(x, y, w, h) {
@@ -82,9 +85,10 @@ export function modelFigure(m) {
       <path d="M50,38 v-30" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>
       <path d="M50,98 v30" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>`;
   } else {
-    spec = `<g transform="rotate(-90 50 68)">${dogbone(-6, 58, 112, 20)}</g>
-      <path d="M50,12 v-10" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>
-      <path d="M50,124 v10" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>`;
+    // vertical specimen 104 long (y 16..120), pulled at both grips
+    spec = `<g transform="rotate(-90 50 68)">${dogbone(-2, 56, 104, 24)}</g>
+      <path d="M50,16 v-14" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>
+      <path d="M50,120 v14" stroke="currentColor" stroke-width="1.5" marker-end="url(#ilArr)"/>`;
   }
 
   const ox = 136, ow = 154, oy = 12, oh = 100;
