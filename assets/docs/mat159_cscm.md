@@ -1,8 +1,33 @@
 # MAT_159 — CSCM Concrete
 
 ## When to use
-- Concrete damage/crushing, often for impact/blast-type dynamics.
+- Concrete damage and crushing, often for impact- and blast-type dynamics.
 
-## Important
-CSCM can be sensitive and usually requires calibration (rate effects, mesh dependence, etc.).
-The generator here is a compact example; use the keyword sample as a known starting point.
+## What the generator writes
+
+`*MAT_CSCM` with user-defined parameters (the keyword option left blank), in mm–ms–g–N–MPa:
+
+- Input f_c is the measured cylinder strength of the concrete you model (its mean strength).
+- Shear, cap and damage parameters follow the calibration of Novozhilov, Dmitriev & Mikhaluk (2022). They differ from the values `*MAT_CSCM_CONCRETE` generates internally from f_c and d_max.
+- `GFT = GFS = G_F`, `GFC = 100 G_F`, with G_F from f_c and d_max.
+- `ERODE = 1.05`: elements are eroded when the maximum principal strain exceeds 5 %.
+
+## Rate effects (IRATE)
+
+`IRATE = 0` (default) switches rate effects off. With `IRATE = 1` the Murray (2007) viscoplastic model is used: `η = η0 / ε̇^n`. Murray's fits for η0c and η0t take f'c in psi and give η0 in s^(1−n). The generator converts them to milliseconds:
+
+- `ETA0C = η0c,s · 1000^(1 − NC)`, `NC = 0.78`
+- `ETA0T = η0t,s · 1000^(1 − NT)`, `NT = 0.48`
+
+At f_c = 30 MPa this gives ETA0C = 4.587E-4 and ETA0T = 2.242E-3, identical to the values LS-DYNA R13 prints for `*MAT_CSCM_CONCRETE` with FPC = 30 and UNITS = 1 (MPa, mm, ms). Before 2026-10-15 the generator wrote the values in seconds and evaluated η0t with f_c in MPa instead of psi (5.07E-5 instead of 2.24E-3); this had no effect while IRATE = 0.
+
+## Points to check before use
+
+- The tensile G_F dissipated in the notched-prism example was 1.41 × GFT (5 mm mesh). Check G_F against a test where tensile cracking governs.
+- Calibration targets 20–58 MPa; outside that range check the uniaxial response.
+
+## References
+
+- Murray, Y. D. (2007). *Users manual for LS-DYNA concrete material model 159*. FHWA-HRT-05-062.
+- Novozhilov, Y. V., Dmitriev, A. N., & Mikhaluk, D. S. (2022). Precise calibration of the Continuous Surface Cap Model for concrete simulation. *Buildings*, 12(5), 636.
+- LS-DYNA Keyword User's Manual, Vol. II, R13 — *MAT_CSCM.

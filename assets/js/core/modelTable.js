@@ -1,5 +1,6 @@
 // Shared model table (home + library)
 import { escapeHtml } from "./dom.js";
+import { specimenIcon } from "./illus.js?v=20261015d";
 
 export function byMat(a, b){
   return (a.mat||"").toString().localeCompare((b.mat||"").toString(), undefined, { numeric:true });
@@ -29,8 +30,13 @@ export function renderModelRows(tbody, items, opts = {}){
       <tr>
         <td class="mat">MAT_${escapeHtml(m.mat)}</td>
         <td>
+          <div class="namecell">
+          ${specimenIcon(m)}
+          <div>
           <div class="name"><a href="./details.html?id=${id}">${escapeHtml(m.name)}</a></div>
           <div class="desc">${escapeHtml(m.summary || "")}</div>
+          </div>
+          </div>
         </td>
         <td class="hide-sm">${escapeHtml(m.category || "—")}</td>
         <td class="num hide-sm">${(m.inputs || []).length}</td>

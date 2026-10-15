@@ -1,0 +1,332 @@
+"""Build LS-DYNA decks for the standard-specimen examples of LS-DYNA Material Hub.
+
+Units: mm, ms, g, N, MPa (same as every generator on the site).
+
+Specimens
+  CYL   concrete cylinder 150 x 300 mm, uniaxial compression between frictionless platens
+  BEAM  notched concrete prism 150 x 150 x 550 mm, three-point bending, span 500 mm (EN 14651 geometry)
+  BAR   round steel tensile bar d0 = 10 mm, gauge L0 = 50 mm (ISO 6892-1 proportional, k = 5.65)
+
+Material cards come from the site's generators (tools/examples/materials/*.k).
+
+usage: python build_examples.py <out_dir>        -> <out_dir>/<case>/case.k
+"""
+import math
+import os
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+MATDIR = os.path.join(HERE, "materials")
+
+
+# ----------------------------------------------------------------- helpers
+def f10(x):
+    if isinstance(x, int):
+        return f"{x:10d}"
+    s = f"{x:10.4g}"
+    return s if len(s) <= 10 else f"{x:10.3E}"
+
+
+def card(*vals):
+    return "".join(f10(v) for v in vals)
+
+
+def material_block(name):
+    """Return the generator output without *KEYWORD/*END/*TITLE."""
+    lines = open(os.path.join(MATDIR, name + ".k"), encoding="utf-8").read().splitlines()
+    out, skip = [], 0
+    for ln in lines:
+        if skip:
+            if not ln.startswith("$"):
+                skip -= 1          # the title line itself (comments before it are dropped too)
+            continue
+        u = ln.strip().upper()
+        if u in ("*KEYWORD", "*END"):
+            continue
+        if u == "*TITLE":
+            skip = 1
+            continue
+        out.append(ln)
+    return "\n".join(out).strip()
+
+
+# ----------------------------------------------------------------- O-grid disc
+def ogrid_disc(R, n):
+    """Structured O-grid (core square + ring) on a disc of radius R, n cells across (n even).
+    Returns (points[(i,j)] -> (x,y), quads[(i,j)] -> 4 index pairs)."""
+    assert n % 2 == 0
+    s = 0.5   # index-space fraction occupied by the core square
+    c = 0.5   # core half-width as a fraction of R
+    pts = {}
+    for i in range(n + 1):
+        for j in range(n + 1):
+            u = -1 + 2 * i / n
+            v = -1 + 2 * j / n
+            rho = max(abs(u), abs(v))
+            if rho <= s + 1e-12:
+                x, y = R * c * u / s, R * c * v / s
+            else:
+                if abs(u) >= abs(v):
+                    phi = (math.pi / 4) * (v / abs(u))
+                    d = (math.copysign(math.cos(phi), u), math.sin(phi))
+                else:
+                    phi = (math.pi / 4) * (u / abs(v))
+                    d = (math.sin(phi), math.copysign(math.cos(phi), v))
+                pin = (R * c * u / rho, R * c * v / rho)
+                t = (rho - s) / (1 - s)
+                x = pin[0] + t * (R * d[0] - pin[0])
+                y = pin[1] + t * (R * d[1] - pin[1])
+            pts[(i, j)] = (x, y)
+    quads = {(i, j): [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1)] for i in range(n) for j in range(n)}
+    return pts, quads
+
+
+class Mesh:
+    def __init__(self):
+        self.nodes = []      # (id, x, y, z)
+        self.elems = []      # (id, pid, n1..n8)
+
+    def add_node(self, x, y, z):
+        nid = len(self.nodes) + 1
+        self.nodes.append((nid, x, y, z))
+        return nid
+
+    def add_hex(self, pid, ns):
+        eid = len(self.elems) + 1
+        self.elems.append((eid, pid, *ns))
+        return eid
+
+    def node_cards(self):
+        out = ["*NODE"]
+        out += [f"{n:8d}{x:16.6f}{y:16.6f}{z:16.6f}" for n, x, y, z in self.nodes]
+        return out
+
+    def elem_cards(self):
+        out = ["*ELEMENT_SOLID"]
+        out += ["".join(f"{v:8d}" for v in e) for e in self.elems]
+        return out
+
+
+def node_set(sid, ids, title):
+    out = ["*SET_NODE_LIST_TITLE", title, card(sid)]
+    ids = list(ids)
+    for k in range(0, len(ids), 8):
+        out.append("".join(f"{i:10d}" for i in ids[k:k + 8]))
+    return out
+
+
+def cylinder_mesh(R, H, n, nz, radius_of_z=None):
+    pts, quads = ogrid_disc(R, n)
+    m = Mesh()
+    ids = {}
+    for k in range(nz + 1):
+        z = H * k / nz
+        sc = 1.0 if radius_of_z is None else radius_of_z(z) / R
+        for key, (x, y) in pts.items():
+            ids[(key, k)] = m.add_node(x * sc, y * sc, z)
+    for k in range(nz):
+        for q in quads.values():
+            bot = [ids[(p, k)] for p in q]
+            top = [ids[(p, k + 1)] for p in q]
+            m.add_hex(1, bot + top)
+    layer = lambda k: [ids[(key, k)] for key in pts]
+    centre = ids[((n // 2, n // 2), 0)]
+    edge = ids[((n, n // 2), 0)]
+    axis = lambda k: ids[((n // 2, n // 2), k)]
+    return m, layer, centre, edge, axis
+
+
+# ----------------------------------------------------------------- common deck parts
+def header(title, tend, dt_out, extra_ctrl=()):
+    return [
+        "*KEYWORD",
+        "*TITLE",
+        title,
+        "$ Units: mm-ms-g-N-MPa. Generated by tools/examples/build_examples.py (LS-DYNA Material Hub)",
+        "*CONTROL_TERMINATION",
+        card(float(tend)),
+        *extra_ctrl,
+        "*CONTROL_ENERGY",
+        card(2, 2, 2, 2),
+        "*DATABASE_GLSTAT", card(float(dt_out)),
+        "*DATABASE_MATSUM", card(float(dt_out)),
+        "*DATABASE_SPCFORC", card(float(dt_out)),
+        "*DATABASE_NODOUT", card(float(dt_out)),
+        "*DATABASE_EXTENT_BINARY", card(0, 0, 3, 1),     # STRFLG = 1: strain tensors in d3plot
+        card(0, 0, 0, 1, 1, 1, 2, 1),                  # card 2: defaults
+        card(0, 0, 1.0, 0, 0, 0),                      # card 3: defaults
+    ]
+
+
+def ramp_curve(lcid, v, t_ramp, tend):
+    return ["*DEFINE_CURVE_TITLE", "prescribed velocity (smooth start)", card(lcid),
+            f"{0.0:20.6f}{0.0:20.6f}",
+            f"{t_ramp:20.6f}{v:20.8f}",
+            f"{tend * 10:20.6f}{v:20.8f}"]
+
+
+CONCRETE = {
+    # case suffix : (material file, mid, eosid, note)
+    "KCC": ("k072", 1, 1001, "MAT_072R3, generator output (DIF curve active)"),
+    "KCC-NR": ("k072", 1, 1001, "MAT_072R3, LCRATE set to 0 (no strain-rate enhancement)"),
+    "WIN": ("w084", 2, 0, "MAT_084 Winfrith, RATE = 1"),
+    "CSCM": ("c159", 3, 0, "MAT_159 CSCM, IRATE = 0"),
+    "CDP": ("d273", 4, 0, "MAT_273 CDPM2, STRFLG = 0"),
+}
+STEEL = {
+    "M003": ("s003", 12, 0, "MAT_003, bilinear fit to the MAT_024 curve"),
+    "M015": ("s015", 13, 13, "MAT_015 Johnson-Cook, A/B/n fitted to the MAT_024 curve, C = 0"),
+    "M024": ("s024", 11, 0, "MAT_024 with the Yun & Gardner (2017) curve, fy = 355, fu = 510 MPa"),
+}
+
+
+def concrete_material(key, beam=False):
+    f, mid, eos, note = CONCRETE[key]
+    if beam and f == "k072":
+        f = "k072_h5"          # KCC is regularised per element size: 5 mm in the beam, 7.5 mm in the cylinder
+    blk = material_block(f)
+    if key == "KCC-NR":
+        # card 3 field 6 (LCRATE) -> 0
+        lines = blk.splitlines()
+        i = next(k for k, l in enumerate(lines) if l.startswith("$# slambda"))
+        l = lines[i + 1]
+        lines[i + 1] = l[:50] + f"{0:10d}" + l[60:]
+        blk = "\n".join(lines)
+    return mid, eos, note, blk
+
+
+def write(path, lines):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", newline="\n", encoding="utf-8") as fh:
+        fh.write("\n".join(lines) + "\n")
+
+
+# ----------------------------------------------------------------- CYL
+def build_cyl(out, key):
+    mid, eos, note, mat = concrete_material(key)
+    R, H, n, nz = 75.0, 300.0, 20, 40
+    m, layer, centre, edge, axis = cylinder_mesh(R, H, n, nz)
+    tend, dz = 30.0, 3.0                       # 3 mm shortening = 1 % strain
+    v = -dz / (tend - 0.5)
+    L = header(f"CYL {key}: concrete cylinder 150x300 uniaxial compression ({note})", tend, 0.05)
+    L += ["*DATABASE_BINARY_D3PLOT", card(tend / 30)]
+    if key == "WIN":
+        L += ["*DATABASE_BINARY_D3CRACK", card(tend / 30)]
+    L += ["*PART", f"cylinder ({note})", card(1, 1, mid, eos, 1),
+          "*SECTION_SOLID", card(1, 1),
+          "*HOURGLASS", card(1, 4, 0.05)]
+    L += m.node_cards() + m.elem_cards()
+    bot, top = layer(0), layer(nz)
+    L += node_set(1, bot, "bottom face") + node_set(2, top, "top face (loaded)")
+    L += node_set(3, [axis(nz)], "top centre node")
+    L += ["*BOUNDARY_SPC_SET", card(1, 0, 0, 0, 1, 0, 0, 0),
+          "*BOUNDARY_SPC_NODE", card(centre, 0, 1, 1, 1, 0, 0, 0), card(edge, 0, 0, 1, 1, 0, 0, 0),
+          "*BOUNDARY_PRESCRIBED_MOTION_SET", card(2, 3, 0, 1, 1.0)]
+    L += ramp_curve(1, v, 0.5, tend)
+    L += ["*DATABASE_HISTORY_NODE_SET", card(3)]
+    L += [mat, "*END"]
+    write(os.path.join(out, f"CYL-{key}", "case.k"), L)
+
+
+# ----------------------------------------------------------------- BEAM
+def build_beam(out, key):
+    mid, eos, note, mat = concrete_material(key, beam=True)
+    Lb, B, D = 550.0, 150.0, 150.0
+    nx, ny, nz = 111, 30, 30                  # odd nx -> one element column centred on midspan
+    dx, dy, dz = Lb / nx, B / ny, D / nz
+    notch_cols = {nx // 2}                    # 4.95 mm wide notch
+    notch_rows = 5                            # 25 mm deep
+    m = Mesh()
+    nid = {}
+    for i in range(nx + 1):
+        for j in range(ny + 1):
+            for k in range(nz + 1):
+                nid[(i, j, k)] = m.add_node(i * dx, j * dy, k * dz)
+    for i in range(nx):
+        for j in range(ny):
+            for k in range(nz):
+                if i in notch_cols and k < notch_rows:
+                    continue
+                n8 = [nid[(i, j, k)], nid[(i + 1, j, k)], nid[(i + 1, j + 1, k)], nid[(i, j + 1, k)],
+                      nid[(i, j, k + 1)], nid[(i + 1, j, k + 1)], nid[(i + 1, j + 1, k + 1)], nid[(i, j + 1, k + 1)]]
+                m.add_hex(1, n8)
+    used = {n for e in m.elems for n in e[2:]}
+    iL, iR = round(25.0 / dx), round((Lb - 25.0) / dx)          # supports at 25 mm from the ends
+    ic = nx // 2
+    sup_left = [nid[(i, j, 0)] for i in (iL - 1, iL, iL + 1) for j in range(ny + 1)]
+    sup_right = [nid[(i, j, 0)] for i in (iR - 1, iR, iR + 1) for j in range(ny + 1)]
+    load = [nid[(i, j, nz)] for i in (ic, ic + 1) for j in range(ny + 1)]
+    cmod = [nid[(ic, ny // 2, 0)], nid[(ic + 1, ny // 2, 0)]]
+    defl = [nid[(ic, ny // 2, nz)], nid[(ic + 1, ny // 2, nz)]]
+    tend, dmax = 40.0, 1.0
+    v = -dmax / (tend - 1.0)
+    L = header(f"BEAM {key}: notched prism 150x150x550, 3-point bending, span {(iR - iL) * dx:.1f} ({note})", tend, 0.05)
+    L += ["*DATABASE_BINARY_D3PLOT", card(tend / 40)]
+    if key == "WIN":
+        L += ["*DATABASE_BINARY_D3CRACK", card(tend / 40)]
+    # ELFORM 2 (fully integrated): the crack localises in one element column, where reduced
+    # integration + hourglass control absorbed 20-55 % of the external work in a first run.
+    L += ["*PART", f"prism ({note})", card(1, 1, mid, eos, 0),
+          "*SECTION_SOLID", card(1, 2)]
+    m.nodes = [nd for nd in m.nodes if nd[0] in used]
+    L += m.node_cards() + m.elem_cards()
+    L += node_set(1, sup_left, "left support (3 node lines)") + node_set(2, sup_right, "right support (3 node lines)")
+    L += node_set(3, load, "load line (2 node lines at midspan)")
+    L += node_set(4, cmod + defl, "CMOD pair (bottom, notch edges) and deflection pair (top)")
+    mid_left = nid[(iL, ny // 2, 0)]
+    L += ["*BOUNDARY_SPC_SET", card(1, 0, 0, 0, 1, 0, 0, 0), card(2, 0, 0, 0, 1, 0, 0, 0),
+          "*BOUNDARY_SPC_NODE", card(mid_left, 0, 1, 1, 1, 0, 0, 0),
+          card(nid[(iR, ny // 2, 0)], 0, 0, 1, 1, 0, 0, 0),
+          "*BOUNDARY_PRESCRIBED_MOTION_SET", card(3, 3, 0, 1, 1.0)]
+    L += ramp_curve(1, v, 1.0, tend)
+    L += ["*DATABASE_HISTORY_NODE_SET", card(4)]
+    L += [mat, "*END"]
+    write(os.path.join(out, f"BEAM-{key}", "case.k"), L)
+
+
+# ----------------------------------------------------------------- BAR
+def build_bar(out, key):
+    f, mid, eos, note = STEEL[key]
+    mat = material_block(f)
+    R0, Lc, n, nz = 5.0, 80.0, 10, 80
+    # 0.5 % smooth diameter reduction at mid-length to fix the neck location
+    rz = lambda z: R0 * (1 - 0.0025 * (1 + math.cos(2 * math.pi * (z - Lc / 2) / Lc)))
+    m, layer, centre, edge, axis = cylinder_mesh(R0, Lc, n, nz, radius_of_z=rz)
+    tend, ext = 60.0, 24.0                      # 24 mm elongation of the 80 mm parallel length
+    v = ext / (tend - 1.0)
+    g0, g1 = round((Lc / 2 - 25) / (Lc / nz)), round((Lc / 2 + 25) / (Lc / nz))
+    L = header(f"BAR {key}: round tensile bar d0=10, L0=50 ({note})", tend, 0.1,
+               extra_ctrl=["*CONTROL_TIMESTEP", card(0.0, 0.9, 0, 0.0, -1.0e-4)])
+    L += ["*DATABASE_BINARY_D3PLOT", card(tend / 30)]
+    L += ["*PART", f"bar ({note})", card(1, 1, mid, eos, 0),
+          "*SECTION_SOLID", card(1, 2)]
+    L += m.node_cards() + m.elem_cards()
+    L += node_set(1, layer(0), "grip end (fixed)") + node_set(2, layer(nz), "grip end (pulled)")
+    L += node_set(3, [axis(g0), axis(g1)], "gauge marks L0 = 50 mm on the axis")
+    L += ["*BOUNDARY_SPC_SET", card(1, 0, 1, 1, 1, 0, 0, 0), card(2, 0, 1, 1, 0, 0, 0, 0),
+          "*BOUNDARY_PRESCRIBED_MOTION_SET", card(2, 3, 0, 1, 1.0)]
+    L += ramp_curve(1, v, 1.0, tend)
+    L += ["*DATABASE_HISTORY_NODE_SET", card(3)]
+    L += [mat, "*END"]
+    write(os.path.join(out, f"BAR-{key}", "case.k"), L)
+
+
+def main():
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, "decks")
+    for k in ("KCC", "KCC-NR", "WIN", "CSCM", "CDP"):
+        build_cyl(out, k)
+    for k in ("KCC-NR", "WIN", "CSCM", "CDP"):
+        build_beam(out, k)
+    for k in STEEL:
+        build_bar(out, k)
+    for d in sorted(os.listdir(out)):
+        p = os.path.join(out, d, "case.k")
+        if os.path.exists(p):
+            txt = open(p).read()
+            nn = len(txt.split("*NODE\n")[1].split("*ELEMENT_SOLID")[0].splitlines())
+            ne = len(txt.split("*ELEMENT_SOLID\n")[1].split("*SET_NODE")[0].splitlines())
+            print(f"{d:14s} nodes={nn:7d} elems={ne:7d}")
+
+
+if __name__ == "__main__":
+    main()

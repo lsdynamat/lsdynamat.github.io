@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 300" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="none" stroke="currentColor">
+  <title>Concrete cylinder 150 x 300 mm in uniaxial compression</title>
+  <!-- platens -->
+  <rect x="80" y="28" width="120" height="10" fill="currentColor" fill-opacity=".15" stroke-width="1"/>
+  <rect x="80" y="262" width="120" height="10" fill="currentColor" fill-opacity=".15" stroke-width="1"/>
+  <!-- cylinder -->
+  <path d="M90 50 v200 M190 50 v200" stroke-width="1.5"/>
+  <ellipse cx="140" cy="50" rx="50" ry="10" stroke-width="1.5"/>
+  <path d="M90 250 a50 10 0 0 0 100 0" stroke-width="1.5"/>
+  <path d="M90 250 a50 10 0 0 1 100 0" stroke-width="1" stroke-dasharray="3 3" opacity=".6"/>
+  <!-- prescribed displacement -->
+  <path d="M140 4 v20" stroke-width="1.5"/><path d="M135 18 l5 7 l5 -7" stroke-width="1.5"/>
+  <text x="150" y="16" fill="currentColor" stroke="none">u(t), 3 mm in 30 ms</text>
+  <!-- support -->
+  <path d="M95 278 l8 10 h-16 z M135 278 l8 10 h-16 z M175 278 l8 10 h-16 z" stroke-width="1"/>
+  <text x="200" y="290" fill="currentColor" stroke="none">u_z = 0</text>
+  <!-- dims -->
+  <path d="M220 50 v200 M215 50 h10 M215 250 h10" stroke-width="1" opacity=".7"/>
+  <text x="228" y="154" fill="currentColor" stroke="none">H = 300</text>
+  <path d="M90 76 h100" stroke-width="1" opacity=".7"/>
+  <text x="140" y="92" text-anchor="middle" fill="currentColor" stroke="none">D = 150</text>
+  <text x="20" y="150" fill="currentColor" stroke="none" font-size="10">frictionless</text>
+  <text x="20" y="163" fill="currentColor" stroke="none" font-size="10">platens</text>
+  <text x="140" y="300" text-anchor="middle" fill="currentColor" stroke="none" font-size="10" opacity=".8">16 000 hexa, 7.5 mm, ELFORM 1</text>
+</svg>

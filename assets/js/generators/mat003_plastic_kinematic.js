@@ -46,11 +46,11 @@ export const FIELDS = [
 
   { key: "sigy", label: "Yield stress SIGY (fy)", unit: "MPa", default: DEFAULTS.sigy, min: 0, hint: "Example: 390" },
   { key: "etan", label: "Tangent modulus ETAN", unit: "MPa", default: DEFAULTS.etan, min: 0, hint: "Post-yield slope" },
-  { key: "beta", label: "Hardening mix BETA", unit: "-", default: DEFAULTS.beta, min: 0, max: 1, hint: "0=isotropic, 1=kinematic" },
+  { key: "beta", label: "Hardening mix BETA", unit: "-", default: DEFAULTS.beta, min: 0, max: 1, hint: "0=kinematic, 1=isotropic" },
 
   { key: "src", label: "SRC (optional)", unit: "-", default: DEFAULTS.src, hint: "Leave blank/0 to disable rate effect" },
   { key: "srp", label: "SRP (optional)", unit: "-", default: DEFAULTS.srp, hint: "Leave blank/0 to disable rate effect" },
-  { key: "fs",  label: "FS (optional)",  unit: "-", default: DEFAULTS.fs,  hint: "Often left blank/0" },
+  { key: "fs",  label: "FS (optional)",  unit: "-", default: DEFAULTS.fs,  hint: "Plastic strain at element erosion; blank = no erosion" },
   { key: "vp",  label: "VP", unit: "-", default: DEFAULTS.vp, min: 0, hint: "0=scale yield stress; 1=viscoplastic" },
 ];
 
@@ -68,14 +68,16 @@ export function generate(input = {}) {
   // Optional Cowper–Symonds: blank/0 => write 0
   const src = readOptionalPositive(inp.src) ?? 0.0;
   const srp = readOptionalPositive(inp.srp) ?? 0.0;
-  const fs  = readOptionalNumber(inp.fs) ?? 0.0;
+  // FS = plastic strain at erosion; blank field -> LS-DYNA default 1E+20 (no erosion)
+  const fs  = readOptionalPositive(inp.fs);
   const vp  = mustNonNegInt("vp", inp.vp);
 
   // ---- title (AUTO as you requested) ----
+  // Manual (R13, MAT_003 Remark 2): BETA = 0 -> kinematic, BETA = 1 -> isotropic
   const hardeningText =
     beta <= 1e-12
-      ? "isotropic hardening"
-      : (Math.abs(beta - 1.0) <= 1e-12 ? "kinematic hardening" : `combined hardening (BETA=${toFixed(beta, 2)})`);
+      ? "kinematic hardening"
+      : (Math.abs(beta - 1.0) <= 1e-12 ? "isotropic hardening" : `combined hardening (BETA=${toFixed(beta, 2)})`);
 
   const titleLine = `MAT_003 fy = ${toFixed(sigy, 1)} MPa, Etan = ${toFixed(etan, 1)} MPa, ${hardeningText}`;
 
@@ -107,7 +109,7 @@ export function generate(input = {}) {
   lines.push(
     `${fmt10(src, 6)}` +
     `${fmt10(srp, 6)}` +
-    `${fmt10(fs, 6)}` +
+    `${fs == null ? " ".repeat(10) : fmt10(fs, 6)}` +
     `${fmt10(vp)}`
   );
 

@@ -1,5 +1,95 @@
 [
-
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-15",
+    "version": "1.4",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "Fracture energy is now regularised to the element-size input: λ6–λ10 are stretched so that one cracked element dissipates G_F (fib MC2010 by default, or the new optional G_F input). Checked by single-element tension in LS-DYNA R13: within 2.5 % of the target for h = 5–50 mm and f_c = 20–60 MPa. The compressive peak is unchanged."
+  },
+  {
+    "id": "mat159_cscm",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_159 CSCM",
+    "change": "f_c is now treated as the measured mean cylinder strength: the modulus no longer adds 8 MPa twice (E was computed from f_c + 16) and G_F uses f_c directly. GFT/GFS are written with 5 decimals (0.0753 was written as 0.08). ETA0C/ETA0T converted from s to ms and ETA0T now uses f_c in psi; both match *MAT_CSCM_CONCRETE in LS-DYNA R13. New IRATE input (default 0)."
+  },
+  {
+    "id": "mat273_cdp",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_273 CDP",
+    "change": "FT now follows EN 1992-1-1 with f_c as the mean cylinder strength: fctm = 0.30 (f_c − 8)^(2/3) (2.35 MPa at f_c = 30 MPa, was 2.90)."
+  },
+  {
+    "id": "mat084_winfrith",
+    "date": "2026-10-15",
+    "version": "1.1",
+    "model": "MAT_084 Winfrith",
+    "change": "f_c is now the mean cylinder strength (fcm = f_c, no longer f_c + 8): TM and GFt use f_c, UTS = 0.30 (f_c − 8)^(2/3) per EN 1992-1-1."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-15",
+    "version": "1.3",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "RSIZE is now 1/25.4 = 3.937E-2 (was 3.972E-2). Documentation adds single-element tension tests showing that the dissipated fracture energy scales with element size below LOCWID (0.05 N/mm at 5 mm, 0.26 N/mm at 25 mm for f_c = 30 MPa)."
+  },
+  {
+    "id": "mat024_piecewise_linear_plasticity",
+    "date": "2026-10-14",
+    "version": "1.1",
+    "model": "MAT_024 Piecewise Linear Plasticity",
+    "change": "Cards 3 and 4 (EPS1–8, ES1–8) are now written. LS-DYNA requires them even when LCSS is used; without them the deck stopped with an input error. Checked in an LS-DYNA R13 tensile-bar run."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-14",
+    "version": "1.2",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "New inputs: dif_model (0 = rate effects off, 1 = CEB-FIP MC90 + Malvar & Ross, 2 = fib MC2010) and rate_cap (DIF held constant above it, default 300 1/s, as in the manual's sample curve). Checked in LS-DYNA R13: peak/f_c = 0.998, 1.270 and 1.156 at 1 1/s."
+  },
+  {
+    "id": "mat015_johnson_cook",
+    "date": "2026-10-14",
+    "version": "2.0",
+    "model": "MAT_015 Johnson–Cook",
+    "change": "Rewrote the generator to the R13 card layout (MID RO G E PR / A B N C M TM TR EPS0 / CP PC SPALL IT D1–D4 / D5 EROD EFMIN NUMINT) with 10-column fields. Adds G, the *EOS_LINEAR_POLYNOMIAL required for solids, EPS0 converted from 1/s to 1/ms, CP, PC and optional D1–D5. Checked against the analytical JC curve in a single-element LS-DYNA R13 test."
+  },
+  {
+    "id": "mat027_mooney_rivlin",
+    "date": "2026-10-14",
+    "version": "2.0",
+    "model": "MAT_027 Mooney–Rivlin",
+    "change": "Rewrote the generator to the R13 card layout (MID RO PR A B REF / SGL SW ST LCID). Removed the K input, which is not a MAT_027 field; PR now limited to 0.49–0.4999 as the manual recommends. Checked against the analytical uniaxial response in LS-DYNA R13."
+  },
+  {
+    "id": "mat003_plastic_kinematic",
+    "date": "2026-10-14",
+    "version": "1.1",
+    "model": "MAT_003 Plastic Kinematic",
+    "change": "BETA labels corrected (0 = kinematic, 1 = isotropic, per the manual). FS is now written blank when not given (LS-DYNA default: no erosion); FS = 0 behaved the same in R13. SRC hint now states 1/ms units."
+  },
+  {
+    "id": "mat084_winfrith",
+    "date": "2026-10-14",
+    "version": "1.0",
+    "model": "MAT_084 Winfrith",
+    "change": "Theory notes converted from PDF to a page, with the formulas the generator uses."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-14",
+    "version": "1.1",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "DIF curve abscissa converted from 1/s to 1/ms (the model runs in ms; rate effects were shifted by a factor of 1000). Compressive DIF now switches to the steep CEB-FIP branch at 30 1/s instead of 1e5. *EOS_TABULATED_COMPACTION written with 16-character fields; LS-DYNA could not read the EOS before. Matches the manual's 45.4 MPa sample curve; checked in LS-DYNA R13. Theory notes added."
+  },
+  {
+    "id": "mat273_cdp",
+    "date": "2026-10-14",
+    "version": "1.0",
+    "model": "MAT_273 CDP",
+    "change": "Theory notes added."
+  },
   {
     "id": "mat003_plastic_kinematic",
     "date": "2025-12-31",
@@ -7,17 +97,6 @@
     "model": "MAT_003 Plastic Kinematic",
     "change": "Initial generator + auto title (fy, Etan, hardening type) + materials entry."
   },
-
-
-  
-  {
-    "id": "mat015_johnson_cook",
-    "date": "2025-12-26",
-    "version": "1.0",
-    "model": "MAT_015 Johnson–Cook",
-    "change": "Initial generator + details + sample."
-  },
-
   {
     "id": "mat024_piecewise_linear_plasticity",
     "date": "2025-12-31",
@@ -25,11 +104,34 @@
     "model": "MAT_024 Piecewise Linear Plasticity",
     "change": "Initial generator using Yun & Gardner (2017) engineering envelope; converted to true stress/strain and exported as true plastic strain vs true stress (*DEFINE_CURVE). Adds one post-peak plateau point to prevent extrapolation. Refs: DOI 10.1016/j.jcsr.2017.01.024; DOI 10.1016/j.istruc.2024.107930."
   },
-
-
-
-
-  
+  {
+    "id": "mat273_cdp",
+    "date": "2025-12-29",
+    "version": "1.0",
+    "model": "MAT_273 CDP",
+    "change": "Initial CDP generator. Derives E (EC2), FT, ECC (Jirásek & Bažant) and the bilinear softening WF from fc; RO, PR, E, FT, WF, EFC and STRFLG can be overridden."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2025-12-27",
+    "version": "1.0",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "Initial generator (ported from Python): scaled failure surfaces, DIF curve and tabulated compaction EOS."
+  },
+  {
+    "id": "mat159_cscm",
+    "date": "2025-12-27",
+    "version": "1.0",
+    "model": "MAT_159 CSCM",
+    "change": "Initial generator + details + sample."
+  },
+  {
+    "id": "mat015_johnson_cook",
+    "date": "2025-12-26",
+    "version": "1.0",
+    "model": "MAT_015 Johnson–Cook",
+    "change": "Initial generator + details + sample."
+  },
   {
     "id": "mat027_mooney_rivlin",
     "date": "2025-12-26",
@@ -43,31 +145,5 @@
     "version": "1.0",
     "model": "MAT_084 Winfrith",
     "change": "Initial generator + details + sample."
-  },
-  {
-    "id": "mat159_cscm",
-    "date": "2025-12-27",
-    "version": "1.0",
-    "model": "MAT_159 CSCM",
-    "change": "Initial generator + details + sample."
-  },
-
-
-  {
-    "date": "2025-12-29",
-    "type": "added",
-    "model": "MAT_273 CDP",
-    "version": "1.0",
-    "details": "Added CDP generator with confinement dropdown (cover/core) and FT method dropdown (auto EC2 or manual). Auto-derives ECC and WF using paper-style formulas.",
-    "files": [
-      "assets/js/generators/mat273_cdp.js",
-      "assets/js/generators/index.js",
-      "assets/data/materials.json",
-      "assets/docs/mat273_cdp.md"
-    ]
   }
-
-
-
-  
 ]

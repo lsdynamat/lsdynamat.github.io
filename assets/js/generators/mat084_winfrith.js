@@ -39,7 +39,7 @@ export const FIELDS = [
   { key: "mid",  label: "Material ID (MID)", unit: "-",      default: DEFAULTS.mid,  min: 1, hint: "Example: 99" },
   { key: "ro",   label: "Density (RO)",      unit: "g/mm^3", default: DEFAULTS.ro,   min: 1e-6, hint: "Typical: 0.0022–0.0024" },
   { key: "pr",   label: "Poisson ratio (PR)",unit: "-",      default: DEFAULTS.pr,   min: 0.0, max: 0.49, hint: "Typical: 0.20" },
-  { key: "fc",   label: "Compressive strength (f_c)", unit: "MPa", default: DEFAULTS.fc, min: 1, hint: "Example: 30.0" },
+  { key: "fc",   label: "Cylinder compressive strength (f_c = f_cm)", unit: "MPa", default: DEFAULTS.fc, min: 12, hint: "Measured mean cylinder strength, e.g. 38 for C30/37" },
   { key: "dmax", label: "Max aggregate size (d_max)", unit: "mm", default: DEFAULTS.dmax, min: 1, hint: "Example: 16" },
 ];
 
@@ -124,16 +124,19 @@ export function generate(input = {}) {
 // ------------------------
 // math (ported from your Python)
 // ------------------------
+// fc is the measured cylinder strength of the concrete being modelled, i.e. the mean strength f_cm
+// (CEB-FIP MC90 / EN 1992-1-1 notation). f_ck = f_cm - 8 MPa is used only where a code formula needs it.
 function calculate_tm(fc) {
   const Ec0 = 21.5e3; // MPa
-  const delta_f = 8;
   const fcm0 = 10;
-  return Ec0 * Math.pow((fc + delta_f) / fcm0, 1 / 3);
+  return Ec0 * Math.pow(fc / fcm0, 1 / 3);
 }
 
+// EN 1992-1-1 Table 3.1: f_ctm = 0.30 f_ck^(2/3) up to C50/60, 2.12 ln(1 + f_cm/10) above
 function calculate_ft(fc) {
-  if (fc <= 50) return 0.3 * Math.pow(fc, 2 / 3);
-  return 2.12 * Math.log(1 + 0.1 * (fc + 8));
+  const fck = Math.max(fc - 8, 1);
+  if (fck <= 50) return 0.3 * Math.pow(fck, 2 / 3);
+  return 2.12 * Math.log(1 + 0.1 * fc);
 }
 
 function calculate_gf0(dmax) {
@@ -141,7 +144,7 @@ function calculate_gf0(dmax) {
 }
 
 function calculate_gf(fc, dmax) {
-  const fcm = fc + 8;
+  const fcm = fc;
   const fcm0 = 10;
   const gf0 = calculate_gf0(dmax);
   return gf0 * Math.pow(fcm / fcm0, 0.7);

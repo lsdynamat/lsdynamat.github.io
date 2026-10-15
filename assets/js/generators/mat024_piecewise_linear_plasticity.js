@@ -240,6 +240,12 @@ export function generate(input = {}) {
   lines.push("$#       C        P      LCSS      LCSR        VP");
   lines.push(`${fmt10(c, 6)}${fmt10(p, 6)}${fmt10(lcss)}${fmt10(0)}${fmt10(0)}`);
 
+  // Cards 3-4 are required by LS-DYNA even when LCSS is used (values ignored)
+  lines.push("$#    EPS1      EPS2      EPS3      EPS4      EPS5      EPS6      EPS7      EPS8");
+  lines.push(Array(8).fill(fmt10(0)).join(""));
+  lines.push("$#     ES1       ES2       ES3       ES4       ES5       ES6       ES7       ES8");
+  lines.push(Array(8).fill(fmt10(0)).join(""));
+
   // 4) END
   lines.push("*END");
   lines.push("");

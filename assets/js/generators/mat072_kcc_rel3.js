@@ -26,6 +26,9 @@ export const DEFAULTS = {
   omega: 0.5,      // -
   ro: 0.0023,      // g/mm^3 (typical concrete)
   pr: 0.16,        // Poisson in your Python used as phr=0.16
+  dif_model: 1,    // 0 = no rate effects, 1 = CEB-FIP MC90 (comp.) + Malvar & Ross (tension), 2 = fib MC2010
+  rate_cap: 300,   // 1/s: DIF held constant above this strain rate
+  gf: "",          // N/mm, blank = fib MC2010: 73 fcm^0.18 N/m
 };
 
 // If your UI reads "inputs" from materials.json, this is optional.
@@ -33,7 +36,8 @@ export const DEFAULTS = {
 export const FIELDS = [
   { key: "mid", label: "Material ID (MID)", unit: "-", default: DEFAULTS.mid, min: 1, hint: "Example: 1" },
   { key: "fc", label: "Compressive strength (fc)", unit: "MPa", default: DEFAULTS.fc, min: 1, hint: "Example: 25" },
-  { key: "elm_size", label: "Element size", unit: "mm", default: DEFAULTS.elm_size, min: 1, hint: "Example: 25" },
+  { key: "elm_size", label: "Element size", unit: "mm", default: DEFAULTS.elm_size, min: 1, hint: "Element edge length where cracks form; G_F is regularised to it" },
+  { key: "gf", label: "Fracture energy G_F (optional)", unit: "N/mm", default: DEFAULTS.gf, hint: "Blank = fib MC2010" },
   { key: "omega", label: "Omega (ω)", unit: "-", default: DEFAULTS.omega, min: 0, max: 1, hint: "Example: 0.5" },
   { key: "ro", label: "Density (RO)", unit: "g/mm^3", default: DEFAULTS.ro, min: 1e-6, hint: "Typical: 0.0023" },
   { key: "pr", label: "Poisson ratio (PR)", unit: "-", default: DEFAULTS.pr, min: 0.0, max: 0.49, hint: "Python uses 0.16" },
@@ -48,6 +52,9 @@ export function generate(input = {}) {
   const omega = mustInRange("omega", inp.omega, 0.0, 1.0);
   const ro = mustPositive("ro", inp.ro);
   const pr = mustInRange("pr", inp.pr, 0.0, 0.49);
+  const difModel = Math.round(mustInRange("dif_model", inp.dif_model, 0, 2));
+  const rateCap = mustPositive("rate_cap", inp.rate_cap);
+  const gfIn = Number(inp.gf);
 
   // --- Python constants / conversions
   // In python:
@@ -61,8 +68,9 @@ export function generate(input = {}) {
   const mesh_size_in = elm_size_mm / INCH; // mm -> inch
 
   // --- Python per-material constants
-  const lcrate = 1000 + mid;
-  const eosid = lcrate;
+  const lcid_dif = 1000 + mid;
+  const eosid = 1000 + mid;
+  const lcrate = difModel === 0 ? 0 : lcid_dif;
 
   // In python:
   // phr = 0.16
@@ -122,37 +130,38 @@ export function generate(input = {}) {
     0.000e+0, 0.000e+0, 0.000e+0
   ];
 
-  // --- DIF curve (ported exactly)
-  const fco = 1450;
-  const esco = 0.00003;
-
+  // --- DIF curves (strain rate in 1/s here; converted to 1/ms when written)
+  const fco = 1450;                       // psi (10 MPa)
   const alpha_DIF = 1 / (5 + 9 * fc_psi / fco);
   const gamma = Math.pow(10, (6.156 * alpha_DIF - 2));
-
-  const esc = [0, 3e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 3, 10, 30, 100, 300, 3.0e+5];
-  const est = [3.0e+4, 3.0e+2, 1.0e+2, 3.0e+1, 1.0e+1, 3.0, 1.0, 1.0e-1, 1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5];
-
-  const es_DIF = [...est.map(v => -v), ...esc];
-  const DIF = new Array(es_DIF.length).fill(0);
-
-  // compression DIF part
-  for (let idx = est.length; idx < est.length + esc.length; idx++) {
-    const val = esc[idx - est.length];
-    if (val <= 1e5) DIF[idx] = Math.pow(val / esco, (1.026 * alpha_DIF));
-    else DIF[idx] = gamma * Math.pow(val / esco, (1 / 3));
-  }
-  DIF[est.length] = 1.0;
-
-  // tension DIF part
-  const esto = 1.0e-6;
   const delta = 1 / (1 + 8 * fc_psi / fco);
   const beta = Math.pow(10, (6 * delta - 2));
 
-  for (let idx = 0; idx < est.length; idx++) {
-    const val = est[idx];
-    if (val <= 1.0) DIF[idx] = Math.pow(val / esto, delta);
-    else DIF[idx] = beta * Math.pow(val / esto, (1 / 3));
-  }
+  // compression, rate r > 0 (1/s)
+  const difC = r => {
+    if (r <= 0) return 1.0;
+    if (difModel === 2) {                 // fib MC2010 (5.1-104/105), eps0 = 30e-6 1/s
+      return r <= 30 ? Math.pow(r / 30e-6, 0.014) : 0.012 * Math.pow(r / 30e-6, 1 / 3);
+    }
+    // CEB-FIP MC90: steep branch above 30 1/s
+    return r <= 30 ? Math.pow(r / 30e-6, 1.026 * alpha_DIF) : gamma * Math.pow(r / 30e-6, 1 / 3);
+  };
+  // tension, rate r > 0 (1/s)
+  const difT = r => {
+    if (difModel === 2) {                 // fib MC2010 (5.1-106/107), eps0 = 1e-6 1/s
+      return r <= 10 ? Math.pow(r / 1e-6, 0.018) : 0.0062 * Math.pow(r / 1e-6, 1 / 3);
+    }
+    // Malvar & Ross (1998)
+    return r <= 1 ? Math.pow(r / 1e-6, delta) : beta * Math.pow(r / 1e-6, 1 / 3);
+  };
+
+  // abscissa points (1/s), capped at rateCap; beyond it DIF is held constant (as in the manual's sample curve)
+  const esc = [0, 3e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1.0, 3, 10, 30, 100, 300].filter(r => r < rateCap);
+  const est = [300, 100, 30, 10, 3, 1, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5].filter(r => r < rateCap);
+  const tensPts = [100 * rateCap, rateCap, ...est].map(r => [-r, Math.max(1, difT(Math.min(r, rateCap)))]);
+  const compPts = [...esc, rateCap, 100 * rateCap].map(r => [r, Math.max(1, difC(Math.min(r, rateCap)))]);
+  const curve = [...tensPts, ...compPts];
+  curve.find(p => p[0] === 0)[1] = 1.0;
 
   // --- EOS table (defaults then converted to MPa)
   const ev = [0, -1.5e-3, -4.3e-3, -1.01e-2, -3.05e-2, -5.13e-2, -7.26e-2, -9.43e-2, -1.74e-1, -2.08e-1];
@@ -183,8 +192,21 @@ export function generate(input = {}) {
   // W_conv = W * INCH (inch -> mm)
   const W_conv = W * INCH;
 
+  // --- Fracture-energy regularisation (crack band)
+  // Single-element tension tests in LS-DYNA R13 (rate effects off) give, for the default damage
+  // function, a dissipated energy per unit volume g0 = 0.01026 (fc/30)^0.42 N/mm^2 (fc 20-60 MPa),
+  // and G_F = g0 * min(h, LOCWID): MAT_072R3 regularises only above LOCWID. G_F scales linearly
+  // with the post-peak part of lambda, so lambda_i (i >= 6) is stretched about the peak (lambda_5)
+  // by k = G_F,target / (g0 * min(h, LOCWID)).
+  const gfTarget = Number.isFinite(gfIn) && gfIn > 0 ? gfIn : 73 * Math.pow(fc_mpa, 0.18) / 1000; // N/mm
+  const g0 = 0.01026 * Math.pow(fc_mpa / 30, 0.42);
+  const hEff = Math.min(elm_size_mm, W_conv);
+  const kLambda = gfTarget / (g0 * hEff);
+  const lamPeak = lambda_default[4];
+  const lambda_out = lambda_default.map((v, i) => (i < 5 || v >= 1.0) ? v : lamPeak + kLambda * (v - lamPeak));
+
   // --- Title exactly like you did for CSCM style
-  const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, dmax=${elm_size_mm.toFixed(0)}mm`;
+  const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, element size=${elm_size_mm.toFixed(0)}mm`;
 
   // --- Keyword render (match your Python writing layout)
   const lines = [];
@@ -200,6 +222,7 @@ export function generate(input = {}) {
   lines.push(title);
   lines.push(UNITS_LINE);
   REF_LINES.forEach(s => lines.push(s));
+  lines.push(`$ G_F = ${gfTarget.toFixed(4)} N/mm (${Number.isFinite(gfIn) && gfIn > 0 ? "input" : "fib MC2010"}), regularised to h = ${elm_size_mm} mm: post-peak lambda x ${kLambda.toFixed(3)}`);
   lines.push(HUB_LINE);
 
   lines.push(`$#     mid        ro        pr`);
@@ -221,7 +244,7 @@ export function generate(input = {}) {
     `${padInt(100, 10)}` +
     `${padInt(2, 10)}` +
     `${padInt(1, 10)}` +
-    `${fmtE(3.972e-2, 10, 3)}` +
+    `${fmtE(1 / INCH, 10, 3)}` +
     `${fmtE(1.450e+2, 10, 3)}` +
     `${padInt(lcrate, 10)}` +
     `${fmtE(W_conv, 10, 3)}` +
@@ -229,11 +252,11 @@ export function generate(input = {}) {
   );
 
   lines.push(`$# lambda1   lambda2   lambda3   lambda4   lambda5   lambda6   lambda7   lambda8`);
-  lines.push(lambda_default.slice(0, 8).map(v => fmtE(v, 10, 3)).join(""));
+  lines.push(lambda_out.slice(0, 8).map(v => fmtE(v, 10, 3)).join(""));
 
   lines.push(`$#lambda09  lambda10  lambda11  lambda12  lambda13        b3       a0y       a1y`);
   lines.push(
-    lambda_default.slice(8, 13).map(v => fmtE(v, 10, 3)).join("") +
+    lambda_out.slice(8, 13).map(v => fmtE(v, 10, 3)).join("") +
     `${fmtE(b3, 10, 3)}` +
     `${fmtE(a0yn, 10, 3)}` +
     `${fmtE(a1yn, 10, 3)}`
@@ -250,22 +273,18 @@ export function generate(input = {}) {
     `${fmtE(a2yn, 10, 3)}`
   );
 
-  lines.push(`$`);
-  lines.push(`*DEFINE_CURVE_TITLE`);
-  lines.push(`Dynamic Impact Factors for Tension and Compression`);
-  lines.push(`$#    lcid      sidr       sfa       sfo      offa      offo    dattyp`);
-  lines.push(
-    `${padInt(lcrate, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(1, 10)}` +
-    `${padInt(1, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(0, 10)}` +
-    `${padInt(0, 10)}`
-  );
-  lines.push(`$#                a1                  o1`);
-  for (let i = 0; i < es_DIF.length; i++) {
-    lines.push(`${fmtE(es_DIF[i], 20, 3)}${fmtE(DIF[i], 20, 3)}`);
+  const difName = ["none", "CEB-FIP MC90 (compression) + Malvar & Ross 1998 (tension)", "fib Model Code 2010"][difModel];
+  if (difModel === 0) {
+    lines.push(`$ Rate effects off: LCRATE = 0 (no DIF curve written)`);
+  } else {
+    lines.push(`$`);
+    lines.push(`*DEFINE_CURVE_TITLE`);
+    lines.push(`DIF: ${difName}, capped at ${rateCap} 1/s`);
+    lines.push(`$#    lcid      sidr       sfa       sfo      offa      offo    dattyp`);
+    lines.push([lcid_dif, 0, 1, 1, 0, 0, 0].map(v => padInt(v, 10)).join(""));
+    lines.push(`$ abscissa = strain rate in 1/ms (negative = tension); formulas use 1/s, converted x 1e-3`);
+    lines.push(`$#                a1                  o1`);
+    for (const [r, d] of curve) lines.push(`${fmtE(r * 1e-3, 20, 3)}${fmtE(d, 20, 3)}`);
   }
 
   lines.push(`$`);
@@ -275,24 +294,24 @@ export function generate(input = {}) {
   lines.push(`${padInt(eosid, 10)}${fmtE(GAMMA, 10, 3)}${fmtE(EO, 10, 3)}${fmtE(VO, 10, 3)}`);
 
   lines.push(`$           EV01            EV02            EV03            EV04            EV05`);
-  lines.push(ev.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(ev.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$           EV06            EV07            EV08            EV09            EV10`);
-  lines.push(ev.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(ev.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            P01             P02             P03             P04             P05`);
-  lines.push(Pv.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Pv.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            P06             P07             P08             P09             P10`);
-  lines.push(Pv.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Pv.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            T01             T02             T03             T04             T05`);
-  lines.push([0,0,0,0,0].map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push([0,0,0,0,0].map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            T06             T07             T08             T09             T10`);
-  lines.push([0,0,0,0,0].map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push([0,0,0,0,0].map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$            K01             K02             K03             K04             K05`);
-  lines.push(Kun.slice(0, 5).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Kun.slice(0, 5).map(v => fmtE(v, 16, 8)).join(""));
   lines.push(`$            K06             K07             K08             K09             K10`);
-  lines.push(Kun.slice(5, 10).map(v => fmtE(v, 12, 8)).join(" "));
+  lines.push(Kun.slice(5, 10).map(v => fmtE(v, 16, 8)).join(""));
 
   lines.push(`$`);
   lines.push(`*END`);
@@ -334,7 +353,7 @@ function padInt(v, width) {
 function fmtE(v, width = 10, sig = 3) {
   const n = Number(v);
   if (!Number.isFinite(n)) return String(v).padStart(width, " ");
-  // mimic python's 10.3E / 10.1E etc
-  const s = n.toExponential(sig).replace("e", "E");
+  // mimic python's 10.3E / 16.8E: two-digit exponent (E+00)
+  const s = n.toExponential(sig).replace(/e([+-])(\d+)$/, (m, sg, d) => "E" + sg + d.padStart(2, "0"));
   return s.padStart(width, " ");
 }

@@ -1,16 +1,16 @@
 // assets/js/generators/mat159_cscm.js
 // CSCM Generator (LS-DYNA *MAT_CSCM, MAT_159)
-// Units: mm-s-g-N-MPa
+// Units: mm-ms-g-N-MPa (density g/mm^3, stress MPa)
 
 export const KEY = "mat159_cscm";
 export const ID = 159;
 export const NAME = "CSCM Concrete (*MAT_CSCM)";
 export const CATEGORY = "Concrete";
-export const UNITS = "mm-s-g-N-MPa";
+export const UNITS = "mm-ms-g-N-MPa";
 
 // --- Header lines (match screenshot)
 const PREPOST_LINE = "$# LS-DYNA Keyword file created by LS-PrePost(R) V4.8.17 - 24Jun2021";
-const UNITS_LINE = "$ Units: mm-s-g-N-MPa";
+const UNITS_LINE = "$ Units: mm-ms-g-N-MPa (ETA0C/ETA0T converted from s to ms)";
 const MODEL_LINE = "$ Model: Continuous Surface Cap Model (CSCM) - MAT 159";
 const REF_LINE_1 = "$ Reference: Novozhilov Y.V., Dmitriev A.N., Mikhaluk D.S. Precise Calibration";
 const REF_LINE_2 = "$ of the Continuous Surface Cap Model for Concrete Simulation. Buildings. 2022.";
@@ -24,6 +24,7 @@ export const DEFAULTS = {
   mid: 465,     // example MID
   ro: 0.0023,   // g/mm^3
   pr: 0.2,      // Poisson ratio
+  irate: 0,     // 0 = rate effects off, 1 = on
 };
 
 // Optional: used if you ever want to auto-sync forms from the generator itself
@@ -43,6 +44,7 @@ export function generate(input = {}) {
   const dmax = mustPositive("dmax", inp.dmax);
   const ro = mustPositive("ro", inp.ro);
   const pr = mustInRange("pr", inp.pr, 0.0, 0.49);
+  const irate = Math.round(mustInRange("irate", inp.irate, 0, 1));
 
   // --- Ported calculations (same as Python)
   const { GF } = calculateFractureEnergy(fc, dmax);
@@ -59,7 +61,6 @@ export function generate(input = {}) {
   // Fixed constants (Python)
   const nplot = 1;
   const incre = 0.0;
-  const irate = 0;
   const erode = 1.05;
   const recov = 0.0;
   const itretrc = 0;
@@ -156,10 +157,10 @@ export function generate(input = {}) {
   lines.push("$#       b       gfc         d       gft       gfs      pwrc      pwrt      pmod");
   lines.push(
     f10(B, 1, true) +
-    f10(GFC, 1, true) +
+    f10(GFC, 3, true) +
     f10(D, 1, true) +
-    f10(GFT, 2, true) +
-    f10(GFS, 2, true) +
+    f10(GFT, 5, true) +
+    f10(GFS, 5, true) +
     f10(PWRC, 1, true) +
     f10(PWRT, 1, true) +
     f10(PMOD, 1, true)
@@ -273,8 +274,8 @@ function formatCreatedNow() {
    ========================= */
 
 function calculateFractureEnergy(fc, dmax = 16) {
-  const delta_f = 8;        // MPa
-  const fcm = fc + delta_f; // adjusted
+  // fc is the measured (mean) cylinder strength, so fcm = fc (CEB-FIP MC90 G_F)
+  const fcm = fc;
   const fcm0 = 10;          // MPa
 
   const GF0 = 0.021 + 5.357e-4 * dmax;
@@ -285,13 +286,11 @@ function calculateFractureEnergy(fc, dmax = 16) {
 
 function calculateModulus(fc, poisson_ratio = 0.2) {
   const Ec0 = 21.5e3;
-  const delta_f = 8;
-  const fcm = fc + delta_f;
+  const fcm = fc;           // measured (mean) cylinder strength
   const fcm0 = 10;
 
-  // EXACT as your Python:
-  // E = Ec0 * ((fcm + delta_f) / fcm0) ** (1/3)
-  const E = Ec0 * Math.pow((fcm + delta_f) / fcm0, 1 / 3);
+  // CEB-FIP MC90 tangent modulus (the Python port added 8 MPa twice: fc + 16)
+  const E = Ec0 * Math.pow(fcm / fcm0, 1 / 3);
 
   const G = E / (2 * (1 + poisson_ratio));
   const K = E / (3 * (1 - 2 * poisson_ratio));
@@ -320,11 +319,15 @@ function calculateAlphaBeta(fc) {
 function calculateAdditionalParameters(fc) {
   const fpsi = fc * 145.038;
 
-  const eta0c = (1.2772337e-11 * (fpsi ** 2) - 1.0613722e-7 * fpsi + 3.203497e-4);
+  // Murray (2007) fits, f'c in psi, time in seconds: eta = eta0 / rate^n
   const nc = 0.78;
-
-  const eta0t = (8.0614774e-13 * (fc ** 2) - 9.77736719e-10 * fc + 5.0752351e-5);
   const nt = 0.48;
+  const eta0c_s = 1.2772337e-11 * (fpsi ** 2) - 1.0613722e-7 * fpsi + 3.203497e-4;
+  const eta0t_s = 8.0614774e-13 * (fpsi ** 2) - 9.77736719e-10 * fpsi + 5.0752351e-5;
+  // s -> ms: eta0 carries units s^(1-n), so multiply by 1000^(1-n)
+  // (matches the values *MAT_CSCM_CONCRETE generates internally with UNITS = 1)
+  const eta0c = eta0c_s * Math.pow(1000, 1 - nc);
+  const eta0t = eta0t_s * Math.pow(1000, 1 - nt);
 
   const overc = 1.309663e-2 * (fc ** 2) - 0.3927659 * fc + 21.45;
   const overt = 1.309663e-2 * (fc ** 2) - 0.3927659 * fc + 21.45;

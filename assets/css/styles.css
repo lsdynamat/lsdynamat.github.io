@@ -167,6 +167,20 @@ h2{font-size:15px; font-weight:600; margin:0}
   margin-bottom:24px;
 }
 .section{margin-top:40px}
+.pagehead-side{display:flex; flex-direction:column; align-items:flex-end; gap:14px}
+
+/* ---------- illustrations (core/illus.js) ---------- */
+.il-icon{flex:none; color:var(--muted); margin-top:1px}
+.namecell{display:flex; gap:12px; align-items:flex-start}
+.il-fig{margin:0; color:var(--muted); max-width:100%}
+.il-fig svg{display:block; max-width:100%; height:auto}
+.il-fig figcaption{font-size:12px; color:var(--muted); text-align:right; margin-top:2px}
+.il-t{font:italic 13px var(--font-sans, inherit); fill:currentColor}
+.il-s{font-size:10px; fill:currentColor; opacity:.85}
+@media (max-width:640px){
+  .pagehead-side{align-items:stretch; width:100%}
+  .il-fig figcaption{text-align:left}
+}
 .section-title{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:10px}
 
 /* ---------- forms ---------- */
@@ -212,6 +226,7 @@ table.data .desc{color:var(--muted); font-size:13px; margin-top:2px; max-width:6
 table.data .num{font-family:var(--mono); font-size:13px; color:var(--muted); white-space:nowrap}
 table.data .actions{white-space:nowrap; text-align:right}
 table.data .actions a{margin-left:12px; font-size:13px}
+table.data .actions .small{margin-left:12px}
 @media (max-width:760px){
   table.data .hide-sm{display:none}
   table.data .desc{display:none}
@@ -335,6 +350,7 @@ table.data .actions a{margin-left:12px; font-size:13px}
 .doc h3{font-size:15px}
 .doc p,.doc ul,.doc ol{margin:0 0 12px}
 .doc code{font-size:.9em; background:var(--sunken); border:1px solid var(--rule); padding:1px 5px; border-radius:3px}
+.doc :not(pre) > code{overflow-wrap:anywhere}
 .doc pre{background:var(--code-bg); border:1px solid var(--rule); padding:12px; border-radius:var(--r); overflow:auto; font-size:13px}
 .doc pre code{border:0; background:none; padding:0}
 .doc table{border-collapse:collapse; margin:12px 0; font-size:14px}
@@ -409,3 +425,57 @@ body.lsd-modal-open{overflow:hidden}
 .doc li > ul,.doc li > ol{margin:2px 0 4px}
 .doc blockquote{margin:0 0 12px; padding:8px 14px; border-left:3px solid var(--rule-strong); background:var(--sunken); color:var(--muted)}
 .doc blockquote p{margin:0}
+
+/* =========================================================
+   Charts (dataviz reference palette, light + dark steps)
+   ========================================================= */
+.viz-root{
+  --series-1:#2a78d6; --series-2:#eb6834; --series-3:#1baf7a; --series-4:#eda100;
+  --series-5:#e87ba4; --series-6:#008300; --series-7:#6250d6; --series-8:#e34948;
+  --viz-grid:#e6e6e1; --viz-axis:#b9b9b1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .viz-root{
+    --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+    --series-5:#d55181; --series-6:#008300; --series-7:#9085e9; --series-8:#e66767;
+    --viz-grid:#2a2c30; --viz-axis:#44474e;
+  }
+}
+:root[data-theme="dark"] .viz-root{
+  --series-1:#3987e5; --series-2:#d95926; --series-3:#199e70; --series-4:#c98500;
+  --series-5:#d55181; --series-6:#008300; --series-7:#9085e9; --series-8:#e66767;
+  --viz-grid:#2a2c30; --viz-axis:#44474e;
+}
+.viz-legend{display:flex; flex-wrap:wrap; gap:4px 16px; font-size:13px; color:var(--muted); margin-bottom:6px}
+.viz-key{display:inline-flex; align-items:center; gap:6px}
+.viz-key i,.viz-tip i{display:inline-block; width:14px; height:3px; border-radius:2px}
+.viz-plot{position:relative}
+.viz-plot svg{display:block; overflow:visible}
+.viz-grid{stroke:var(--viz-grid); stroke-width:1}
+.viz-axis{stroke:var(--viz-axis); stroke-width:1}
+.viz-ref{stroke:var(--muted); stroke-width:1; stroke-dasharray:4 3}
+.viz-tick{fill:var(--muted); font-size:11px; font-family:var(--mono)}
+.viz-title{fill:var(--muted); font-size:12px}
+.viz-line{fill:none; stroke-width:2; stroke-linejoin:round; stroke-linecap:round}
+.viz-cross{stroke:var(--viz-axis); stroke-width:1}
+.viz-dot{stroke:var(--surface); stroke-width:2}
+.viz-tip{
+  position:absolute; pointer-events:none; min-width:150px;
+  background:var(--surface); border:1px solid var(--rule-strong); border-radius:var(--r);
+  padding:6px 8px; font-size:12px; box-shadow:0 2px 8px rgba(0,0,0,.08)
+}
+.viz-tip-h{color:var(--muted); font-family:var(--mono); margin-bottom:2px}
+.viz-tip div:not(.viz-tip-h){display:flex; align-items:center; gap:6px}
+.viz-tip b{margin-left:auto; padding-left:10px; font-family:var(--mono); font-weight:500}
+
+/* examples page */
+.ex-grid{display:grid; grid-template-columns:minmax(260px, 340px) 1fr; gap:24px; align-items:start}
+@media (max-width:860px){ .ex-grid{grid-template-columns:minmax(0,1fr)} }
+.ex-sketch{border:1px solid var(--rule); border-radius:var(--r); background:var(--surface); padding:10px; color:var(--text)}
+.ex-sketch svg{display:block; width:100%; height:auto}
+.ex-section{padding-top:32px; margin-top:32px; border-top:1px solid var(--rule)}
+.ex-section:first-of-type{border-top:0; margin-top:0; padding-top:0}
+.ex-figs{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-top:12px}
+.ex-figs figure{margin:0}
+.ex-figs img{width:100%; border:1px solid var(--rule); border-radius:var(--r); background:#fff}
+.ex-figs figcaption{font-size:12px; color:var(--muted); margin-top:4px}

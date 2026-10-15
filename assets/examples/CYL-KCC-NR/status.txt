@@ -1,0 +1,4 @@
+   37785 t 3.0000E+01 dt 7.96E-04 write d3plot file            10/15/26 05:42:05
+ N o r m a l    t e r m i n a t i o n                          10/15/26 05:42:05
+ N o r m a l    t e r m i n a t i o n                          10/15/26 05:42:05
+ Elapsed time     462 seconds for   37785 cycles using     4 MPP procs
