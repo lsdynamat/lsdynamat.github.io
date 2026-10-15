@@ -11,6 +11,7 @@
 //
 // Units: mm–ms–g–N–MPa
 
+import { fitField } from "../core/units.js?v=20261015g";
 export const KEY = "mat024_piecewise_linear_plasticity";
 export const ID = 24;
 export const NAME = "Piecewise Linear Plasticity";
@@ -316,6 +317,9 @@ function toFixed(x, n) {
   return v.toFixed(n);
 }
 function fmt10(x, decimals = 6) {
+  return fitW(fmt10Raw(x, decimals), x, 10);
+}
+function fmt10Raw(x, decimals = 6) {
   if (Number.isInteger(x)) return String(x).padStart(10, " ");
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(10, " ");
@@ -324,9 +328,20 @@ function fmt10(x, decimals = 6) {
   return v.toFixed(decimals).padStart(10, " ");
 }
 function fmt20(x, decimals = 6) {
+  return fitW(fmt20Raw(x, decimals), x, 20);
+}
+function fmt20Raw(x, decimals = 6) {
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(20, " ");
   const av = Math.abs(v);
   if (av !== 0 && (av >= 1e8 || av < 1e-8)) return v.toExponential(6).replace("e", "E").padStart(20, " ");
   return v.toFixed(decimals).padStart(20, " ");
+}
+
+// Never let a number overflow its field or touch the previous one (LS-DYNA reads by column).
+function fitW(s, v, w) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return s;
+  if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
+  return s;
 }

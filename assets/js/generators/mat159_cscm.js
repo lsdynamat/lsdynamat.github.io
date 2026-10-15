@@ -2,6 +2,7 @@
 // CSCM Generator (LS-DYNA *MAT_CSCM, MAT_159)
 // Units: mm-ms-g-N-MPa (density g/mm^3, stress MPa)
 
+import { fitField } from "../core/units.js?v=20261015g";
 export const KEY = "mat159_cscm";
 export const ID = 159;
 export const NAME = "CSCM Concrete (*MAT_CSCM)";
@@ -237,9 +238,15 @@ function mustInRange(name, x, lo, hi) {
 
 // Fixed width column formatting (10 chars)
 function f10i(x) {
+  return fitW(f10iRaw(x), x, 10);
+}
+function f10iRaw(x) {
   return String(Math.trunc(Number(x))).padStart(10, " ");
 }
 function f10(x, decimals = 6, trim = false) {
+  return fitW(f10Raw(x, decimals, trim), x, 10);
+}
+function f10Raw(x, decimals = 6, trim = false) {
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(10, " ");
   let s = v.toFixed(decimals);
@@ -253,6 +260,9 @@ function f10(x, decimals = 6, trim = false) {
 
 // Scientific formatting like "6.11000E-4" and ALWAYS 5 decimals in mantissa
 function f10sci(x, mantissaDecimals = 5) {
+  return fitW(f10sciRaw(x, mantissaDecimals), x, 10);
+}
+function f10sciRaw(x, mantissaDecimals = 5) {
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(10, " ");
 
@@ -357,4 +367,12 @@ function calculateRXd(fc) {
   const R = 4.45994 * Math.exp(-fc / 11.51679) + 1.95358;
   const XD = 17.087 + 1.892 * fc;
   return { R, XD };
+}
+
+// Never let a number overflow its field or touch the previous one (LS-DYNA reads by column).
+function fitW(s, v, w) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return s;
+  if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
+  return s;
 }

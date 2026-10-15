@@ -3,6 +3,7 @@
 // Card layout checked against LS-DYNA Keyword User's Manual Vol. II, R13 (p. 2-262 ff.)
 // Units: mm-ms-g-N-MPa
 
+import { fitField } from "../core/units.js?v=20261015g";
 export const KEY = "mat027_mooney_rivlin";
 export const ID = 27;
 export const NAME = "Mooney–Rivlin Rubber (*MAT_MOONEY-RIVLIN_RUBBER)";
@@ -106,6 +107,9 @@ function toFixed(x, n) {
   return Number.isFinite(v) ? v.toFixed(n) : String(x);
 }
 function fmt10(x, decimals = 6) {
+  return fitW(fmt10Raw(x, decimals), x, 10);
+}
+function fmt10Raw(x, decimals = 6) {
   if (Number.isInteger(x) && Math.abs(x) < 1e9) return String(x).padStart(10, " ");
   const v = Number(x);
   if (!Number.isFinite(v)) return String(x).padStart(10, " ");
@@ -116,4 +120,12 @@ function fmt10(x, decimals = 6) {
   let s = v.toFixed(decimals);
   while (s.length > 10 && decimals > 0) s = v.toFixed(--decimals);
   return s.padStart(10, " ");
+}
+
+// Never let a number overflow its field or touch the previous one (LS-DYNA reads by column).
+function fitW(s, v, w) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return s;
+  if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
+  return s;
 }
