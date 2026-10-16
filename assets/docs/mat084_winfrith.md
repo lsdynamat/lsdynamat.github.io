@@ -67,6 +67,10 @@ Winfrith converts crack-normal strain to an opening with a characteristic length
 
 Like the PDF, the generator now takes f_c as the mean cylinder strength fcm and computes `fctm = 0.30 fck^(2/3)` with `fck = fcm − 8` (until 2026-10-15 it treated f_c as fck and added 8 MPa). Two differences remain: the generator uses the MC90 tangent modulus instead of the EC2 secant modulus `Ecm = 22 000 (fcm/10)^0.3`, and it sets ASIZE = d_max/2, following the manual's definition of ASIZE as a radius (the PDF uses ASIZE ≈ d_max).
 
+## Compression after the peak: hourglass-controlled
+
+Winfrith has no compressive softening: a single element in uniaxial compression stays at UCS. Winfrith is implemented for the one-point solid (ELFORM 1) only; LS-DYNA R13 switches ELFORM 2 back to 1 with Warning 20101. In the cylinder example, vertical splitting cracks soften the elements laterally and the mesh then deforms in hourglass modes. Beyond about 3 ‰ strain the load depends on the hourglass control, not on the card: with the same card and mesh it climbs to 42 MPa (IHQ 4, QM 0.05), 35 MPa (IHQ 6), or collapses (IHQ 1). Do not use Winfrith for crushing; if compressive post-peak results matter, compare at least two hourglass settings.
+
 In the notched-prism example the energy dissipated by Winfrith was 1.66 × GFt even with a one-element-wide crack, so check G_F against a test if tensile cracking governs.
 
 ## References

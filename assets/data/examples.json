@@ -60,8 +60,20 @@
         {
           "case": "CYL-WIN",
           "model": "mat084_winfrith",
-          "label": "Winfrith",
+          "label": "Winfrith, hourglass IHQ 4 / QM 0.05",
           "slot": 2
+        },
+        {
+          "case": "CYL-WIN-HG6",
+          "model": "mat084_winfrith",
+          "label": "Winfrith, hourglass IHQ 6",
+          "slot": 6
+        },
+        {
+          "case": "CYL-WIN-HG1",
+          "model": "mat084_winfrith",
+          "label": "Winfrith, hourglass IHQ 1",
+          "slot": 7
         },
         {
           "case": "CYL-CSCM",
@@ -80,8 +92,9 @@
         "With rate effects off, KCC, CSCM and CDP peak at 30.2, 30.2 and 30.0 MPa: the generated cards reproduce the input f_c within 1 %. The initial modulus is 30–32 GPa, close to the EN 1992-1-1 value E_cm = 22 (f_cm/10)^0.3 ≈ 30.6 GPa.",
         "KCC with its DIF curve peaks at 42.6 MPa (+41 %). The explicit test runs at about 0.3–1 s⁻¹, where the CEB-FIP MC90 compressive DIF for f_c = 30 MPa is 1.34–1.40, so the solver is doing what the curve asks. For quasi-static analyses set dif_model = 0 (LCRATE = 0), or use the lower fib MC2010 curve (dif_model = 2).",
         "Post-peak behaviour differs widely at 1 % strain: CDP keeps 43 % of its peak, KCC 86 %, CSCM 91 %. With frictionless platens the strain field stays nearly uniform, so these branches are mostly a material response. They depend on the compressive softening parameters (EFC for CDP, GFC for CSCM, b1 and the λ–η curve for KCC). The KCC branch is more ductile than with a fixed λ–η curve because the generator stretches the softening to the element size.",
-        "Winfrith is not usable after the peak in this test. A single element under the same loading stays at 30.3 MPa, but the cylinder flattens at 30 MPa up to 5 ‰ and then climbs to 42 MPa at 1 %. The plot shows why: the shaft pinches inwards at mid-height and splits along vertical cracks, a deformation mode of the one-point element that Winfrith requires (ELFORM 1). Use Winfrith where tensile cracking governs, not for crushing.",
-        "Hourglass energy stays below 0.5 % of the external work for KCC, CSCM and CDP (0.9 % for Winfrith), and kinetic energy below 0.6 %."
+        "Winfrith reaches f_c correctly (30.0–30.7 MPa up to 2.5 ‰ with every hourglass setting), but its curve after about 3 ‰ is decided by the hourglass control, not by the material. With the same card and mesh, IHQ 4 / QM 0.05 climbs to 42 MPa, IHQ 6 to 35 MPa, IHQ 4 / QM 0.01 peaks at 34 MPa and drops to 19 MPa, and viscous IHQ 1 collapses to 1 MPa. A single element under the same loading stays at 30.4 MPa, so the card itself is not the cause.",
+        "Why: in the cylinder, vertical splitting cracks soften the elements laterally, and the one-point element then deforms in hourglass modes (the shaft pinches in, tilts or collapses in a band, see the plots). The axial element stresses stay at about 30 MPa or less and the lateral stress near zero, so the extra load with IHQ 4 is carried by hourglass forces, not by confinement. Winfrith exists only for ELFORM 1: LS-DYNA R13 switches ELFORM 2 back to 1 (Warning 20101), so a fully integrated element is not an option. Use Winfrith where tensile cracking governs, and do not trust its compressive post-peak branch; if you must, compare at least two hourglass settings.",
+        "Hourglass energy stays below 0.5 % of the external work for KCC, CSCM and CDP, and kinetic energy below 0.6 %. For Winfrith the total (0.9 % with IHQ 4, 5–7 % with the other settings) hides the problem: with IHQ 4 it stays near 0.1 % of the work up to 20 ms, then grows by about 5 % of the work done in the last 3 ms, exactly where the load climbs."
       ]
     },
     {

@@ -1,0 +1,8 @@
+{
+ "case": "CYL-WIN-HG6",
+ "peak_stress_MPa": 35.128396097122085,
+ "strain_at_peak": 0.009305268731055295,
+ "peak_force_kN": 620.77,
+ "hourglass_pct": 5.266048232884257,
+ "kinetic_pct": 0.6956080474778917
+}

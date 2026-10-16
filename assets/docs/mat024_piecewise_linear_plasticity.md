@@ -48,7 +48,7 @@ Enter the measured reduction of area **Z** (%) and the element size **h** in the
 
 | Element size h in the neck | k(h) | FAIL for Z = 59 % | Runs (FAIL → elongation at fracture A) |
 |---|---|---|---|
-| 0.5 mm | 1.29 | 1.15 | 1.02 → 33.7 %, 1.18 → 35.3 % |
+| 0.5 mm | 1.29 | 1.15 | 1.02 → 33.7 %, 1.10 → 34.7 %, 1.18 → 35.3 % |
 | 1.0 mm | 1.13 | 1.01 | 0.8 → 31.5 %, 0.9 → 32.8 %, 1.0 → 34.9 % |
 | 1.5 mm | 1.02 | 0.91 | 0.7 → 30.9 %, 0.8 → 33.2 %, 0.9 → 34.8 % |
 | 3.0 mm | 0.81 | 0.72 | 0.5 → 29.3 %, 0.65 → 33.1 %, 0.8 → 37.0 % |

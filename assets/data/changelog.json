@@ -11,7 +11,7 @@
     "date": "2026-10-16",
     "version": "",
     "model": "Examples",
-    "change": "New example: S355 flat specimen pulled to fracture, compared with three BAM tensile tests (Zenodo 6778336). The round-bar example was rerun with the new MAT_024 curve, with and without FAIL."
+    "change": "New example: S355 flat specimen pulled to fracture, compared with three BAM tensile tests (Zenodo 6778336). The round-bar example was rerun with the new MAT_024 curve, with and without FAIL. Cylinder example: Winfrith's rise to 42 MPa after the peak traced to hourglass forces (two extra runs with IHQ 6 and IHQ 1 give 35 MPa and collapse); the card is not the cause."
   },
   {
     "id": "mat084_winfrith",
