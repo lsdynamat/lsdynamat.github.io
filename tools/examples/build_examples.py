@@ -177,6 +177,7 @@ STEEL = {
     "M003": ("s003", 12, 0, "MAT_003, bilinear fit to the MAT_024 curve"),
     "M015": ("s015", 13, 13, "MAT_015 Johnson-Cook, A/B/n fitted to the MAT_024 curve, C = 0"),
     "M024": ("s024", 11, 0, "MAT_024 with the Yun & Gardner (2017) curve, fy = 355, fu = 510 MPa"),
+    "M024-F": ("s024f", 14, 0, "MAT_024 as above with FAIL from Z = 59 % for 1 mm elements"),
 }
 
 

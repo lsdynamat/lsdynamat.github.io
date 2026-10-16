@@ -2,7 +2,7 @@
 // CSCM Generator (LS-DYNA *MAT_CSCM, MAT_159)
 // Units: mm-ms-g-N-MPa (density g/mm^3, stress MPa)
 
-import { fitField } from "../core/units.js?v=20261015h";
+import { fitField } from "../core/units.js?v=20261016a";
 export const KEY = "mat159_cscm";
 export const ID = 159;
 export const NAME = "CSCM Concrete (*MAT_CSCM)";

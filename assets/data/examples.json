@@ -171,7 +171,7 @@
         "Parallel length 80 mm, gauge L₀ = 50 mm = 5.65 √S₀. O-grid mesh of 8 000 hexahedra (≈ 1 mm), ELFORM 2. The diameter is reduced by 0.5 % at mid-length, so the neck forms in the gauge length.",
         "One end fixed, the other pulled 24 mm in 60 ms (about 5 s⁻¹ in the gauge length). Mass scaling to Δt = 1E-4 ms affects only the smallest elements.",
         "Engineering stress = reaction / (π · 5²); engineering strain = change in the gauge length / 50 mm.",
-        "All three models describe the same S355 steel: MAT_024 uses the Yun & Gardner (2017) curve for f_y = 355 and f_u = 510 MPa. MAT_003 (SIGY 355.6, ETAN 1646) and MAT_015 (A 355.6, B 1137, n 0.822, C 0) are least-squares fits to that curve, made for this example."
+        "All three models describe the same S355 steel: MAT_024 uses the Yun & Gardner (2017) curve for f_y = 355 and f_u = 510 MPa, extended beyond A_g with the Considère slope (generator v1.2). The fracture run adds FAIL = 1.01, the generator value for Z = 59 % (BAM S355) and 1 mm elements. MAT_003 (SIGY 355.6, ETAN 1646) and MAT_015 (A 355.6, B 1137, n 0.822, C 0) are least-squares fits to that curve, made for this example."
       ],
       "chart": {
         "x": "eng_strain",
@@ -199,6 +199,12 @@
           "digits": 1
         },
         {
+          "key": "A_strain",
+          "label": "Strain at fracture (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
           "key": "hourglass_pct",
           "label": "Hourglass / work (%)",
           "digits": 1
@@ -210,6 +216,12 @@
           "model": "mat024_piecewise_linear_plasticity",
           "label": "Yun & Gardner curve",
           "slot": 1
+        },
+        {
+          "case": "BAR-M024-F",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "Yun & Gardner curve + FAIL (Z = 59 %)",
+          "slot": 4
         },
         {
           "case": "BAR-M003",
@@ -226,9 +238,107 @@
       ],
       "notes": [
         "All three fits start yielding at 351–353 MPa at 0.2 % strain, so the elastic–plastic transition is consistent.",
-        "MAT_024 with the Yun & Gardner curve gives R_m = 504 MPa (input f_u = 510) at A_g = 17.9 % (Yun & Gardner predict 18.2 %). The neck forms at the reduced section and the load then drops, as in a real test.",
+        "MAT_024 with the Yun & Gardner curve gives R_m = 504 MPa (input f_u = 510) at A_g = 18.7 % (Yun & Gardner predict 18.2 %). The neck forms at the reduced section and the load then drops gradually, as in a real test. With the flat tail of generator v1.1 the neck formed earlier (A_g = 17.9 %) and thinned faster.",
         "MAT_003 (bilinear) and MAT_015 (Johnson–Cook) never neck within 30 % strain: their hardening stays above the Considère limit (dσ/dε ≥ σ), so the engineering stress keeps rising to 606 and 546 MPa. A least-squares fit that matches the curve well up to f_u still over-predicts strength beyond it. Use MAT_024 with a measured true-stress curve when necking or ductile failure matters, or fit MAT_003/MAT_015 only up to A_g and add a failure criterion.",
-        "No failure strain is defined, so the neck in MAT_024 thins without fracture. Add FAIL (MAT_024) or a damage model (e.g. *MAT_ADD_DAMAGE_GISSMO) to predict elongation at fracture A."
+        "Without FAIL the neck thins without fracture. With FAIL from Z = 59 % the bar breaks at 35.5 % engineering strain, close to the A = 35 % of the BAM flat specimens with the same Z (next example). The values of round and flat specimens are not strictly comparable: A depends on the gauge length and the section shape. The free ends ring after fracture, so the curve is cut there."
+      ]
+    },
+    {
+      "id": "flat",
+      "title": "S355 flat specimen 6 × 20 mm — tensile test to fracture against BAM test data",
+      "sketch": "./assets/examples/sketch-flat.svg",
+      "setup": [
+        "Test data: BAM tensile tests on S355 plate, specimens Zx2–Zx4 (Zenodo record 6778336, CC BY 4.0). Flat specimens a × b = 6 × 20 mm, gauge L0 = 60 mm. The protocol gives A = 35 % and Z = 58–61 % for all three.",
+        "One eighth of the specimen with symmetry planes, 8-node hexahedra (ELFORM 2) of h = 0.5, 1, 1.5 and 3 mm. Parallel length ≈ 84 mm, fillet R ≈ 20 mm and grip width 26 mm were measured on the photo of the specimens (the data set does not give them). The width is reduced by 0.5 % at mid-length so the neck forms in the gauge length.",
+        "MAT_024 with the mean measured true stress–strain curve of Zx2–Zx4 up to A_g, then the generator's extension with slope H = σ_true(A_g). FAIL = k(h) · ln(1/(1 − Z)) with Z = 59 %, i.e. the value the MAT_024 generator writes for each element size.",
+        "Engineering strain = elongation of L0 / 60 mm; engineering stress = force / (6 × 20 mm²). After the force maximum the test curves are reconstructed from crosshead travel, so their end point is approximate (30–31.5 % instead of the measured A = 35 %).",
+        "Specimen pulled 28 mm in 70 ms (14 mm on the half model), with mass scaling to Δt = 5E-5 ms."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": []
+      },
+      "summary": [
+        {
+          "key": "Rm_MPa",
+          "label": "R_m (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "Ag_strain",
+          "label": "A_g (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "A_strain",
+          "label": "Elongation at fracture A (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "Z_pct",
+          "label": "Z (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "BAM-TEST-Zx2",
+          "label": "test Zx2",
+          "legendLabel": "BAM tests Zx2–Zx4",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "BAM-TEST-Zx3",
+          "label": "test Zx3",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "BAM-TEST-Zx4",
+          "label": "test Zx4",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "BAM-FIN-H0p5",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 0.5 mm, FAIL 1.15",
+          "slot": 1
+        },
+        {
+          "case": "BAM-FIN-H1",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 1 mm, FAIL 1.01",
+          "slot": 2
+        },
+        {
+          "case": "BAM-FIN-H1p5",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 1.5 mm, FAIL 0.91",
+          "slot": 3
+        },
+        {
+          "case": "BAM-FIN-H3",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 3 mm, FAIL 0.72",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "With the measured curve up to A_g and the Considère-slope extension, every mesh gives R_m = 509 MPa and A_g = 15.4–15.7 % (tests: R_m 504–519 MPa, A_g 14.9–15.5 %). The force maximum and the onset of necking do not depend on the element size.",
+        "With the generator's FAIL for each element size, the specimen breaks at A = 34.8–35.1 % for h = 1, 1.5 and 3 mm, against A = 35 % in the test protocol. The same FAIL on a different mesh would not: FAIL = 1.0 breaks the 1 mm mesh at 34.9 % and the 0.5 mm mesh at about 33.5 %, while on the 3 mm mesh already FAIL = 0.8 delays fracture to 37 %. Always pass the element size of the neck region to the generator (calibration runs in the MAT_024 documentation).",
+        "Between A_g and fracture the model carries more load than the test curves: 501–504 vs 489–502 MPa at 25 % strain, 483–493 vs 416–442 MPa at 30 %. Two effects add up. The test strain after the force maximum comes from crosshead travel and places fracture at 30–31.5 %, while the broken specimens measure A = 35 %, so the test branch is compressed along the strain axis. MAT_024 also has no damage softening before FAIL, whereas voids grow in the real neck. The model is therefore good for when the specimen breaks, less so for the shape of the load drop just before.",
+        "Fracture is abrupt in the model:the force drops to zero within one output interval, because MAT_024 deletes an element at FAIL without prior softening. To model the load drop itself, use a damage model such as *MAT_ADD_DAMAGE_GISSMO.",
+        "The calibration uses one steel and one specimen shape (uniaxial tension, thin plate). FAIL from Z describes fracture after necking in tension; under shear or high triaxiality (notches, thick plates, punching) the fracture strain differs, and a stress-state-dependent criterion is needed."
       ]
     }
   ]

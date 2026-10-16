@@ -26,7 +26,8 @@ function fmt(v) {
 }
 
 /**
- * series: [{ label, slot, points: [[x, y], ...] }]
+ * series: [{ label, slot, points: [[x, y], ...], dash?, legend? }]  (dash: dashed line, e.g. measured data;
+ *   legend: false hides a repeat of the same entity, e.g. replicate tests)
  * opts: { xLabel, yLabel, height, xMax, yMax, refLines: [{ y, label }] }
  */
 export function renderLineChart(host, series, opts = {}) {
@@ -35,8 +36,8 @@ export function renderLineChart(host, series, opts = {}) {
 
   const legend = document.createElement("div");
   legend.className = "viz-legend";
-  legend.innerHTML = series.map(s =>
-    `<span class="viz-key"><i style="background:var(--series-${s.slot})"></i>${escapeHtml(s.label)}</span>`).join("");
+  legend.innerHTML = series.filter(s => s.legend !== false).map(s =>
+    `<span class="viz-key"><i style="${s.dash ? `background:none;border-top:2px dashed var(--series-${s.slot});height:0` : `background:var(--series-${s.slot})`}"></i>${escapeHtml(s.legendLabel || s.label)}</span>`).join("");
   host.appendChild(legend);
 
   const wrap = document.createElement("div");
@@ -90,7 +91,7 @@ export function renderLineChart(host, series, opts = {}) {
   // lines
   for (const s of series) {
     const d = s.points.filter(p => p[0] <= xMax).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
-    el("path", { d, class: "viz-line", style: `stroke:var(--series-${s.slot})` });
+    el("path", { d, class: "viz-line", style: `stroke:var(--series-${s.slot})${s.dash ? ";stroke-dasharray:5 3" : ""}` });
   }
 
   // hover layer

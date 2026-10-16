@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml } from "../core/dom.js";
-import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261015h";
+import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261016a";
 
 setText("year", new Date().getFullYear());
 
@@ -46,7 +46,7 @@ async function renderExample(ex, models, host) {
   if (ready.length) {
     const ys = ex.chart.yScale || 1;
     renderLineChart(chartHost, ready.map(r => ({
-      label: r.label, slot: r.slot,
+      label: r.label, slot: r.slot, dash: !!r.test, legend: r.legend, legendLabel: r.legendLabel,
       points: parseCsv(r.csv).map(o => [o[ex.chart.x] * (ex.chart.xScale || 1), o[ex.chart.y] * ys]),
     })), { xLabel: ex.chart.xLabel, yLabel: ex.chart.yLabel, refLines: ex.chart.ref || [], height: 340 });
   } else {
@@ -60,7 +60,9 @@ async function renderExample(ex, models, host) {
     return `<tr>
       <td><span class="viz-root"><i style="display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px;background:var(--series-${r.slot})"></i></span>${name}${escapeHtml(r.label)}</td>
       ${ex.summary.map(f => `<td class="num">${fmtVal(r.sum?.[f.key], f)}</td>`).join("")}
-      <td class="actions"><a href="${base(r.case)}/case.zip" download>deck (.k, zip)</a>${r.csv ? `<a href="${base(r.case)}/results.csv" download>csv</a>` : `<span class="small">run in progress</span>`}</td>
+      <td class="actions">${r.test
+        ? `<span class="small">measured</span>${r.csv ? `<a href="${base(r.case)}/results.csv" download>csv</a>` : ""}`
+        : `<a href="${base(r.case)}/case.zip" download>deck (.k, zip)</a>${r.csv ? `<a href="${base(r.case)}/results.csv" download>csv</a>` : `<span class="small">run in progress</span>`}`}</td>
     </tr>`;
   }).join("");
   sec.querySelector(".ex-table").innerHTML = head + `<tbody>${body}</tbody>`;

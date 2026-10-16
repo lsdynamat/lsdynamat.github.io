@@ -1,0 +1,9 @@
+{
+ "case": "BAR-M024-F",
+ "Rm_MPa": 504.40657804228204,
+ "Ag_strain": 0.18747,
+ "stress_at_eps_0p002_MPa": 350.70433200699824,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.05242949621443629,
+ "A_strain": 0.355496
+}

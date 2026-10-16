@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 150" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="none" stroke="currentColor">
+  <title>BAM S355 flat tensile specimen 6 x 20 mm, L0 = 60 mm</title>
+  <!-- grips -->
+  <rect x="25" y="49" width="38" height="52" fill="currentColor" fill-opacity=".15" stroke="none"/>
+  <rect x="277" y="49" width="38" height="52" fill="currentColor" fill-opacity=".15" stroke="none"/>
+  <!-- specimen outline (2 px per mm): grips 26 wide, fillets R 20, parallel length 84, width 20 -->
+  <path d="M25 49 H65 C75 49, 80 55, 86 55 H254 C260 55, 265 49, 275 49 H315 V101 H275 C265 101, 260 95, 254 95 H86 C80 95, 75 101, 65 101 H25 Z" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- gauge marks -->
+  <path d="M110 58 v34 M230 58 v34" stroke-width="1" stroke-dasharray="3 2"/>
+  <path d="M110 112 h120 M110 107 v10 M230 107 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="126" text-anchor="middle" fill="currentColor" stroke="none">L0 = 60 (gauge)</text>
+  <path d="M86 136 h168 M86 131 v10 M254 131 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="149" text-anchor="middle" fill="currentColor" stroke="none">parallel length ~84</text>
+  <!-- load -->
+  <path d="M318 75 h14" stroke-width="1.5"/><path d="M326 70 l7 5 l-7 5" stroke-width="1.5"/>
+  <text x="236" y="40" fill="currentColor" stroke="none">u(t), 28 mm in 70 ms</text>
+  <text x="25" y="40" fill="currentColor" stroke="none">symmetry</text>
+  <text x="128" y="40" fill="currentColor" stroke="none">b = 20, a = 6</text>
+  <text x="25" y="14" fill="currentColor" stroke="none" font-size="10" opacity=".8">1/8 model, hexahedra h = 0.5–3 mm, ELFORM 2; −0.5 % width at mid-length</text>
+</svg>

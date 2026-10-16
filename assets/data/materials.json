@@ -164,9 +164,9 @@
       "mat": "024",
       "name": "Piecewise Linear Plasticity",
       "category": "Metals",
-      "summary": "MAT_024 employs the Yun & Gardner (2017) engineering stress–strain envelope to define a rational steel material curve in the absence of experimental data, implemented as a true stress–true plastic strain curve via DEFINE_CURVE.",
-      "version": "1.1",
-      "updatedAt": "2026-10-14",
+      "summary": "MAT_024 employs the Yun & Gardner (2017) engineering stress–strain envelope to define a rational steel material curve in the absence of experimental data, implemented as a true stress–true plastic strain curve via DEFINE_CURVE. Optional ductile fracture (FAIL) from the reduction of area Z, calibrated on a BAM S355 tensile test.",
+      "version": "1.2",
+      "updatedAt": "2026-10-16",
       "generator": "mat024_piecewise_linear_plasticity",
       "doc": "./assets/docs/mat024_piecewise_linear_plasticity.md",
       "inputs": [
@@ -198,11 +198,34 @@
     
         {
           "key": "tail_d_epsp",
-          "label": "Tail length Δεp after peak",
+          "label": "Extension beyond A_g, Δεp",
           "unit": "-",
-          "default": 0.1,
+          "default": 2.0,
           "min": 0.0,
-          "hint": "Adds one final point at εp(peak)+Δεp with constant peak stress to avoid solver extrapolation. Typical 0.05–0.30."
+          "hint": "Length of the straight extension of the curve beyond A_g, in true plastic strain. Keep it above FAIL."
+        },
+        {
+          "key": "tail_h",
+          "label": "Slope beyond A_g, H / σ(A_g)",
+          "unit": "-",
+          "default": 1.0,
+          "min": 0.0,
+          "hint": "Slope of the extension as a multiple of the true stress at A_g. 1 = Considère slope, the neck starts at A_g (calibrated value). 0 = flat tail (versions ≤ 1.1)."
+        },
+        {
+          "key": "z_pct",
+          "label": "Reduction of area Z (optional)",
+          "unit": "%",
+          "default": "",
+          "hint": "Measured reduction of area at fracture. Blank = no fracture (FAIL = 0)."
+        },
+        {
+          "key": "h_el",
+          "label": "Element size in the neck",
+          "unit": "mm",
+          "default": 1.0,
+          "min": 0.1,
+          "hint": "Used only with Z: FAIL = k(h) · ln(1/(1−Z)), with k calibrated for 8-node solids."
         }
       ]
     },

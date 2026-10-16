@@ -1,5 +1,19 @@
 [
   {
+    "id": "mat024_piecewise_linear_plasticity",
+    "date": "2026-10-16",
+    "version": "1.2",
+    "model": "MAT_024 Piecewise Linear Plasticity",
+    "change": "Beyond A_g the curve now continues with slope H = σ_true(A_g) (Considère slope) instead of a flat tail, so the neck starts at A_g and grows gradually. New optional ductile fracture: FAIL = k(h) · ln(1/(1−Z)) from the reduction of area Z and the element size h, with k = 1.29, 1.13, 1.02 and 0.81 for h = 0.5, 1, 1.5 and 3 mm. Calibrated on BAM S355 flat tensile tests: the specimen breaks at A = 34.8–35.1 % (test 35 %) on every mesh."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-16",
+    "version": "",
+    "model": "Examples",
+    "change": "New example: S355 flat specimen pulled to fracture, compared with three BAM tensile tests (Zenodo 6778336). The round-bar example was rerun with the new MAT_024 curve, with and without FAIL."
+  },
+  {
     "id": "mat084_winfrith",
     "date": "2026-10-15",
     "version": "",
