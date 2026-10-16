@@ -12,7 +12,7 @@
 //
 // Units: mm–ms–g–N–MPa
 
-import { fitField } from "../core/units.js?v=20261016a";
+import { fitField } from "../core/units.js?v=20261016b";
 export const KEY = "mat024_piecewise_linear_plasticity";
 export const ID = 24;
 export const NAME = "Piecewise Linear Plasticity";

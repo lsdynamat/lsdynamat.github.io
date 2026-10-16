@@ -1,8 +1,8 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261016a";
-import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261016a";
+import { getGenerator } from "../generators/index.js?v=20261016b";
+import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261016b";
 
 setText("year", new Date().getFullYear());
 

@@ -3,7 +3,7 @@
 // Card layout checked against LS-DYNA Keyword User's Manual Vol. II, R13 (p. 2-187 ff.)
 // Units: mm-ms-g-N-MPa
 
-import { fitField } from "../core/units.js?v=20261016a";
+import { fitField } from "../core/units.js?v=20261016b";
 export const KEY = "mat015_johnson_cook";
 export const ID = 15;
 export const NAME = "Johnson–Cook (*MAT_JOHNSON_COOK)";
