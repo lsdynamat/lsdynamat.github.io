@@ -472,7 +472,7 @@
         "Stiffness. The test rises almost linearly with about 34 GPa (6.5 MPa at 0.19 ‰; the paper reports E_cyl = 34.4 GPa). Winfrith and CSCM start at 37.8 GPa and CDP at 35.2 GPa, close to the E = 36.8–38.1 GPa their generators derive from f_c. KCC is softer, 31.4 GPa (15.7 MPa at 0.5 ‰).",
         "Shape before the peak. The test peaks at 1.76 ‰ and rounds off from about 45 MPa. Winfrith and CSCM stay linear up to about 1.45 ‰ and then run flat (54–57 MPa) like an elastic–perfectly plastic material, so their peak strains in the table (2.8 and 5 ‰) are just points on that plateau. KCC and CDP round off and peak at 2.2 and 2.3 ‰.",
         "Post-peak. The measured mean curve snaps back (the strain decreases while the load falls), which a displacement-controlled model with uniform strain cannot follow. Only CDP softens (40.5 MPa at 4.9 ‰); KCC, Winfrith and CSCM stay at 54–57 MPa up to 5 ‰. For KCC part of this comes from the regularisation: the generator stretches the whole λ–η softening branch to the element size, so a 3.75 mm element also softens slowly in compression.",
-        "Hourglass energy is below 0.3 % and kinetic energy below 0.03 % of the external work for all four models."
+        "Hourglass energy is below 0.3 % and kinetic energy below 0.03 % of the external work for all four models. No fringe images are shown: with frictionless platens the field stays uniform up to 5 ‰, so the pictures carry no information."
       ]
     },
     {
@@ -571,7 +571,8 @@
         "Peak load (test mean 3.46 kN): KCC 2.75 kN (−21 %), Winfrith 3.89 (+13 %), CSCM 3.99 (+15 %), CDP 3.71 (+7 %). The models peak at 0.026–0.035 mm deflection, the test at 0.024 mm.",
         "Softening. At 0.1 mm the test carries 1.08 kN; KCC and CSCM 0.89, Winfrith 0.60 and CDP 1.63 kN. KCC follows the shape of the measured tail most closely, Winfrith and CSCM drop too fast just after the peak, and CDP stays above the test up to about 0.25 mm.",
         "Energy against the input. CDP dissipates 0.151 N/mm, the area of its bilinear card (0.150 N/mm, the fib MC2010 G_F = 73 f_cm^0.18). That is 35–55 % above the measured G_F of this concrete; Hoover et al. note that the fib formula overestimates it by about 50 %. KCC targets the same fib value but dissipates 0.098 N/mm. Winfrith and CSCM start from the lower MC90 value (0.088 N/mm) and dissipate 0.110 and 0.124 N/mm.",
-        "Hourglass energy is zero except for Winfrith (6.4 %, one-point element only); kinetic energy is below 0.15 % of the work."
+        "Hourglass energy is zero except for Winfrith (6.4 %, one-point element only); kinetic energy is below 0.15 % of the work.",
+        "In the fringe plots the crack runs straight up from the notch in all four models; CSCM erodes it (white gap). KCC and CSCM also show local crushing over the supports, which are rows of fixed nodes without bearing plates."
       ]
     },
     {
