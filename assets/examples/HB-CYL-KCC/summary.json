@@ -1,0 +1,8 @@
+{
+ "case": "HB-CYL-KCC",
+ "peak_stress_MPa": 55.581150259505634,
+ "strain_at_peak": 0.0021864752924210863,
+ "peak_force_kN": 245.55,
+ "hourglass_pct": 1.1253381424706944e-05,
+ "kinetic_pct": 0.00014203892505249024
+}

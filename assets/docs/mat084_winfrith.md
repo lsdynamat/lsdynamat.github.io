@@ -36,6 +36,29 @@ The crack-normal traction falls linearly with crack opening w:
 
 The area under this line is GFt, which gives `wc = 2 GFt / ft`.
 
+## RATE changes the meaning of FE
+
+The manual describes RATE only as the strain-rate switch, but it also decides how FE is read:
+
+- **RATE = 1** (rate effects off, the generator's choice): FE is the crack opening at zero stress, wc. The dissipated energy is `½ · UTS · FE`.
+- **RATE = 0** (rate effects on): FE is the fracture energy GF (N/mm), and both UTS and GF are multiplied by the dynamic increase factor.
+
+If you switch a generated card to RATE = 0, replace FE = wc by FE = GFt (for f_c = 30 MPa: 0.064 instead of 0.054). Keeping wc would under-state the energy by the factor UTS / 2.
+
+Single-element tension checks (LS-DYNA R13.0 SMP double precision, one ELFORM 1 hexahedron, uniaxial strain, energy = work of the reaction per unit area):
+
+| RATE | UTS (MPa) | FE | Element (mm) | Strain rate (1/s) | Peak (MPa) | Energy (N/mm) | Expected |
+|---|---|---|---|---|---|---|---|
+| 1 | 4.0 | 0.1 | 10 | 0.5 | 3.95 | 0.201 | ½ · 4 · 0.1 = 0.200 |
+| 1 | 4.0 | 0.1 | 20 | 0.25 | 3.96 | 0.200 | 0.200 |
+| 1 | 2.35 | 0.054 (generator, f_c = 30) | 10 | 0.5 | 2.33 | 0.063 | GFt = 0.0635 |
+| 0 | 4.0 | 0.1 | 10 | 0.5 | 6.35 | 0.153 | 0.1 × DIF |
+| 0 | 4.0 | 0.1 | 10 | 5 · 10⁻² | 5.72 | 0.138 | 0.1 × DIF |
+| 0 | 4.0 | 0.1 | 10 | 5 · 10⁻³ | 5.19 | 0.124 | 0.1 × DIF |
+| 0 | 4.0 | 0.1 | 10 | 5 · 10⁻⁴ | 4.73 | 0.112 | 0.1 × DIF |
+
+With RATE = 1 the energy equals `½ · UTS · FE` within 0.5 % and does not depend on the element size. With RATE = 0 the ratio energy / peak stays at FE / UTS = 0.025 at every rate, so the energy tends to FE as the loading slows down. The enhancement is still +18 % at 5 · 10⁻⁴ s⁻¹, so RATE = 0 also raises strength and energy in a quasi-static analysis.
+
 ## Mesh dependence
 
 Winfrith converts crack-normal strain to an opening with a characteristic length `L = Ve^(1/3)`, so that `w = εn · L`. Because wc is fixed, the strain at which tension vanishes, `ε0 = wc / L`, gets smaller as elements get larger. In a stress–strain plot, coarse and fine meshes soften differently, but the dissipated energy per crack area stays the same.
@@ -43,6 +66,10 @@ Winfrith converts crack-normal strain to an opening with a characteristic length
 ## Differences from the PDF note
 
 Like the PDF, the generator now takes f_c as the mean cylinder strength fcm and computes `fctm = 0.30 fck^(2/3)` with `fck = fcm − 8` (until 2026-10-15 it treated f_c as fck and added 8 MPa). Two differences remain: the generator uses the MC90 tangent modulus instead of the EC2 secant modulus `Ecm = 22 000 (fcm/10)^0.3`, and it sets ASIZE = d_max/2, following the manual's definition of ASIZE as a radius (the PDF uses ASIZE ≈ d_max).
+
+## Compression after the peak: hourglass-controlled
+
+Winfrith has no compressive softening: a single element in uniaxial compression stays at UCS. Winfrith is implemented for the one-point solid (ELFORM 1) only; LS-DYNA R13 switches ELFORM 2 back to 1 with Warning 20101. In the cylinder example, vertical splitting cracks soften the elements laterally and the mesh then deforms in hourglass modes. Beyond about 3 ‰ strain the load depends on the hourglass control, not on the card: with the same card and mesh it climbs to 42 MPa (IHQ 4, QM 0.05), 35 MPa (IHQ 6), or collapses (IHQ 1). Do not use Winfrith for crushing; if compressive post-peak results matter, compare at least two hourglass settings.
 
 In the notched-prism example the energy dissipated by Winfrith was 1.66 × GFt even with a one-element-wide crack, so check G_F against a test if tensile cracking governs.
 

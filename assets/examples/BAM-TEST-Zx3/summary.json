@@ -1,0 +1,8 @@
+{
+ "case": "BAM-TEST-Zx3",
+ "Rm_MPa": 503.6,
+ "Ag_strain": 0.1551,
+ "A_strain": 0.35,
+ "Z_pct": 58.05,
+ "source": "BAM tensile test, Zenodo 6778336 (CC BY 4.0); A and Z from the test protocol"
+}

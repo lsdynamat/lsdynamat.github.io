@@ -1,7 +1,7 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, on } from "../core/dom.js";
 import { openSamples } from "../core/sampleViewer.js";
-import { renderModelRows, matchesQuery, byMat } from "../core/modelTable.js?v=20261015g";
+import { renderModelRows, matchesQuery, byMat } from "../core/modelTable.js?v=20261016c";
 
 setText("year", new Date().getFullYear());
 

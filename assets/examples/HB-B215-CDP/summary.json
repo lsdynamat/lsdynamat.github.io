@@ -1,0 +1,11 @@
+{
+ "case": "HB-B215-CDP",
+ "peak_force_kN": 6.83465765915886,
+ "peak_nominal_stress_MPa": 2.6004227491715834,
+ "defl_at_peak_mm": 0.057686,
+ "work_Nmm": 916.8653394356189,
+ "GF_Nmm": 0.1528108899059365,
+ "final_force_ratio": 0.024451846505588903,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.44172343209228304
+}

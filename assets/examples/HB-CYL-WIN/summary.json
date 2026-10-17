@@ -1,0 +1,8 @@
+{
+ "case": "HB-CYL-WIN",
+ "peak_stress_MPa": 56.82609559213557,
+ "strain_at_peak": 0.002788191563037306,
+ "peak_force_kN": 251.05,
+ "hourglass_pct": 0.2017886622891402,
+ "kinetic_pct": 0.0021059171083499867
+}

@@ -1,0 +1,8 @@
+{
+ "case": "HB-CYL-CDP",
+ "peak_stress_MPa": 53.04372531790898,
+ "strain_at_peak": 0.0022627939486051397,
+ "peak_force_kN": 234.34,
+ "hourglass_pct": 0.013485239281345339,
+ "kinetic_pct": 0.028895193739038157
+}

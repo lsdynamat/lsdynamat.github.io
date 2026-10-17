@@ -1,0 +1,11 @@
+{
+ "case": "HB-B215-CSCM",
+ "peak_force_kN": 7.3419435109591795,
+ "peak_nominal_stress_MPa": 2.79343280690091,
+ "defl_at_peak_mm": 0.059988,
+ "work_Nmm": 755.4566437858003,
+ "GF_Nmm": 0.12590944063096673,
+ "final_force_ratio": 0.030060160456228693,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.5614260907257586
+}

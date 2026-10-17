@@ -60,8 +60,20 @@
         {
           "case": "CYL-WIN",
           "model": "mat084_winfrith",
-          "label": "Winfrith",
+          "label": "Winfrith, hourglass IHQ 4 / QM 0.05",
           "slot": 2
+        },
+        {
+          "case": "CYL-WIN-HG6",
+          "model": "mat084_winfrith",
+          "label": "Winfrith, hourglass IHQ 6",
+          "slot": 6
+        },
+        {
+          "case": "CYL-WIN-HG1",
+          "model": "mat084_winfrith",
+          "label": "Winfrith, hourglass IHQ 1",
+          "slot": 7
         },
         {
           "case": "CYL-CSCM",
@@ -80,8 +92,9 @@
         "With rate effects off, KCC, CSCM and CDP peak at 30.2, 30.2 and 30.0 MPa: the generated cards reproduce the input f_c within 1 %. The initial modulus is 30–32 GPa, close to the EN 1992-1-1 value E_cm = 22 (f_cm/10)^0.3 ≈ 30.6 GPa.",
         "KCC with its DIF curve peaks at 42.6 MPa (+41 %). The explicit test runs at about 0.3–1 s⁻¹, where the CEB-FIP MC90 compressive DIF for f_c = 30 MPa is 1.34–1.40, so the solver is doing what the curve asks. For quasi-static analyses set dif_model = 0 (LCRATE = 0), or use the lower fib MC2010 curve (dif_model = 2).",
         "Post-peak behaviour differs widely at 1 % strain: CDP keeps 43 % of its peak, KCC 86 %, CSCM 91 %. With frictionless platens the strain field stays nearly uniform, so these branches are mostly a material response. They depend on the compressive softening parameters (EFC for CDP, GFC for CSCM, b1 and the λ–η curve for KCC). The KCC branch is more ductile than with a fixed λ–η curve because the generator stretches the softening to the element size.",
-        "Winfrith is not usable after the peak in this test. A single element under the same loading stays at 30.3 MPa, but the cylinder flattens at 30 MPa up to 5 ‰ and then climbs to 42 MPa at 1 %. The plot shows why: the shaft pinches inwards at mid-height and splits along vertical cracks, a deformation mode of the one-point element that Winfrith requires (ELFORM 1). Use Winfrith where tensile cracking governs, not for crushing.",
-        "Hourglass energy stays below 0.5 % of the external work for KCC, CSCM and CDP (0.9 % for Winfrith), and kinetic energy below 0.6 %."
+        "Winfrith reaches f_c correctly (30.0–30.7 MPa up to 2.5 ‰ with every hourglass setting), but its curve after about 3 ‰ is decided by the hourglass control, not by the material. With the same card and mesh, IHQ 4 / QM 0.05 climbs to 42 MPa, IHQ 6 to 35 MPa, IHQ 4 / QM 0.01 peaks at 34 MPa and drops to 19 MPa, and viscous IHQ 1 collapses to 1 MPa. A single element under the same loading stays at 30.4 MPa, so the card itself is not the cause.",
+        "Why: in the cylinder, vertical splitting cracks soften the elements laterally, and the one-point element then deforms in hourglass modes (the shaft pinches in, tilts or collapses in a band, see the plots). The axial element stresses stay at about 30 MPa or less and the lateral stress near zero, so the extra load with IHQ 4 is carried by hourglass forces, not by confinement. Winfrith exists only for ELFORM 1: LS-DYNA R13 switches ELFORM 2 back to 1 (Warning 20101), so a fully integrated element is not an option. Use Winfrith where tensile cracking governs, and do not trust its compressive post-peak branch; if you must, compare at least two hourglass settings.",
+        "Hourglass energy stays below 0.5 % of the external work for KCC, CSCM and CDP, and kinetic energy below 0.6 %. For Winfrith the total (0.9 % with IHQ 4, 5–7 % with the other settings) hides the problem: with IHQ 4 it stays near 0.1 % of the work up to 20 ms, then grows by about 5 % of the work done in the last 3 ms, exactly where the load climbs."
       ]
     },
     {
@@ -171,7 +184,7 @@
         "Parallel length 80 mm, gauge L₀ = 50 mm = 5.65 √S₀. O-grid mesh of 8 000 hexahedra (≈ 1 mm), ELFORM 2. The diameter is reduced by 0.5 % at mid-length, so the neck forms in the gauge length.",
         "One end fixed, the other pulled 24 mm in 60 ms (about 5 s⁻¹ in the gauge length). Mass scaling to Δt = 1E-4 ms affects only the smallest elements.",
         "Engineering stress = reaction / (π · 5²); engineering strain = change in the gauge length / 50 mm.",
-        "All three models describe the same S355 steel: MAT_024 uses the Yun & Gardner (2017) curve for f_y = 355 and f_u = 510 MPa. MAT_003 (SIGY 355.6, ETAN 1646) and MAT_015 (A 355.6, B 1137, n 0.822, C 0) are least-squares fits to that curve, made for this example."
+        "All three models describe the same S355 steel: MAT_024 uses the Yun & Gardner (2017) curve for f_y = 355 and f_u = 510 MPa, extended beyond A_g with the Considère slope (generator v1.2). The fracture run adds FAIL = 1.01, the generator value for Z = 59 % (BAM S355) and 1 mm elements. MAT_003 (SIGY 355.6, ETAN 1646) and MAT_015 (A 355.6, B 1137, n 0.822, C 0) are least-squares fits to that curve, made for this example."
       ],
       "chart": {
         "x": "eng_strain",
@@ -199,6 +212,12 @@
           "digits": 1
         },
         {
+          "key": "A_strain",
+          "label": "Strain at fracture (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
           "key": "hourglass_pct",
           "label": "Hourglass / work (%)",
           "digits": 1
@@ -210,6 +229,12 @@
           "model": "mat024_piecewise_linear_plasticity",
           "label": "Yun & Gardner curve",
           "slot": 1
+        },
+        {
+          "case": "BAR-M024-F",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "Yun & Gardner curve + FAIL (Z = 59 %)",
+          "slot": 4
         },
         {
           "case": "BAR-M003",
@@ -226,9 +251,426 @@
       ],
       "notes": [
         "All three fits start yielding at 351–353 MPa at 0.2 % strain, so the elastic–plastic transition is consistent.",
-        "MAT_024 with the Yun & Gardner curve gives R_m = 504 MPa (input f_u = 510) at A_g = 17.9 % (Yun & Gardner predict 18.2 %). The neck forms at the reduced section and the load then drops, as in a real test.",
+        "MAT_024 with the Yun & Gardner curve gives R_m = 504 MPa (input f_u = 510) at A_g = 18.7 % (Yun & Gardner predict 18.2 %). The neck forms at the reduced section and the load then drops gradually, as in a real test. With the flat tail of generator v1.1 the neck formed earlier (A_g = 17.9 %) and thinned faster.",
         "MAT_003 (bilinear) and MAT_015 (Johnson–Cook) never neck within 30 % strain: their hardening stays above the Considère limit (dσ/dε ≥ σ), so the engineering stress keeps rising to 606 and 546 MPa. A least-squares fit that matches the curve well up to f_u still over-predicts strength beyond it. Use MAT_024 with a measured true-stress curve when necking or ductile failure matters, or fit MAT_003/MAT_015 only up to A_g and add a failure criterion.",
-        "No failure strain is defined, so the neck in MAT_024 thins without fracture. Add FAIL (MAT_024) or a damage model (e.g. *MAT_ADD_DAMAGE_GISSMO) to predict elongation at fracture A."
+        "Without FAIL the neck thins without fracture. With FAIL from Z = 59 % the bar breaks at 35.5 % engineering strain, close to the A = 35 % of the BAM flat specimens with the same Z (next example). The values of round and flat specimens are not strictly comparable: A depends on the gauge length and the section shape. The free ends ring after fracture, so the curve is cut there."
+      ]
+    },
+    {
+      "id": "flat",
+      "title": "S355 flat specimen 6 × 20 mm — tensile test to fracture against BAM test data",
+      "sketch": "./assets/examples/sketch-flat.svg",
+      "setup": [
+        "Test data: BAM tensile tests on S355 plate, specimens Zx2–Zx4 (Zenodo record 6778336, CC BY 4.0). Flat specimens a × b = 6 × 20 mm, gauge L0 = 60 mm. The protocol gives A = 35 % and Z = 58–61 % for all three.",
+        "One eighth of the specimen with symmetry planes, 8-node hexahedra (ELFORM 2) of h = 0.5, 1, 1.5 and 3 mm. Parallel length ≈ 84 mm, fillet R ≈ 20 mm and grip width 26 mm were measured on the photo of the specimens (the data set does not give them). The width is reduced by 0.5 % at mid-length so the neck forms in the gauge length.",
+        "MAT_024 with the mean measured true stress–strain curve of Zx2–Zx4 up to A_g, then the generator's extension with slope H = σ_true(A_g). FAIL = k(h) · ln(1/(1 − Z)) with Z = 59 %, i.e. the value the MAT_024 generator writes for each element size.",
+        "Engineering strain = elongation of L0 / 60 mm; engineering stress = force / (6 × 20 mm²). After the force maximum the test curves are reconstructed from crosshead travel, so their end point is approximate (30–31.5 % instead of the measured A = 35 %).",
+        "Specimen pulled 28 mm in 70 ms (14 mm on the half model), with mass scaling to Δt = 5E-5 ms."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": []
+      },
+      "summary": [
+        {
+          "key": "Rm_MPa",
+          "label": "R_m (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "Ag_strain",
+          "label": "A_g (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "A_strain",
+          "label": "Elongation at fracture A (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "Z_pct",
+          "label": "Z (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "BAM-TEST-Zx2",
+          "label": "test Zx2",
+          "legendLabel": "BAM tests Zx2–Zx4",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "BAM-TEST-Zx3",
+          "label": "test Zx3",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "BAM-TEST-Zx4",
+          "label": "test Zx4",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "BAM-FIN-H0p5",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 0.5 mm, FAIL 1.15",
+          "slot": 1
+        },
+        {
+          "case": "BAM-FIN-H1",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 1 mm, FAIL 1.01",
+          "slot": 2
+        },
+        {
+          "case": "BAM-FIN-H1p5",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 1.5 mm, FAIL 0.91",
+          "slot": 3
+        },
+        {
+          "case": "BAM-FIN-H3",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "h = 3 mm, FAIL 0.72",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "With the measured curve up to A_g and the Considère-slope extension, every mesh gives R_m = 509 MPa and A_g = 15.4–15.7 % (tests: R_m 504–519 MPa, A_g 14.9–15.5 %). The force maximum and the onset of necking do not depend on the element size.",
+        "With the generator's FAIL for each element size, the specimen breaks at A = 34.8–35.1 % for h = 0.5, 1, 1.5 and 3 mm, against A = 35 % in the test protocol. The same FAIL on a different mesh would not: FAIL = 1.0 breaks the 1 mm mesh at 34.9 % and the 0.5 mm mesh (FAIL 1.02) at 33.7 %, while on the 3 mm mesh already FAIL = 0.8 delays fracture to 37 %. Always pass the element size of the neck region to the generator (calibration runs in the MAT_024 documentation).",
+        "Between A_g and fracture the model carries more load than the test curves: 501–504 vs 489–502 MPa at 25 % strain, 483–493 vs 416–442 MPa at 30 %. Two effects add up. The test strain after the force maximum comes from crosshead travel and places fracture at 30–31.5 %, while the broken specimens measure A = 35 %, so the test branch is compressed along the strain axis. MAT_024 also has no damage softening before FAIL, whereas voids grow in the real neck. The model is therefore good for when the specimen breaks, less so for the shape of the load drop just before.",
+        "Fracture is abrupt in the model: the force drops to zero within one output interval, because MAT_024 deletes an element at FAIL without prior softening. To model the load drop itself, use the generator's GISSMO option (fracture model = 1, next example).",
+        "The calibration uses one steel and one specimen shape (uniaxial tension, thin plate). FAIL from Z describes fracture after necking in tension; under shear or high triaxiality (notches, thick plates, punching) the fracture strain differs, and a stress-state-dependent criterion is needed."
+      ]
+    },
+    {
+      "id": "flat-gissmo",
+      "title": "S355 flat specimen — fracture with GISSMO instead of FAIL",
+      "sketch": "./assets/examples/sketch-flat.svg",
+      "setup": [
+        "Same specimen, meshes and hardening curve as the example above, but with FAIL = 0 and the *MAT_ADD_DAMAGE_GISSMO card that the MAT_024 generator writes for Z = 59 % (fracture model = 1).",
+        "One card for all four meshes: failure strain in tension ε₀ = 1.219 for 1 mm elements, Rice–Tracey dependence on triaxiality, LCREGD factors 1.19 / 1.00 / 0.88 / 0.67 for h = 0.5 / 1 / 1.5 / 3 mm, ECRIT = plastic strain at A_g (0.139), DMGEXP = 2, FADEXP = 4.",
+        "Grey dashed lines: BAM tests Zx2–Zx4. The FAIL run on the 1 mm mesh from the example above is shown for comparison."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": []
+      },
+      "summary": [
+        { "key": "Rm_MPa", "label": "R_m (MPa)", "digits": 1 },
+        { "key": "Ag_strain", "label": "A_g (%)", "scale": 100, "digits": 1 },
+        { "key": "A_strain", "label": "Elongation at fracture A (%)", "scale": 100, "digits": 1 }
+      ],
+      "runs": [
+        { "case": "BAM-TEST-Zx2", "label": "test Zx2", "legendLabel": "BAM tests Zx2–Zx4", "slot": 0, "test": true },
+        { "case": "BAM-TEST-Zx3", "label": "test Zx3", "slot": 0, "test": true, "legend": false },
+        { "case": "BAM-TEST-Zx4", "label": "test Zx4", "slot": 0, "test": true, "legend": false },
+        { "case": "GIS-FIN-H0p5", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 0.5 mm", "slot": 1 },
+        { "case": "GIS-FIN-H1", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 1 mm", "slot": 2 },
+        { "case": "GIS-FIN-H1p5", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 1.5 mm", "slot": 3 },
+        { "case": "GIS-FIN-H3", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 3 mm", "slot": 4 },
+        { "case": "BAM-FIN-H1", "model": "mat024_piecewise_linear_plasticity", "label": "FAIL, h = 1 mm", "slot": 5 }
+      ],
+      "notes": [
+        "With one GISSMO card for every mesh, the specimen breaks at A = 34.8–35.4 % for h = 1, 1.5 and 3 mm and at 34.0 % for h = 0.5 mm (test protocol: 35 %). R_m and A_g are the same as with FAIL (509 MPa, 15.4–15.7 %): ECRIT = plastic strain at A_g keeps damage from softening the material before necking.",
+        "The difference from FAIL is the end of the curve. With FAIL the stress stays at 450–480 MPa up to 34 % and then falls to zero within about 1 % strain. With GISSMO the stress starts to fall at about 31 % and goes from about 450 MPa at 32 % to 50–90 MPa at 34–34.5 %: the crack grows across the width over about 3 % strain instead of the whole neck eroding at once.",
+        "The tests drop earlier and more steeply (416–442 MPa at 30 % against 480–484 MPa in the model). Part of this is the test strain axis after the force maximum, which comes from crosshead travel and ends at 30–31.5 % although the broken specimens measure A = 35 %. GISSMO with FADEXP = 4 was chosen to reproduce a drop to about 0.85 R_m before the final break, not the test curve point by point.",
+        "FAIL is written for one element size (the h input), so it suits a uniform mesh in the neck. GISSMO takes the element size from the mesh (LCREGD), so a model with fine elements in the connection and coarse elements elsewhere keeps one material card. The factors were calibrated for 8-node solids in tension; shells and shear-dominated fracture need their own calibration (see the MAT_024 documentation)."
+      ]
+    },
+    {
+      "id": "hb-cyl",
+      "title": "Open-data benchmark 1 — cylinder 75 × 150 mm, f_c = 55.6 MPa (Hoover et al. 2013)",
+      "sketch": "./assets/examples/sketch-hb-cyl.svg",
+      "setup": [
+        "A blind check of the generators against published tests: one concrete batch (d_max = 10 mm, w/c 0.41) tested as cylinders and as notched beams of several sizes. This example and the next two use the cylinders and the D = 93 and 215 mm beams.",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",
+        "Full cylinder, O-grid mesh of 16 000 hexahedra (3.75 mm), ELFORM 1 with IHQ 4 / QM 0.05. Frictionless platens; top face pushed down 0.75 mm (5 ‰) in 30 ms. Stress = bottom reaction / (π · 37.5²), strain = platen displacement / 150 mm.",
+        "Test data: Hoover, Bažant, Vorel, Wendner, Hubler, Eng. Fract. Mech. 114 (2013) 92–103, doi:10.1016/j.engfracmech.2013.08.007, and Wendner et al., Mater. Struct. 48 (2015) 3603–3626, doi:10.1617/s11527-014-0426-0; curves from the ConcreteTestCollection that BOKU Vienna publishes for model calibration. Grey dashed line: measured mean curve; its min/max envelopes snap back after the peak and are left out."
+      ],
+      "chart": {
+        "x": "strain",
+        "y": "stress_MPa",
+        "xScale": 1000,
+        "xLabel": "axial strain (‰)",
+        "yLabel": "axial stress (MPa)",
+        "ref": [
+          {
+            "y": 55.6,
+            "label": "f_c = 55.6 MPa"
+          }
+        ]
+      },
+      "summary": [
+        {
+          "key": "peak_stress_MPa",
+          "label": "Peak stress (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "strain_at_peak",
+          "label": "Strain at peak (‰)",
+          "scale": 1000,
+          "digits": 2
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "HB-TEST-CYL-mean",
+          "label": "test, mean curve",
+          "legendLabel": "test (mean)",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "HB-CYL-KCC",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (no rate)",
+          "slot": 5
+        },
+        {
+          "case": "HB-CYL-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "HB-CYL-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        },
+        {
+          "case": "HB-CYL-CDP",
+          "model": "mat273_cdp",
+          "label": "CDP",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "The peak is not a validation, because f_c is the input: KCC, Winfrith, CSCM and CDP peak at 55.6, 56.8, 54.6 and 53.0 MPa (−5 to +2 %). What the test checks is the rest of the curve.",
+        "Stiffness. The test rises almost linearly with about 34 GPa (6.5 MPa at 0.19 ‰; the paper reports E_cyl = 34.4 GPa). Winfrith and CSCM start at 37.8 GPa and CDP at 35.2 GPa, close to the E = 36.8–38.1 GPa their generators derive from f_c. KCC is softer, 31.4 GPa (15.7 MPa at 0.5 ‰).",
+        "Shape before the peak. The test peaks at 1.76 ‰ and rounds off from about 45 MPa. Winfrith and CSCM stay linear up to about 1.45 ‰ and then run flat (54–57 MPa) like an elastic–perfectly plastic material, so their peak strains in the table (2.8 and 5 ‰) are just points on that plateau. KCC and CDP round off and peak at 2.2 and 2.3 ‰.",
+        "Post-peak. The measured mean curve snaps back (the strain decreases while the load falls), which a displacement-controlled model with uniform strain cannot follow. Only CDP softens (40.5 MPa at 4.9 ‰); KCC, Winfrith and CSCM stay at 54–57 MPa up to 5 ‰. For KCC part of this comes from the regularisation: the generator stretches the whole λ–η softening branch to the element size, so a 3.75 mm element also softens slowly in compression.",
+        "Hourglass energy is below 0.3 % and kinetic energy below 0.03 % of the external work for all four models."
+      ]
+    },
+    {
+      "id": "hb-b93",
+      "title": "Open-data benchmark 2 — notched beam D = 93 mm, three-point bending (Hoover et al. 2013)",
+      "sketch": "./assets/examples/sketch-hb-beam.svg",
+      "setup": [
+        "Beam D = 93 mm, thickness 40 mm, span 202 mm (2.176 D), central notch 27 mm deep (a/D = 0.29 on the 3 mm grid; test 0.3) and one element wide. 30 108 hexahedra of 3 mm, ELFORM 2.",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",
+        "Supports and load line are rows of nodes (three node lines at each support, two at midspan); midspan pushed down 0.45 mm in 30 ms. Load = sum of the support reactions; deflection = mean of the two top nodes at midspan.",
+        "Work / ligament = area under the load–deflection curve up to the end of the run, divided by 40 × (D − a). The same integral of the measured mean curve (to 0.43 mm) is 0.126 N/mm; the paper's work-of-fracture G_F of this concrete is 0.097–0.111 N/mm.",
+        "Test data: Hoover, Bažant, Vorel, Wendner, Hubler, Eng. Fract. Mech. 114 (2013) 92–103, doi:10.1016/j.engfracmech.2013.08.007, and Wendner et al., Mater. Struct. 48 (2015) 3603–3626, doi:10.1617/s11527-014-0426-0; curves from the ConcreteTestCollection that BOKU Vienna publishes for model calibration. Grey dashed lines: measured mean curve and its min/max envelope."
+      ],
+      "chart": {
+        "x": "deflection_mm",
+        "y": "force_N",
+        "yScale": 0.001,
+        "xLabel": "midspan deflection (mm)",
+        "yLabel": "load (kN)"
+      },
+      "summary": [
+        {
+          "key": "peak_force_kN",
+          "label": "Peak load (kN)",
+          "digits": 2
+        },
+        {
+          "key": "peak_nominal_stress_MPa",
+          "label": "σ_N at peak (MPa)",
+          "digits": 2
+        },
+        {
+          "key": "defl_at_peak_mm",
+          "label": "Deflection at peak (mm)",
+          "digits": 3
+        },
+        {
+          "key": "GF_Nmm",
+          "label": "Work / ligament (N/mm)",
+          "digits": 3
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "HB-TEST-B93-mean",
+          "label": "test, mean curve",
+          "legendLabel": "test (mean, min/max)",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "HB-TEST-B93-min",
+          "label": "test, min envelope",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "HB-TEST-B93-max",
+          "label": "test, max envelope",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "HB-B93-KCC",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (no rate)",
+          "slot": 5
+        },
+        {
+          "case": "HB-B93-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "HB-B93-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        },
+        {
+          "case": "HB-B93-CDP",
+          "model": "mat273_cdp",
+          "label": "CDP",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "Peak load (test mean 3.46 kN): KCC 2.75 kN (−21 %), Winfrith 3.89 (+13 %), CSCM 3.99 (+15 %), CDP 3.71 (+7 %). The models peak at 0.026–0.035 mm deflection, the test at 0.024 mm.",
+        "Softening. At 0.1 mm the test carries 1.08 kN; KCC and CSCM 0.89, Winfrith 0.60 and CDP 1.63 kN. KCC follows the shape of the measured tail most closely, Winfrith and CSCM drop too fast just after the peak, and CDP stays above the test up to about 0.25 mm.",
+        "Energy against the input. CDP dissipates 0.151 N/mm, the area of its bilinear card (0.150 N/mm, the fib MC2010 G_F = 73 f_cm^0.18). That is 35–55 % above the measured G_F of this concrete; Hoover et al. note that the fib formula overestimates it by about 50 %. KCC targets the same fib value but dissipates 0.098 N/mm. Winfrith and CSCM start from the lower MC90 value (0.088 N/mm) and dissipate 0.110 and 0.124 N/mm.",
+        "Hourglass energy is zero except for Winfrith (6.4 %, one-point element only); kinetic energy is below 0.15 % of the work."
+      ]
+    },
+    {
+      "id": "hb-b215",
+      "title": "Open-data benchmark 3 — notched beam D = 215 mm and the size effect (Hoover et al. 2013)",
+      "sketch": "./assets/examples/sketch-hb-beam.svg",
+      "setup": [
+        "Beam D = 215 mm, thickness 40 mm, span 469 mm, notch 65 mm (a/D = 0.30), one element wide. 36 016 hexahedra of 5 mm, ELFORM 2; midspan pushed down 0.9 mm in 40 ms. Load, deflection and work / ligament as in the D = 93 mm example (measured mean curve: 0.138 N/mm to 0.55 mm).",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",
+        "Same cards as for D = 93 mm except KCC, which the generator regularises for 5 mm instead of 3 mm elements.",
+        "Test data: Hoover, Bažant, Vorel, Wendner, Hubler, Eng. Fract. Mech. 114 (2013) 92–103, doi:10.1016/j.engfracmech.2013.08.007, and Wendner et al., Mater. Struct. 48 (2015) 3603–3626, doi:10.1617/s11527-014-0426-0; curves from the ConcreteTestCollection that BOKU Vienna publishes for model calibration. Grey dashed lines: measured mean curve and its min/max envelope."
+      ],
+      "chart": {
+        "x": "deflection_mm",
+        "y": "force_N",
+        "yScale": 0.001,
+        "xLabel": "midspan deflection (mm)",
+        "yLabel": "load (kN)"
+      },
+      "summary": [
+        {
+          "key": "peak_force_kN",
+          "label": "Peak load (kN)",
+          "digits": 2
+        },
+        {
+          "key": "peak_nominal_stress_MPa",
+          "label": "σ_N at peak (MPa)",
+          "digits": 2
+        },
+        {
+          "key": "defl_at_peak_mm",
+          "label": "Deflection at peak (mm)",
+          "digits": 3
+        },
+        {
+          "key": "GF_Nmm",
+          "label": "Work / ligament (N/mm)",
+          "digits": 3
+        },
+        {
+          "key": "hourglass_pct",
+          "label": "Hourglass / work (%)",
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "HB-TEST-B215-mean",
+          "label": "test, mean curve",
+          "legendLabel": "test (mean, min/max)",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "HB-TEST-B215-min",
+          "label": "test, min envelope",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "HB-TEST-B215-max",
+          "label": "test, max envelope",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "HB-B215-KCC",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC (no rate)",
+          "slot": 5
+        },
+        {
+          "case": "HB-B215-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "HB-B215-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        },
+        {
+          "case": "HB-B215-CDP",
+          "model": "mat273_cdp",
+          "label": "CDP",
+          "slot": 4
+        }
+      ],
+      "notes": [
+        "Peak load (test mean 6.57 kN): KCC 5.21 kN (−21 %), Winfrith 7.14 (+9 %), CSCM 7.34 (+12 %), CDP 6.83 (+4 %).",
+        "Size effect. The nominal strength σ_N = 1.5 P S / (W D²) falls from 3.03 to 2.50 MPa between D = 93 and 215 mm, a ratio of 0.826. The models give 0.824 (KCC), 0.797 (Winfrith), 0.800 (CSCM) and 0.799 (CDP): all four reproduce the size effect within 4 % from the generator cards alone.",
+        "KCC is 21 % low in both sizes although its cylinder strength is right and its size effect is the closest. Its card tensile strength is 4.15 MPa, higher than the 3.94 MPa of the other three, so the input f_t is not the cause; the shift comes from how KCC reaches tensile failure in the beam, and its lower elastic modulus (see the cylinder example) adds to it.",
+        "Energy. CDP again dissipates its card value (0.153 N/mm), about 40 % above the paper's G_F; KCC 0.100, CSCM 0.126 and Winfrith 0.165 N/mm. When a fracture test of the concrete is available, scale CDP's WF and WF1 (or KCC's gf input) to the measured G_F instead of using the fib estimate.",
+        "Hourglass energy is zero except for Winfrith (7.1 %); kinetic energy is below 0.7 % of the work."
       ]
     }
   ]

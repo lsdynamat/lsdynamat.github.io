@@ -1,0 +1,8 @@
+{
+ "case": "HB-CYL-CSCM",
+ "peak_stress_MPa": 54.59651167824377,
+ "strain_at_peak": 0.005033931127230581,
+ "peak_force_kN": 241.2,
+ "hourglass_pct": 1.0626564967833894e-06,
+ "kinetic_pct": 0.00024658756757450854
+}

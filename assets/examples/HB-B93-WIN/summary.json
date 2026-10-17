@@ -1,0 +1,11 @@
+{
+ "case": "HB-B93-WIN",
+ "peak_force_kN": 3.8924000000000003,
+ "peak_nominal_stress_MPa": 3.409056538328131,
+ "defl_at_peak_mm": 0.034909,
+ "work_Nmm": 291.03337698430926,
+ "GF_Nmm": 0.11023991552435956,
+ "final_force_ratio": 0.04350786147364094,
+ "hourglass_pct": 6.413467615619246,
+ "kinetic_pct": 0.1149532164546179
+}

@@ -87,12 +87,29 @@ def main(cdir):
     asc = os.path.join(cdir, "asc")
     spc = read_spcforc(os.path.join(asc, "spcforc"))
     nod = read_nodout(os.path.join(asc, "nodout"))
-    hist = nodes_of_set(deck, "CMOD pair") if case.startswith("BEAM") else \
+    hist = nodes_of_set(deck, "CMOD pair") if case.startswith(("BEAM", "HB-B")) else \
         nodes_of_set(deck, "gauge marks") if case.startswith("BAR") else nodes_of_set(deck, "top centre")
     rows, summ = [], {"case": case}
 
-    if case.startswith("CYL"):
-        A, H = math.pi * 75.0 ** 2, 300.0
+    if case.startswith("HB-B"):
+        # Hoover et al. (2013) beams: W = 40 mm, span 2.176 D, notch a (see build_hoover.py)
+        D, S, a = {"HB-B93": (93.0, 202.0, 27.0), "HB-B215": (215.0, 469.0, 65.0)}[case.rsplit("-", 1)[0]]
+        W = 40.0
+        c1, c2, d1, d2 = hist
+        for t, d in nod:
+            if not all(n in d for n in hist):
+                continue
+            cmod = d[c2][0] - d[c1][0]
+            defl = -(d[d1][2] + d[d2][2]) / 2
+            fz = interp([(s[0], s[3]) for s in spc], t)
+            rows.append((t, defl, cmod, fz, defl / D, 1.5 * fz * S / (W * D ** 2)))
+        hdr = "time_ms,deflection_mm,cmod_mm,force_N,nominal_strain,nominal_stress_MPa"
+        pk = max(rows, key=lambda r: r[3])
+        Wk = sum((r1[3] + r0[3]) / 2 * (r1[1] - r0[1]) for r0, r1 in zip(rows, rows[1:]))
+        summ.update(peak_force_kN=pk[3] / 1e3, peak_nominal_stress_MPa=pk[5], defl_at_peak_mm=pk[1],
+                    work_Nmm=Wk, GF_Nmm=Wk / (W * (D - a)), final_force_ratio=rows[-1][3] / pk[3])
+    elif case.startswith(("CYL", "HB-CYL")):
+        A, H = (math.pi * 37.5 ** 2, 150.0) if case.startswith("HB") else (math.pi * 75.0 ** 2, 300.0)
         top = hist[0]
         u = [(t, d[top][2]) for t, d in nod if top in d]
         for t, fx, fy, fz in spc:

@@ -1,0 +1,11 @@
+{
+ "case": "HB-B215-WIN",
+ "peak_force_kN": 7.139945623415812,
+ "peak_nominal_stress_MPa": 2.7165774721866,
+ "defl_at_peak_mm": 0.0623,
+ "work_Nmm": 988.4008184958867,
+ "GF_Nmm": 0.16473346974931447,
+ "final_force_ratio": 0.04494431987655371,
+ "hourglass_pct": 7.1159110545223045,
+ "kinetic_pct": 0.4028092300385511
+}

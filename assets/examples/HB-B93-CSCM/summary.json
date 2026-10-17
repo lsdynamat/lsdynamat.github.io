@@ -1,0 +1,11 @@
+{
+ "case": "HB-B93-CSCM",
+ "peak_force_kN": 3.985382795618971,
+ "peak_nominal_stress_MPa": 3.490493083225079,
+ "defl_at_peak_mm": 0.033356,
+ "work_Nmm": 327.7736646822996,
+ "GF_Nmm": 0.12415669116753773,
+ "final_force_ratio": 0.04521021172622797,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.10866380191098926
+}

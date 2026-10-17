@@ -1,0 +1,11 @@
+{
+ "case": "HB-B215-KCC",
+ "peak_force_kN": 5.211543232887648,
+ "peak_nominal_stress_MPa": 1.9828667735729908,
+ "defl_at_peak_mm": 0.05075,
+ "work_Nmm": 602.3651620242609,
+ "GF_Nmm": 0.10039419367071016,
+ "final_force_ratio": 0.030294289607671693,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.7074010469676726
+}
