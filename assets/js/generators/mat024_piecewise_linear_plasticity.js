@@ -4,7 +4,8 @@
 // IMPORTANT: Output order is solver-safe:
 //   *KEYWORD → header → *DEFINE_CURVE_TITLE → *MAT_PIECEWISE_LINEAR_PLASTICITY_TITLE → *END
 // Beyond A_g the curve continues as a straight line with slope H = σ_true(A_g) (Considère slope).
-// Optional FAIL from the reduction of area Z, scaled for the element size.
+// Optional ductile fracture from the reduction of area Z: FAIL (erosion, scaled for the element size)
+// or *MAT_ADD_DAMAGE_GISSMO (damage with stress fade-out, regularised for any element size by LCREGD).
 //
 // References:
 // Yun, X. & Gardner, L. (2017). JCSR 133, 36–46. DOI: 10.1016/j.jcsr.2017.01.024
@@ -12,7 +13,7 @@
 //
 // Units: mm–ms–g–N–MPa
 
-import { fitField } from "../core/units.js?v=20261016b";
+import { fitField } from "../core/units.js?v=20261016c";
 export const KEY = "mat024_piecewise_linear_plasticity";
 export const ID = 24;
 export const NAME = "Piecewise Linear Plasticity";
@@ -28,6 +29,10 @@ export const UNIT_SPEC = {
     "S",
   ] },
   curve: ["-", "S"],   // effective plastic strain vs yield stress
+  curveTitles: {
+    "GISSMO failure strain": ["-", "-"],   // failure strain vs triaxiality
+    "GISSMO regularisation": ["L", "-"],   // factor vs element size
+  },
 };
 
 const MATERIAL_CARDS_BANNER = [
@@ -70,6 +75,7 @@ export const DEFAULTS = {
   // Ductile fracture (optional): reduction of area Z and element size in the neck
   z_pct: "",
   h_el: 1.0,
+  damage: 1,   // with Z: 0 = FAIL (element erosion), 1 = GISSMO
 };
 
 // FAIL = k(h) · ln(1 / (1 − Z)) with the post-A_g slope H = σ_true(A_g).
@@ -82,8 +88,19 @@ export const FAIL_K = [
   [3.0, 0.81],
 ];
 
-export function failFactor(h) {
-  const t = FAIL_K;
+// GISSMO: failure strain in uniaxial tension eps0(h) = kG(h) · ln(1 / (1 − Z)), Rice–Tracey dependence on
+// triaxiality eps_f(eta) = eps0 · exp(−1.5 (eta − 1/3)), ECRIT = plastic strain at A_g, DMGEXP = 2, FADEXP = 4.
+// kG(h) calibrated on the same BAM specimen (fracture at A = 35 %); written as LCSDG at h = 1 mm and LCREGD = kG(h)/kG(1).
+export const GISSMO_K = [
+  [0.5, 1.630],
+  [1.0, 1.367],
+  [1.5, 1.207],
+  [3.0, 0.913],
+];
+export const GISSMO_DMGEXP = 2.0;
+export const GISSMO_FADEXP = 4.0;
+
+export function failFactor(h, t = FAIL_K) {
   if (h <= t[0][0]) return t[0][1];
   if (h >= t[t.length - 1][0]) return t[t.length - 1][1];
   // linear in log(h)
@@ -132,7 +149,8 @@ export const FIELDS = [
   },
   { key: "tail_h", label: "Slope beyond A_g, H / σ(A_g)", unit: "-", default: DEFAULTS.tail_h, min: 0, hint: "1 = Considère slope (calibrated). 0 = flat tail." },
   { key: "z_pct", label: "Reduction of area Z (optional)", unit: "%", default: DEFAULTS.z_pct, hint: "From the tensile test. Blank = no fracture." },
-  { key: "h_el", label: "Element size in the neck", unit: "mm", default: DEFAULTS.h_el, min: 0.1, hint: "Used only with Z to scale FAIL." },
+  { key: "h_el", label: "Element size in the neck", unit: "mm", default: DEFAULTS.h_el, min: 0.1, hint: "Used only with Z and FAIL (damage = 0). GISSMO regularises every element size itself." },
+  { key: "damage", label: "Fracture model", unit: "-", default: DEFAULTS.damage, min: 0, max: 1, hint: "Used only with Z. 0 = FAIL (element erosion), 1 = *MAT_ADD_DAMAGE_GISSMO (gradual load drop)." },
 ];
 
 export function generate(input = {}) {
@@ -154,6 +172,7 @@ export function generate(input = {}) {
   const zIn = readOptionalPositive(inp.z_pct);
   if (zIn != null && zIn >= 100) throw new Error("Z must be < 100 %");
   const h_el = mustPositive("h_el", inp.h_el);
+  const damage = Math.round(mustInRange("damage", inp.damage, 0, 1));
 
   // ---------------- Yun & Gardner (engineering strains) ----------------
   const eps_y = fy / E;
@@ -231,8 +250,11 @@ export function generate(input = {}) {
   }
 
   // Ductile fracture: fracture strain from Z, scaled for the element size in the neck
-  const kFail = zIn != null ? failFactor(h_el) : null;
-  const failStrain = zIn != null ? kFail * Math.log(1 / (1 - zIn / 100)) : null;
+  const useGissmo = zIn != null && damage === 1;
+  const lnZ = zIn != null ? Math.log(1 / (1 - zIn / 100)) : null;
+  const kFail = zIn != null && !useGissmo ? failFactor(h_el) : null;
+  const failStrain = kFail != null ? kFail * lnZ : null;
+  const eps0 = useGissmo ? failFactor(1.0, GISSMO_K) * lnZ : null;
   const epsAg = eps_p[ipk];
 
   // ---------------- Keyword output (order matters) ----------------
@@ -278,6 +300,8 @@ export function generate(input = {}) {
     lines.push(`$ FAIL = ${toFixed(kFail, 3)} x ln(1/(1-Z)) = ${toFixed(failStrain, 3)} for Z = ${toFixed(zIn, 1)} % and ${toFixed(h_el, 2)} mm elements in the neck`);
     lines.push(`$ (calibrated with the post-A_g slope H = ${toFixed(tail_h, 2)} x sigma_true(A_g); valid for 8-node solids)`);
     if (failStrain <= epsAg) lines.push("$ WARNING: FAIL is below the plastic strain at A_g: elements erode before necking");
+  } else if (useGissmo) {
+    lines.push("$ FAIL left at 0: fracture is handled by *MAT_ADD_DAMAGE_GISSMO below.");
   } else {
     lines.push("$ FAIL left at 0: no fracture. Enter Z to add element erosion at ductile fracture.");
   }
@@ -309,7 +333,46 @@ export function generate(input = {}) {
   lines.push("$#     ES1       ES2       ES3       ES4       ES5       ES6       ES7       ES8");
   lines.push(Array(8).fill(fmt10(0)).join(""));
 
-  // 4) END
+  // 4) GISSMO damage (optional)
+  if (useGissmo) {
+    const lcsdg = mid * 1000 + 25;
+    const lcregd = mid * 1000 + 26;
+    lines.push("*MAT_ADD_DAMAGE_GISSMO");
+    lines.push(`$ Ductile fracture from Z = ${toFixed(zIn, 1)} %: eps_f(eta) = ${toFixed(eps0, 4)} x exp(-1.5 (eta - 1/3)) for 1 mm elements (Rice-Tracey)`);
+    lines.push("$ LCREGD scales eps_f with the element size; ECRIT = plastic strain at A_g (onset of necking)");
+    lines.push("$ Calibrated on BAM S355 flat tensile tests with 8-node solids and the post-A_g slope H = sigma_true(A_g)");
+    lines.push("$      MID     blank      DTYP     REFSZ    NUMFIP");
+    lines.push(`${fmt10(mid)}${" ".repeat(10)}${fmt10(1)}${fmt10(0.0, 1)}${fmt10(1.0, 1)}`);
+    lines.push("$#   LCSDG     ECRIT    DMGEXP     DCRIT    FADEXP    LCREGD");
+    lines.push(`${fmt10(lcsdg)}${fmt10(epsAg, 5)}${fmt10(GISSMO_DMGEXP, 1)}${fmt10(0.0, 1)}${fmt10(GISSMO_FADEXP, 1)}${fmt10(lcregd)}`);
+    lines.push("$#   LCSRS      SHRF     BIAXF    LCDLIM   MIDFAIL     HISVN      SOFT     LP2BI");
+    lines.push(`${fmt10(0)}${fmt10(0.0, 1)}${fmt10(0.0, 1)}${fmt10(0)}${fmt10(0.0, 1)}${fmt10(0)}${fmt10(0.0, 1)}${fmt10(0.0, 1)}`);
+
+    lines.push("*DEFINE_CURVE_TITLE");
+    lines.push(`GISSMO failure strain vs triaxiality, Z=${toFixed(zIn, 1)}%`);
+    lines.push("$#    LCID      SIDR       SFA       SFO      OFFA      OFFO");
+    lines.push(`${fmt10(lcsdg)}${fmt10(0)}${fmt10(1.0, 1)}${fmt10(1.0, 1)}${fmt10(0.0, 1)}${fmt10(0.0, 1)}`);
+    lines.push("$#                a               o");
+    // constant below eta = -1/3 (no void growth in compression), Rice-Tracey above
+    const etas = [-1.0];
+    for (let k = 0; k <= 23; k++) etas.push(-1 / 3 + 0.1 * k);
+    for (const eta of etas) {
+      const ef = eps0 * Math.exp(-1.5 * (Math.max(eta, -1 / 3) - 1 / 3));
+      lines.push(`${fmt20(eta, 6)}${fmt20(ef, 6)}`);
+    }
+
+    lines.push("*DEFINE_CURVE_TITLE");
+    lines.push("GISSMO regularisation factor vs element size");
+    lines.push("$#    LCID      SIDR       SFA       SFO      OFFA      OFFO");
+    lines.push(`${fmt10(lcregd)}${fmt10(0)}${fmt10(1.0, 1)}${fmt10(1.0, 1)}${fmt10(0.0, 1)}${fmt10(0.0, 1)}`);
+    lines.push("$#                a               o");
+    const k1 = failFactor(1.0, GISSMO_K);
+    for (const h of [0.1, 0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 100.0]) {
+      lines.push(`${fmt20(h, 4)}${fmt20(failFactor(h, GISSMO_K) / k1, 6)}`);
+    }
+  }
+
+  // 5) END
   lines.push("*END");
   lines.push("");
 

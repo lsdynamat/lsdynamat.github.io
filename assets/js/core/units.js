@@ -129,7 +129,8 @@ export function tidyDeck(text) {
  * Convert a keyword deck written in mm · ms · g · N · MPa to another unit system.
  * spec: { "<KEYWORD without _TITLE>": { rows: [row, ...], repeat?: row } } where a row is an
  * array of dimension codes (10-character fields) or { w, d } for other field widths, and
- * spec.curve = [xDim, yDim] for *DEFINE_CURVE points (20-character fields).
+ * spec.curve = [xDim, yDim] for *DEFINE_CURVE points (20-character fields), and
+ * spec.curveTitles = { "<title prefix>": [xDim, yDim] } for *DEFINE_CURVE_TITLE curves with other axes.
  */
 export function convertDeck(text, spec, sys) {
   if (!sys || sys.id === BASE_UNITS.id) return text;
@@ -139,13 +140,14 @@ export function convertDeck(text, spec, sys) {
     ? { rows: [["-", "-", "-", "-", "-", "-", "-", "-"]], repeat: { w: 20, d: spec.curve } }
     : null;
 
-  let block = null, row = 0, needTitle = false;
+  let block = null, row = 0, needTitle = false, curveBlock = false;
   return text.split("\n").map(line => {
     if (line.startsWith("*")) {
       const kw = line.trim().toUpperCase();
       needTitle = kw === "*TITLE" || kw.endsWith("_TITLE");
       const base = kw.replace(/_TITLE$/, "");
       block = base === "*DEFINE_CURVE" ? curveSpec : spec[base] || null;
+      curveBlock = base === "*DEFINE_CURVE";
       row = 0;
       return line;
     }
@@ -154,7 +156,13 @@ export function convertDeck(text, spec, sys) {
       if (/^\$ abscissa/.test(line)) return line.replace(/1\/ms/g, `1/${sys.time}`);
       return line;
     }
-    if (needTitle) { needTitle = false; return line; }
+    if (needTitle) {
+      needTitle = false;
+      // spec.curveTitles: { "<title prefix>": [xDim, yDim] } for curves whose axes differ from spec.curve
+      const hit = curveBlock && spec.curveTitles && Object.keys(spec.curveTitles).find(k => line.startsWith(k));
+      if (hit) block = { rows: curveSpec ? curveSpec.rows : [["-"]], repeat: { w: 20, d: spec.curveTitles[hit] } };
+      return line;
+    }
     if (!block || line.trim() === "") return line;
     const r = block.rows[row] || block.repeat;
     row++;

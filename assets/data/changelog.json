@@ -2,6 +2,20 @@
   {
     "id": "mat024_piecewise_linear_plasticity",
     "date": "2026-10-16",
+    "version": "1.3",
+    "model": "MAT_024 Piecewise Linear Plasticity",
+    "change": "New fracture model input (default 1 = GISSMO): with Z given, the generator writes *MAT_ADD_DAMAGE_GISSMO with a Rice–Tracey failure curve ε_f(η) = ε₀ exp(−1.5(η − 1/3)), ε₀ = kG(1 mm) · ln(1/(1−Z)), an LCREGD element-size curve kG(h)/kG(1 mm), ECRIT = plastic strain at A_g, DMGEXP = 2 and FADEXP = 4. kG = 1.63, 1.37, 1.21 and 0.91 for h = 0.5, 1, 1.5 and 3 mm, calibrated on the BAM S355 flat specimen. One card breaks the specimen at A = 34.0–35.4 % on all four meshes, with a gradual load drop. Fracture model 0 keeps the FAIL output of version 1.2. Unit conversion now also rescales the element-size axis of LCREGD."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-16",
+    "version": "",
+    "model": "Examples",
+    "change": "New example: the S355 flat specimen with the generator's GISSMO card on four meshes, against the BAM tests and the FAIL run."
+  },
+  {
+    "id": "mat024_piecewise_linear_plasticity",
+    "date": "2026-10-16",
     "version": "1.2",
     "model": "MAT_024 Piecewise Linear Plasticity",
     "change": "Beyond A_g the curve now continues with slope H = σ_true(A_g) (Considère slope) instead of a flat tail, so the neck starts at A_g and grows gradually. New optional ductile fracture: FAIL = k(h) · ln(1/(1−Z)) from the reduction of area Z and the element size h, with k = 1.29, 1.13, 1.02 and 0.81 for h = 0.5, 1, 1.5 and 3 mm. Calibrated on BAM S355 flat tensile tests: the specimen breaks at A = 34.8–35.1 % (test 35 %) on every mesh."

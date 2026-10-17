@@ -1,7 +1,7 @@
 // assets/js/generators/mat273_cdp.js  (ONLY the updated parts shown fully usable)
 // Replace your current file with this full version if you want; it's complete.
 
-import { fitField } from "../core/units.js?v=20261016b";
+import { fitField } from "../core/units.js?v=20261016c";
 export const KEY = "mat273_cdp";
 export const ID = 273;
 export const NAME = "CDP Concrete (*MAT_CONCRETE_DAMAGE_PLASTIC_MODEL)";

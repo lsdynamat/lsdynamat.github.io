@@ -350,8 +350,47 @@
         "With the measured curve up to A_g and the Considère-slope extension, every mesh gives R_m = 509 MPa and A_g = 15.4–15.7 % (tests: R_m 504–519 MPa, A_g 14.9–15.5 %). The force maximum and the onset of necking do not depend on the element size.",
         "With the generator's FAIL for each element size, the specimen breaks at A = 34.8–35.1 % for h = 0.5, 1, 1.5 and 3 mm, against A = 35 % in the test protocol. The same FAIL on a different mesh would not: FAIL = 1.0 breaks the 1 mm mesh at 34.9 % and the 0.5 mm mesh (FAIL 1.02) at 33.7 %, while on the 3 mm mesh already FAIL = 0.8 delays fracture to 37 %. Always pass the element size of the neck region to the generator (calibration runs in the MAT_024 documentation).",
         "Between A_g and fracture the model carries more load than the test curves: 501–504 vs 489–502 MPa at 25 % strain, 483–493 vs 416–442 MPa at 30 %. Two effects add up. The test strain after the force maximum comes from crosshead travel and places fracture at 30–31.5 %, while the broken specimens measure A = 35 %, so the test branch is compressed along the strain axis. MAT_024 also has no damage softening before FAIL, whereas voids grow in the real neck. The model is therefore good for when the specimen breaks, less so for the shape of the load drop just before.",
-        "Fracture is abrupt in the model: the force drops to zero within one output interval, because MAT_024 deletes an element at FAIL without prior softening. To model the load drop itself, use a damage model such as *MAT_ADD_DAMAGE_GISSMO.",
+        "Fracture is abrupt in the model: the force drops to zero within one output interval, because MAT_024 deletes an element at FAIL without prior softening. To model the load drop itself, use the generator's GISSMO option (fracture model = 1, next example).",
         "The calibration uses one steel and one specimen shape (uniaxial tension, thin plate). FAIL from Z describes fracture after necking in tension; under shear or high triaxiality (notches, thick plates, punching) the fracture strain differs, and a stress-state-dependent criterion is needed."
+      ]
+    },
+    {
+      "id": "flat-gissmo",
+      "title": "S355 flat specimen — fracture with GISSMO instead of FAIL",
+      "sketch": "./assets/examples/sketch-flat.svg",
+      "setup": [
+        "Same specimen, meshes and hardening curve as the example above, but with FAIL = 0 and the *MAT_ADD_DAMAGE_GISSMO card that the MAT_024 generator writes for Z = 59 % (fracture model = 1).",
+        "One card for all four meshes: failure strain in tension ε₀ = 1.219 for 1 mm elements, Rice–Tracey dependence on triaxiality, LCREGD factors 1.19 / 1.00 / 0.88 / 0.67 for h = 0.5 / 1 / 1.5 / 3 mm, ECRIT = plastic strain at A_g (0.139), DMGEXP = 2, FADEXP = 4.",
+        "Grey dashed lines: BAM tests Zx2–Zx4. The FAIL run on the 1 mm mesh from the example above is shown for comparison."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": []
+      },
+      "summary": [
+        { "key": "Rm_MPa", "label": "R_m (MPa)", "digits": 1 },
+        { "key": "Ag_strain", "label": "A_g (%)", "scale": 100, "digits": 1 },
+        { "key": "A_strain", "label": "Elongation at fracture A (%)", "scale": 100, "digits": 1 }
+      ],
+      "runs": [
+        { "case": "BAM-TEST-Zx2", "label": "test Zx2", "legendLabel": "BAM tests Zx2–Zx4", "slot": 0, "test": true },
+        { "case": "BAM-TEST-Zx3", "label": "test Zx3", "slot": 0, "test": true, "legend": false },
+        { "case": "BAM-TEST-Zx4", "label": "test Zx4", "slot": 0, "test": true, "legend": false },
+        { "case": "GIS-FIN-H0p5", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 0.5 mm", "slot": 1 },
+        { "case": "GIS-FIN-H1", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 1 mm", "slot": 2 },
+        { "case": "GIS-FIN-H1p5", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 1.5 mm", "slot": 3 },
+        { "case": "GIS-FIN-H3", "model": "mat024_piecewise_linear_plasticity", "label": "GISSMO, h = 3 mm", "slot": 4 },
+        { "case": "BAM-FIN-H1", "model": "mat024_piecewise_linear_plasticity", "label": "FAIL, h = 1 mm", "slot": 5 }
+      ],
+      "notes": [
+        "With one GISSMO card for every mesh, the specimen breaks at A = 34.8–35.4 % for h = 1, 1.5 and 3 mm and at 34.0 % for h = 0.5 mm (test protocol: 35 %). R_m and A_g are the same as with FAIL (509 MPa, 15.4–15.7 %): ECRIT = plastic strain at A_g keeps damage from softening the material before necking.",
+        "The difference from FAIL is the end of the curve. With FAIL the stress stays at 450–480 MPa up to 34 % and then falls to zero within about 1 % strain. With GISSMO the stress starts to fall at about 31 % and goes from about 450 MPa at 32 % to 50–90 MPa at 34–34.5 %: the crack grows across the width over about 3 % strain instead of the whole neck eroding at once.",
+        "The tests drop earlier and more steeply (416–442 MPa at 30 % against 480–484 MPa in the model). Part of this is the test strain axis after the force maximum, which comes from crosshead travel and ends at 30–31.5 % although the broken specimens measure A = 35 %. GISSMO with FADEXP = 4 was chosen to reproduce a drop to about 0.85 R_m before the final break, not the test curve point by point.",
+        "FAIL is written for one element size (the h input), so it suits a uniform mesh in the neck. GISSMO takes the element size from the mesh (LCREGD), so a model with fine elements in the connection and coarse elements elsewhere keeps one material card. The factors were calibrated for 8-node solids in tension; shells and shear-dominated fracture need their own calibration (see the MAT_024 documentation)."
       ]
     }
   ]

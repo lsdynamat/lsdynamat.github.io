@@ -3,7 +3,7 @@
 // Card layout checked against LS-DYNA Keyword User's Manual Vol. II, R13 (p. 2-262 ff.)
 // Units: mm-ms-g-N-MPa
 
-import { fitField } from "../core/units.js?v=20261016b";
+import { fitField } from "../core/units.js?v=20261016c";
 export const KEY = "mat027_mooney_rivlin";
 export const ID = 27;
 export const NAME = "Mooney–Rivlin Rubber (*MAT_MOONEY-RIVLIN_RUBBER)";
