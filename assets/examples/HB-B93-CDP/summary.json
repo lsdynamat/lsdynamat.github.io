@@ -1,0 +1,11 @@
+{
+ "case": "HB-B93-CDP",
+ "peak_force_kN": 3.714184052210442,
+ "peak_nominal_stress_MPa": 3.2529707706664466,
+ "defl_at_peak_mm": 0.034132,
+ "work_Nmm": 398.6819000586511,
+ "GF_Nmm": 0.15101587123433752,
+ "final_force_ratio": 0.04386158513147632,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.08633405803097895
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 190" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="none" stroke="currentColor">
+  <title>Notched beam D x 40 mm in three-point bending</title>
+  <!-- beam with notch -->
+  <path d="M20 60 h300 v60 h-148 v-12 h-4 v12 h-148 z" stroke-width="1.5"/>
+  <!-- load -->
+  <path d="M170 22 v34" stroke-width="1.5"/><path d="M165 50 l5 8 l5 -8" stroke-width="1.5"/>
+  <text x="178" y="32" fill="currentColor" stroke="none">δ(t), 0.45 or 0.9 mm</text>
+  <!-- supports -->
+  <path d="M31 120 l8 12 h-16 z M309 120 l8 12 h-16 z" stroke-width="1"/>
+  <path d="M27 136 h24 M305 136 h24" stroke-width="1"/>
+  <!-- dims -->
+  <path d="M31 150 h278 M31 145 v10 M309 145 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="164" text-anchor="middle" fill="currentColor" stroke="none">span 2.176 D</text>
+  <path d="M20 176 h300 M20 171 v10 M320 171 v10" stroke-width="1" opacity=".7"/>
+  <text x="170" y="188" text-anchor="middle" fill="currentColor" stroke="none">2.4 D</text>
+  <path d="M332 60 v60" stroke-width="1" opacity=".7"/>
+  <text x="300" y="56" fill="currentColor" stroke="none" font-size="10">D × 40</text>
+  <text x="182" y="116" fill="currentColor" stroke="none" font-size="10">notch 0.3 D</text>
+  <path d="M150 112 l-14 12" stroke-width="1" opacity=".7"/>
+  <text x="96" y="134" fill="currentColor" stroke="none" font-size="10">CMOD</text>
+  <text x="20" y="14" fill="currentColor" stroke="none" font-size="10" opacity=".8">hexa 3 mm (D 93) or 5 mm (D 215), ELFORM 2</text>
+</svg>

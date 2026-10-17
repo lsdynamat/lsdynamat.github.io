@@ -1,5 +1,12 @@
 [
   {
+    "id": "examples",
+    "date": "2026-10-17",
+    "version": "",
+    "model": "Examples",
+    "change": "New open-data benchmark for the four concrete generators: cylinders and notched beams D = 93 and 215 mm from Hoover et al. (2013), one batch with f_c = 55.6 MPa, cards generated from f_c and d_max only. All four reproduce the measured size effect within 4 %; peak loads are −21 % (KCC), +7 to +15 % (Winfrith, CSCM, CDP). The fib MC2010 G_F used by the KCC and CDP generators is 35–55 % above this concrete's measured G_F, and CDP dissipates exactly its card value."
+  },
+  {
     "id": "mat024_piecewise_linear_plasticity",
     "date": "2026-10-16",
     "version": "1.3",

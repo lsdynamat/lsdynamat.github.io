@@ -1,0 +1,7 @@
+{
+ "case": "HB-TEST-B215-mean",
+ "peak_force_kN": 6.573384017702402,
+ "peak_nominal_stress_MPa": 2.501014416686663,
+ "defl_at_peak_mm": 0.04199252837871112,
+ "GF_Nmm": 0.1384
+}

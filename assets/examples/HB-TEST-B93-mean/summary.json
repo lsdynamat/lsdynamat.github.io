@@ -1,0 +1,7 @@
+{
+ "case": "HB-TEST-B93-mean",
+ "peak_force_kN": 3.456520101551477,
+ "peak_nominal_stress_MPa": 3.027302551653652,
+ "defl_at_peak_mm": 0.02445900923907645,
+ "GF_Nmm": 0.1255
+}
