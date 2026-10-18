@@ -1,6 +1,6 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, on } from "../core/dom.js";
-import { renderModelRows, matchesQuery, byMat } from "../core/modelTable.js?v=20261016c";
+import { renderModelRows, matchesQuery, byMat } from "../core/modelTable.js?v=20261018a";
 
 setText("year", new Date().getFullYear());
 
