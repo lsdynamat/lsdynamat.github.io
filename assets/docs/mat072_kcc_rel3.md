@@ -16,7 +16,7 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 - Maximum surface: `a0 = 1945 · r` (psi), `a1 = 0.4463`, `a2 = 1.228·10⁻⁵ / r` (1/psi)
 - Yield surface: `a0y = 1469 · r`, `a1y = 0.6250`, `a2y = 3.913·10⁻⁵ / r`
 - Residual surface: `a1f = a1`, `a2f = a2`
-- Softening: `b1 = 1.6`, `b3 = 1.15`, `b2 = (0.09W² − 0.98W + 3.06) · (1 − 0.004 F² + 0.097 F − 0.484)`, with `W = 3 · d_agg = 1.5 in` and `F = f_c,psi / 1000`
+- Softening: `b1 = 1.6`, `b3 = 1.15`, `b2 = 1.0` (see *Tensile damage under multiaxial tension* below; up to version 1.5 the K&C formula `b2 = (0.09W² − 0.98W + 3.06) · (1 − 0.004 F² + 0.097 F − 0.484)` with `W = 1.5 in` and `F = f_c,psi / 1000`, 1.4–1.9 for 20–60 MPa)
 - `LOCWID = 3 · d_agg = 38.1 mm` (d_agg = 12.7 mm, fixed)
 - `OMEGA` is an input (default 0.5); η1–η13 are the 13-point default damage function, and λ6–λ10 are scaled for the fracture energy (next section)
 - EOS: the 10-point compaction curve of the 45.4 MPa reference concrete, with the volumetric strains kept and the pressures and unloading bulk moduli multiplied by `√r` (Wu & Crawford 2015, as LS-DYNA does when it generates the parameters itself). The unloading bulk modulus is then `K = 57 000 √f_c,psi / (3(1 − 2·0.16))`, i.e. E = 57 000 √f_c,psi with PR = 0.16. Up to version 1.4 the curve was not scaled, so every card had E ≈ 31.9 GPa.
@@ -26,7 +26,7 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 
 MAT_072R3 regularises its softening only for elements larger than LOCWID. For smaller elements the energy dissipated per unit volume is fixed by the damage function, so the fracture energy grows with the element size h. Single-element uniaxial tension tests (LS-DYNA R13, rate effects off) with the unscaled damage function gave:
 
-- G_F = g0 · min(h, LOCWID), with `g0 = 0.01026 · (f_c/30)^0.42` N/mm² (f_c = 20–60 MPa, within 0.5 %)
+- G_F = g0 · min(h, LOCWID), with `g0 = 0.01161 · (f_c/30)^0.50` N/mm² for b2 = 1.0 (f_c = 20–60 MPa, fit within 0.1 %; with the K&C b2 formula it was `0.01026 · (f_c/30)^0.42`)
 - unscaled card, f_c = 30 MPa: 0.050, 0.103, 0.259, 0.381 and 0.372 N/mm for h = 5, 10, 25, 48 and 96 mm
 - LS-DYNA auto-generation (`A0 = −f_c`, LOCWID 48 mm), for comparison: 0.006, 0.015, 0.037, 0.069 and 0.071 N/mm
 
@@ -36,9 +36,22 @@ G_F is proportional to the post-peak part of λ (scaling λ6–λ10 by 0.5, 2 an
 - `G_F,target` = the optional G_F input, or fib MC2010 `73 f_c^0.18` N/m (0.135 N/mm at 30 MPa)
 - h = the element-size input: the edge length of the elements where cracks form
 
-Check (single element, uniaxial tension): G_F = 0.133, 0.134, 0.137 and 0.137 N/mm for h = 5, 10, 25 and 50 mm at f_c = 30 MPa (target 0.135); 0.124 (target 0.125) at 20 MPa, 0.149 (0.153) at 60 MPa, 0.145 (0.145) at 45 MPa with h = 15 mm, and 0.079 for an input G_F of 0.08 N/mm.
+Check (single element, uniaxial tension, version 1.6): G_F = 0.135 and 0.134 N/mm for h = 5 and 25 mm at f_c = 30 MPa (target 0.135), 0.125 (target 0.125) at 20 MPa and 0.151 (0.151) at 55.6 MPa with h = 10 mm.
 
 The compressive peak is unchanged (29.98 against 29.96 MPa, h = 5 mm), but λ is shared by tension and compression, so the compressive softening branch becomes more ductile for small elements (28.1 against 24.2 MPa at 1 % strain, h = 5 mm). This follows the same crack-band logic: crushing energy per unit volume rises as the element shrinks.
+
+## Tensile damage under multiaxial tension
+
+KCC accumulates tensile damage as `dλ ∝ dε_p / (1 + p/f_t)^b2`, so damage grows faster the higher the tensile pressure. In uniaxial tension `p = −σ/3` and the generator's λ stretching sets the dissipated energy to G_F. A crack tip is different: in the notched beams of Hoover et al. (2013) the cracked elements end up in near-hydrostatic tension (σxx ≈ σyy ≈ σzz ≈ 2.8 MPa at f_c = 55.6 MPa), because the crack opening goes into elastic volumetric strain that the surrounding concrete does not let the element relieve. With the K&C value b2 = 1.86, single elements dissipate 0.069 N/mm in biaxial tension against 0.151 N/mm in uniaxial tension (CDP: 0.104 and 0.151), the beam elements about 0.08 N/mm, and the beams peaked 19 % below the tests.
+
+| D = 93 mm beam, f_c = 55.6 MPa | peak (kN) | work / ligament (N/mm) |
+|---|---|---|
+| test (mean curve) | 3.46 | 0.126 |
+| b2 = 1.86 (K&C formula, version ≤ 1.5) | 2.78 | 0.098 |
+| b2 = 1.0, λ re-stretched (version 1.6) | 3.39 | 0.130 |
+| b2 = 0.5, λ re-stretched | 3.87 | 0.221 |
+
+b2 = 1.0 makes the beams dissipate about the card's G_F (0.130 and 0.144 N/mm for D = 93 and 215 mm; target 0.151) and brings the peaks within 2 % of the tests. Other parameters do not do this: b3 (damage on the hydrostatic-tension path) left the beam unchanged, and OMEGA = 0 / 0.9 / 1.0 gave 2.60 / 3.79 / 6.13 kN with no softening left from 0.9 on.
 
 ## Strain-rate curve (DIF)
 
@@ -69,7 +82,7 @@ The `dif_model` input selects how rate effects are written:
 - **Curve discretization warning.** LS-DYNA re-samples the DIF curve and reports a discretization difference (Warning 21329), as it does for the manual's own sample curve. In the single-element checks the DIF read by the solver was still correct.
 - **Element size input.** Enter the size of the elements in the cracking zone. With mixed mesh sizes, one card per size range keeps G_F correct.
 - **LOCWID** is fixed at 38.1 mm (d_agg = 12.7 mm); it does not follow the maximum aggregate size of your mix. For elements larger than 38.1 mm, G_F is regularised by LS-DYNA itself and the scaling uses h = 38.1 mm.
-- **Cracking under constraint.** In a notched beam (Hoover et al. 2013 benchmark on the Examples page) KCC peaks 19 % below the test while CDP, CSCM and Winfrith are 4–15 % above it. A cracked KCC element surrounded by intact concrete ends up in hydrostatic tension, its damage grows faster than in uniaxial tension, and it dissipates about half of the G_F the card is regularised for. The response depends strongly on OMEGA (ω = 0 / 0.5 / 0.9 / 1.0: peak 2.60 / 2.78 / 3.79 / 6.13 kN against 3.46 kN measured, with no softening left from ω = 0.9 on). For problems governed by tensile cracking, prefer CDP or CSCM, or check KCC against a fracture test.
+- **Cracking under constraint.** See the next section. b2 = 1.0 was chosen on one data set (Hoover et al. 2013, f_c = 55.6 MPa); check it against a fracture test of your concrete when tensile cracking governs.
 - **f_c** is the measured cylinder strength of the concrete you model (its mean strength).
 - **Elastic modulus.** E follows the EOS (E = 3K(1 − 2PR) = 57 000 √f_c,psi), the ACI 318 relation, so it is lower than the EN 1992-1-1 value E_cm for normal-strength concrete (25.9 against 30.6 GPa at f_c = 30 MPa). The card does not take E as an input.
 

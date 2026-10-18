@@ -1,11 +1,11 @@
 {
  "case": "HB-B215-KCC",
- "peak_force_kN": 5.350094707331494,
- "peak_nominal_stress_MPa": 2.035582275071772,
- "defl_at_peak_mm": 0.047305,
- "work_Nmm": 601.8747362742057,
- "GF_Nmm": 0.10031245604570095,
- "final_force_ratio": 0.02878079892473562,
+ "peak_force_kN": 6.71530535191147,
+ "peak_nominal_stress_MPa": 2.555012068723482,
+ "defl_at_peak_mm": 0.061139,
+ "work_Nmm": 863.541765003375,
+ "GF_Nmm": 0.1439236275005625,
+ "final_force_ratio": 0.025030879638578796,
  "hourglass_pct": 0.0,
- "kinetic_pct": 0.6975528881225547
+ "kinetic_pct": 0.4847717467596816
 }
