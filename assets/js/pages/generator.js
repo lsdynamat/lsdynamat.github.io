@@ -1,8 +1,8 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261018a";
-import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261018a";
+import { getGenerator } from "../generators/index.js?v=20261018b";
+import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261018b";
 
 setText("year", new Date().getFullYear());
 
@@ -19,21 +19,50 @@ function buildDefaultValues(inputs){
   return v;
 }
 
+function optLabel(inp, v){
+  const o = (inp.options || []).find(o => Number(o[0]) === Number(v));
+  return o ? o[1] : String(v);
+}
+
 function renderForm(formEl, inputs, values){
   formEl.innerHTML = "";
   (inputs || []).forEach(inp=>{
     const div = document.createElement("div");
     div.className = "inputbox";
     const id = `in_${escapeHtml(inp.key)}`;
+    const v = values[inp.key];
+    let control;
+    if (inp.control === "toggle"){
+      const onVal = inp.options[1][0];
+      control = `
+      <label class="switch" for="${id}">
+        <input id="${id}" type="checkbox" role="switch" ${Number(v) === Number(onVal) ? "checked" : ""} />
+        <span class="track" aria-hidden="true"></span>
+        <span class="state">${escapeHtml(optLabel(inp, v))}</span>
+      </label>`;
+    } else if (inp.control === "select"){
+      control = `
+      <select id="${id}">${inp.options.map(o =>
+        `<option value="${escapeHtml(o[0])}" ${Number(o[0]) === Number(v) ? "selected" : ""}>${escapeHtml(o[1])}</option>`).join("")}
+      </select>`;
+    } else {
+      control = `<input id="${id}" type="text" inputmode="decimal" spellcheck="false" value="${escapeHtml(v)}" />`;
+    }
 
     div.innerHTML = `
       <label class="k" for="${id}">
         <span>${escapeHtml(inp.label || inp.key)}</span>
         <span class="unit">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</span>
       </label>
-      <input id="${id}" type="text" inputmode="decimal" spellcheck="false" value="${escapeHtml(values[inp.key])}" />
+      ${control}
       ${inp.hint ? `<div class="h">${escapeHtml(inp.hint)}</div>` : ""}
     `;
+    if (inp.control === "toggle"){
+      const cb = div.querySelector("input");
+      cb.addEventListener("change", () => {
+        div.querySelector(".state").textContent = optLabel(inp, inp.options[cb.checked ? 1 : 0][0]);
+      });
+    }
 
     formEl.appendChild(div);
   });
@@ -48,6 +77,9 @@ function validateAndCollect(inputs){
   (inputs || []).forEach(inp=>{
     const el = getEl(`in_${inp.key}`);
     if (!el) return;
+
+    if (inp.control === "toggle"){ out[inp.key] = Number(inp.options[el.checked ? 1 : 0][0]); return; }
+    if (inp.control === "select"){ out[inp.key] = Number(el.value); return; }
 
     const raw = (el.value ?? "").toString().trim();
     if (raw === ""){
@@ -210,6 +242,7 @@ function downloadText(filename, text){
 
   let t = 0;
   on(formEl, "input", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
+  on(formEl, "change", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
   on(sel, "change", syncUI);
   on(unitSel, "change", ()=>{
     try { localStorage.setItem("lsdynamat.units", unitSel.value); } catch {}

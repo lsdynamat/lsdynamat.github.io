@@ -1,8 +1,8 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261018a";
+import { mdToHtml } from "../core/md.js?v=20261018b";
 import { openSamples } from "../core/sampleViewer.js";
-import { modelFigure } from "../core/illus.js?v=20261018a";
+import { modelFigure } from "../core/illus.js?v=20261018b";
 
 setText("year", new Date().getFullYear());
 
@@ -32,7 +32,7 @@ function renderInputs(inputs){
     <tr>
       <td class="mat">${escapeHtml(inp.key)}</td>
       <td><div class="name">${escapeHtml(inp.label || "")}</div>${inp.hint ? `<div class="desc">${escapeHtml(inp.hint)}</div>` : ""}</td>
-      <td class="num">${escapeHtml(inp.default === "" ? "auto" : inp.default)}</td>
+      <td class="num">${escapeHtml(inp.default === "" ? "auto" : (inp.options || []).find(o => Number(o[0]) === Number(inp.default))?.[1] ?? inp.default)}</td>
       <td class="num">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</td>
     </tr>`).join("");
   box.innerHTML = `

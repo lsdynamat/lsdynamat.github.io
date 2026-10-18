@@ -93,14 +93,7 @@
           "default": "",
           "hint": "Effective plastic strain at which elements erode. Leave blank for no erosion (LS-DYNA default 1E20)."
         },
-        {
-          "key": "vp",
-          "label": "VP",
-          "unit": "-",
-          "default": 0,
-          "min": 0,
-          "hint": "0 = scale yield stress (default), 1 = viscoplastic formulation (recommended by the manual)."
-        }
+        {"key": "vp", "label": "Viscoplastic rate formulation (VP)", "unit": "-", "default": 0, "hint": "Off = VP 0, the yield stress is scaled (default). On = VP 1, viscoplastic formulation (recommended by the manual).", "control": "toggle", "options": [[0, "Off: scale yield stress"], [1, "On: viscoplastic"]]}
       ]
     },
 
@@ -149,7 +142,7 @@
         { "key": "eps0", "label": "Reference strain rate", "unit": "1/s", "type": "number", "default": 1.0, "min": 1e-9, "max": 1e9, "hint": "Quasi-static threshold rate. Entered in 1/s; written to the card in 1/ms (x 1e-3)." },
         { "key": "cp", "label": "Specific heat CP", "unit": "J/(kg·K)", "type": "number", "default": 452, "min": 1, "max": 10000, "hint": "Steel ~450–480. Same number in mJ/(g·K) for this unit system." },
         { "key": "pc", "label": "Tensile cutoff PC", "unit": "MPa", "type": "number", "default": "-1E20", "max": 0, "hint": "Must be ≤ 0. -1E20 disables spall; with SPALL=2 a value of 0 would remove all tensile stress." },
-        { "key": "vp", "label": "Rate formulation VP", "unit": "-", "type": "number", "default": 0, "min": 0, "max": 1, "hint": "0 = scale yield stress (default), 1 = viscoplastic." },
+        {"key": "vp", "label": "Viscoplastic rate formulation (VP)", "unit": "-", "type": "number", "default": 0, "hint": "Off = VP 0, the yield stress is scaled (default). On = VP 1, viscoplastic.", "control": "toggle", "options": [[0, "Off: scale yield stress"], [1, "On: viscoplastic"]]},
         { "key": "d1", "label": "Damage D1 (optional)", "unit": "-", "type": "number", "default": "", "hint": "Leave D1–D5 blank to switch off JC failure (EROD=1)." },
         { "key": "d2", "label": "Damage D2 (optional)", "unit": "-", "type": "number", "default": "" },
         { "key": "d3", "label": "Damage D3 (optional)", "unit": "-", "type": "number", "default": "" },
@@ -227,15 +220,7 @@
           "min": 0.1,
           "hint": "Used only with Z and fracture model 0: FAIL = k(h) · ln(1/(1−Z)), with k calibrated for 8-node solids. GISSMO regularises every element size itself."
         },
-        {
-          "key": "damage",
-          "label": "Fracture model",
-          "unit": "-",
-          "default": 1,
-          "min": 0,
-          "max": 1,
-          "hint": "Used only with Z. 0 = FAIL (element erosion, abrupt), 1 = *MAT_ADD_DAMAGE_GISSMO (gradual load drop, any element size)."
-        }
+        {"key": "damage", "label": "Fracture model", "unit": "-", "default": 1, "hint": "Used only with Z. FAIL erodes the element at one strain for one element size; *MAT_ADD_DAMAGE_GISSMO fades the stress out and regularises any element size.", "control": "select", "options": [[0, "FAIL: element erosion (abrupt)"], [1, "GISSMO: gradual load drop"]]}
       ]
     },
 
@@ -365,7 +350,7 @@
         { "key": "dmax", "label": "Max aggregate size (dmax)", "unit": "mm",  "default": 16,   "min": 1,   "hint": "Maximum aggregate size (mm)." },
         { "key": "ro",   "label": "Density (RO)", "unit": "g/mm^3", "default": 0.0023, "min": 0.000001, "hint": "Typical: 0.0022–0.0024." },
         { "key": "pr",   "label": "Poisson ratio (PR)", "unit": "-", "default": 0.20, "min": 0.0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
-        { "key": "irate", "label": "Rate effects (IRATE)", "unit": "-", "default": 0, "min": 0, "max": 1, "hint": "0 = off (quasi-static), 1 = on (Murray 2007 viscoplastic rate model, converted to ms)." }
+        {"key": "irate", "label": "Rate effects (IRATE)", "unit": "-", "default": 0, "hint": "Off = quasi-static. On = Murray (2007) viscoplastic rate model, converted to ms.", "control": "toggle", "options": [[0, "Off"], [1, "On"]]}
       ]
     },
 
@@ -388,7 +373,7 @@
         { "key": "omega", "label": "Omega (ω)", "unit": "-", "default": 0.5, "min": 0, "max": 1, "hint": "Example: 0.5" },
         { "key": "ro", "label": "Density (RO)", "unit": "g/mm^3", "default": 0.0023, "min": 0.000001, "hint": "Typical: 0.0023" },
         { "key": "pr", "label": "Poisson ratio (PR)", "unit": "-", "default": 0.16, "min": 0, "max": 0.49, "hint": "Concrete often ~0.18–0.22." },
-        { "key": "dif_model", "label": "Strain-rate DIF model", "unit": "-", "default": 1, "min": 0, "max": 2, "hint": "0 = off (LCRATE = 0; use for quasi-static runs), 1 = CEB-FIP MC90 compression + Malvar & Ross tension, 2 = fib Model Code 2010." },
+        {"key": "dif_model", "label": "Strain-rate DIF model", "unit": "-", "default": 1, "hint": "Dynamic increase factor curve written as LCRATE.", "control": "select", "options": [[0, "Off (LCRATE = 0), for quasi-static runs"], [1, "CEB-FIP MC90 compression + Malvar & Ross tension"], [2, "fib Model Code 2010"]]},
         { "key": "rate_cap", "label": "DIF rate cap", "unit": "1/s", "default": 300, "min": 1, "hint": "DIF held constant above this strain rate (the manual's sample curve stops rising at 300 1/s)." }
       ]
     },
@@ -419,7 +404,7 @@
     
         { "key": "efc", "default": "", "label": "EFC (optional)", "unit": "-", "hint": "Leave blank/0 to use 1.0E-4. Enter your calibrated value to override." },
     
-        { "key": "strflg",   "default": "", "label": "STRFLG (optional)", "unit": "-", "hint": "0=no strain-rate, 1=strain-rate dependent" }
+        {"key": "strflg", "default": 0, "label": "Strain-rate dependence (STRFLG)", "unit": "-", "hint": "Off = no strain-rate effect. On = strain-rate dependent damage.", "control": "toggle", "options": [[0, "Off"], [1, "On"]]}
       ]
     }
 
