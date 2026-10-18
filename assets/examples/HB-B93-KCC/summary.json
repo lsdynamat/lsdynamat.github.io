@@ -1,11 +1,11 @@
 {
  "case": "HB-B93-KCC",
- "peak_force_kN": 2.7847142469699984,
- "peak_nominal_stress_MPa": 2.4389189988204114,
- "defl_at_peak_mm": 0.027153,
- "work_Nmm": 258.5841757345436,
- "GF_Nmm": 0.09794855141459984,
- "final_force_ratio": 0.05610629534789868,
+ "peak_force_kN": 3.3914277468706535,
+ "peak_nominal_stress_MPa": 2.970293118573847,
+ "defl_at_peak_mm": 0.030257,
+ "work_Nmm": 342.05908862213306,
+ "GF_Nmm": 0.12956783659929283,
+ "final_force_ratio": 0.055852583082385304,
  "hourglass_pct": 0.0,
- "kinetic_pct": 0.14779339274322942
+ "kinetic_pct": 0.10891480119499321
 }

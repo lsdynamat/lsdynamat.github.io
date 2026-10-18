@@ -2,6 +2,20 @@
   {
     "id": "mat072_kcc_rel3",
     "date": "2026-10-18",
+    "version": "1.6",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "b2 (pressure exponent of tensile damage) is now 1.0 instead of the K&C formula (1.4–1.9), and the λ stretching is recalibrated for it (g0 = 0.01161 (f_c/30)^0.50 N/mm²), so single-element uniaxial tension still dissipates G_F (within 0.5 %). With the old b2, cracked elements at a notch tip, which sit in near-hydrostatic tension, dissipated about half of G_F and the Hoover et al. (2013) notched beams peaked 19 % low; with b2 = 1.0 they peak within 2 % of the tests and dissipate 0.86–0.95 G_F. Calibrated on that one data set (f_c = 55.6 MPa)."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-18",
+    "version": "",
+    "model": "Examples",
+    "change": "KCC runs repeated with generator version 1.6: Hoover beams 3.39 and 6.72 kN (tests 3.46 and 6.57 kN), EN 14651 beam f_ct,L 3.7 MPa."
+  },
+  {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-18",
     "version": "1.5",
     "model": "MAT_072R3 K&C Damage Rel. 3",
     "change": "The EOS now scales with f_c: pressures and unloading bulk moduli of the 45.4 MPa reference curve are multiplied by √(f_c/45.4 MPa), as in LS-DYNA's own parameter generation (Wu & Crawford 2015). Before, every card had K = 15.6 GPa and E ≈ 31.9 GPa whatever f_c was; now E = 57 000 √f_c (psi), e.g. 25.9 GPa at 30 MPa and 35.3 GPa at 55.6 MPa. Found with the open-data benchmark (measured E = 34.4 GPa at f_c = 55.6 MPa). Single-element tension still dissipates the target G_F (within 1 %)."
