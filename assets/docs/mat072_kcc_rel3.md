@@ -19,6 +19,7 @@ The model's formulas are in psi and inches, so the generator converts f_c to psi
 - Softening: `b1 = 1.6`, `b3 = 1.15`, `b2 = (0.09W² − 0.98W + 3.06) · (1 − 0.004 F² + 0.097 F − 0.484)`, with `W = 3 · d_agg = 1.5 in` and `F = f_c,psi / 1000`
 - `LOCWID = 3 · d_agg = 38.1 mm` (d_agg = 12.7 mm, fixed)
 - `OMEGA` is an input (default 0.5); η1–η13 are the 13-point default damage function, and λ6–λ10 are scaled for the fracture energy (next section)
+- EOS: the 10-point compaction curve of the 45.4 MPa reference concrete, with the volumetric strains kept and the pressures and unloading bulk moduli multiplied by `√r` (Wu & Crawford 2015, as LS-DYNA does when it generates the parameters itself). The unloading bulk modulus is then `K = 57 000 √f_c,psi / (3(1 − 2·0.16))`, i.e. E = 57 000 √f_c,psi with PR = 0.16. Up to version 1.4 the curve was not scaled, so every card had E ≈ 31.9 GPa.
 - `RSIZE = 1/25.4 = 3.937E-2` (inch per mm), `UCF = 145` (psi per MPa), `NOUT = 2`, `EDROP = 1`, `SLAMBDA = 100`
 
 ## Fracture energy and element size
@@ -69,12 +70,13 @@ The `dif_model` input selects how rate effects are written:
 - **Element size input.** Enter the size of the elements in the cracking zone. With mixed mesh sizes, one card per size range keeps G_F correct.
 - **LOCWID** is fixed at 38.1 mm (d_agg = 12.7 mm); it does not follow the maximum aggregate size of your mix. For elements larger than 38.1 mm, G_F is regularised by LS-DYNA itself and the scaling uses h = 38.1 mm.
 - **f_c** is the measured cylinder strength of the concrete you model (its mean strength).
-- **EOS.** The compaction curve is the 45.4 MPa reference curve converted to MPa. It is not rescaled for other strengths.
+- **Elastic modulus.** E follows the EOS (E = 3K(1 − 2PR) = 57 000 √f_c,psi), the ACI 318 relation, so it is lower than the EN 1992-1-1 value E_cm for normal-strength concrete (25.9 against 30.6 GPa at f_c = 30 MPa). The card does not take E as an input.
 
 ## References
 
 - Malvar, L. J., Crawford, J. E., Wesevich, J. W., & Simons, D. (1997). A plasticity concrete material model for DYNA3D. *International Journal of Impact Engineering*, 19(9–10), 847–873.
 - Malvar, L. J., & Ross, C. A. (1998). Review of strain rate effects for concrete in tension. *ACI Materials Journal*, 95(6), 735–739.
 - Schwer, L. E., & Malvar, L. J. (2005). Simplified concrete modeling with *MAT_CONCRETE_DAMAGE_REL3. *JRI LS-DYNA User Week*, Nagoya.
+- Wu, Y., & Crawford, J. E. (2015). Numerical modeling of concrete using a partially associative plasticity model. *Journal of Engineering Mechanics*, 141(12). doi:10.1061/(ASCE)EM.1943-7889.0000952
 - CEB-FIP (1993). *Model Code 1990: Design Code*. Thomas Telford.
 - LS-DYNA Keyword User's Manual, Vol. II, R13 — *MAT_CONCRETE_DAMAGE_REL3 (sample input for 45.4 MPa concrete).

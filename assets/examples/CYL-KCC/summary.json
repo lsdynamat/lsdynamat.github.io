@@ -1,8 +1,8 @@
 {
  "case": "CYL-KCC",
- "peak_stress_MPa": 42.64956355893322,
- "strain_at_peak": 0.003423915955128076,
- "peak_force_kN": 753.68,
- "hourglass_pct": 0.005563446405506013,
- "kinetic_pct": 0.0014017120496456266
+ "peak_stress_MPa": 42.679555423764754,
+ "strain_at_peak": 0.0037289537082116197,
+ "peak_force_kN": 754.21,
+ "hourglass_pct": 0.005200790311438744,
+ "kinetic_pct": 0.0014756022743192259
 }

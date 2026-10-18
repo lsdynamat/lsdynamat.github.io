@@ -1,5 +1,19 @@
 [
   {
+    "id": "mat072_kcc_rel3",
+    "date": "2026-10-18",
+    "version": "1.5",
+    "model": "MAT_072R3 K&C Damage Rel. 3",
+    "change": "The EOS now scales with f_c: pressures and unloading bulk moduli of the 45.4 MPa reference curve are multiplied by √(f_c/45.4 MPa), as in LS-DYNA's own parameter generation (Wu & Crawford 2015). Before, every card had K = 15.6 GPa and E ≈ 31.9 GPa whatever f_c was; now E = 57 000 √f_c (psi), e.g. 25.9 GPa at 30 MPa and 35.3 GPa at 55.6 MPa. Found with the open-data benchmark (measured E = 34.4 GPa at f_c = 55.6 MPa). Single-element tension still dissipates the target G_F (within 1 %)."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-18",
+    "version": "",
+    "model": "Examples",
+    "change": "All KCC runs repeated with generator version 1.5. Hoover benchmark: KCC now starts at 35.4 GPa (test 34.4 GPa); its beam peaks rise by 1–3 % and stay 19 % below the tests. Fringe images added for the flat steel specimens and the Hoover beams."
+  },
+  {
     "id": "examples",
     "date": "2026-10-17",
     "version": "",
