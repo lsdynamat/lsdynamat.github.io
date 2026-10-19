@@ -8,6 +8,10 @@ OUT=$1; shift
 for c in "$@"; do
   FLAT=0
   case $c in
+    TAIL-*-NF) VIEW="rz 90"; LAST=25; FLAT=1
+            CAP="effective plastic strain at 30 % elongation (no fracture model); one-eighth model mirrored about its symmetry planes";;
+    TAIL-*) VIEW="rz 90"; LAST=32; FLAT=1
+            CAP="effective plastic strain at the end of the run (70 ms, after fracture); one-eighth model mirrored about its symmetry planes";;
     GIS-FIN-*|BAM-FIN-*) VIEW="rz 90"; LAST=32; FLAT=1
             CAP="effective plastic strain at the end of the run (70 ms, after fracture); one-eighth model mirrored about its symmetry planes";;
     HB-CYL-*) VIEW="rx -70

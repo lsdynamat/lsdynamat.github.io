@@ -1,8 +1,9 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261019a";
-import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261019a";
+import { getGenerator } from "../generators/index.js?v=20261019b";
+import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261019b";
+import { unitOptions, toBase, fromBase, fmtNum, preferredUnit, rememberUnit } from "../core/inputUnits.js?v=20261019b";
 
 setText("year", new Date().getFullYear());
 
@@ -46,17 +47,39 @@ function renderForm(formEl, inputs, values){
         `<option value="${escapeHtml(o[0])}" ${Number(o[0]) === Number(v) ? "selected" : ""}>${escapeHtml(o[1])}</option>`).join("")}
       </select>`;
     } else {
-      control = `<input id="${id}" type="text" inputmode="decimal" spellcheck="false" value="${escapeHtml(v)}" />`;
+      // show the value in the unit the user prefers for this quantity (kept between visits)
+      const u = unitOptions(inp.unit) ? preferredUnit(inp.unit) : null;
+      const n = asNum(v);
+      const shown = u && n !== null && String(v).trim() !== "" ? fmtNum(fromBase(n, inp.unit, u)) : v;
+      control = `<input id="${id}" type="text" inputmode="decimal" spellcheck="false" value="${escapeHtml(shown)}" />`;
     }
 
+    const opts = inp.control ? null : unitOptions(inp.unit);
+    const unitHtml = opts
+      ? `<select class="unitsel" id="u_${escapeHtml(inp.key)}" aria-label="unit of ${escapeHtml(inp.label || inp.key)}">${opts.map(o =>
+          `<option ${o[0] === preferredUnit(inp.unit) ? "selected" : ""}>${escapeHtml(o[0])}</option>`).join("")}</select>`
+      : `<span class="unit">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</span>`;
+
     div.innerHTML = `
-      <label class="k" for="${id}">
-        <span>${escapeHtml(inp.label || inp.key)}</span>
-        <span class="unit">${escapeHtml(inp.unit && inp.unit !== "-" ? inp.unit : "")}</span>
-      </label>
+      <div class="k">
+        <label for="${id}">${escapeHtml(inp.label || inp.key)}</label>
+        ${unitHtml}
+      </div>
       ${control}
       ${inp.hint ? `<div class="h">${escapeHtml(inp.hint)}</div>` : ""}
     `;
+    if (opts){
+      // changing the unit converts the number in the box, like ANSYS does
+      const sel = div.querySelector(".unitsel");
+      let prev = sel.value;
+      sel.addEventListener("change", () => {
+        const box = div.querySelector("input");
+        const n = asNum(box.value);
+        if (n !== null && box.value.trim() !== "") box.value = fmtNum(fromBase(toBase(n, inp.unit, prev), inp.unit, sel.value));
+        prev = sel.value;
+        rememberUnit(inp.unit, sel.value);
+      });
+    }
     if (inp.control === "toggle"){
       const cb = div.querySelector("input");
       cb.addEventListener("change", () => {
@@ -93,7 +116,9 @@ function validateAndCollect(inputs){
       return;
     }
 
-    const n = asNum(raw);
+    let n = asNum(raw);
+    const us = getEl(`u_${inp.key}`);
+    if (n !== null && us) n = toBase(n, inp.unit, us.value);
     const bad = n === null
       || (typeof inp.min === "number" && n < inp.min)
       || (typeof inp.max === "number" && n > inp.max);

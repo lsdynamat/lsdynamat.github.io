@@ -1,5 +1,12 @@
 [
   {
+    "id": "examples",
+    "date": "2026-10-19",
+    "version": "",
+    "model": "Examples",
+    "change": "New example: the S355 flat specimen with a flat true-stress tail beyond A_g against the generator's extension with slope σ_true(A_g) (Considère criterion at A_g), with and without FAIL, with fringe plots of the neck and of fracture. With the same FAIL the flat tail breaks the specimen at A = 24–25 % instead of 35 %."
+  },
+  {
     "id": "mat072_kcc_rel3",
     "date": "2026-10-18",
     "version": "1.6",
