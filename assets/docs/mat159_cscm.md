@@ -7,23 +7,23 @@
 
 `*MAT_CSCM` with user-defined parameters (the keyword option left blank), in mm–ms–g–N–MPa:
 
-- Input f_c is the measured cylinder strength of the concrete you model (its mean strength).
-- Shear, cap and damage parameters follow the calibration of Novozhilov, Dmitriev & Mikhaluk (2022). They differ from the values `*MAT_CSCM_CONCRETE` generates internally from f_c and d_max.
-- `GFT = GFS = G_F`, `GFC = 100 G_F`, with G_F from f_c and d_max.
+- Input $f_{c}$ is the measured cylinder strength of the concrete you model (its mean strength).
+- Shear, cap and damage parameters follow the calibration of Novozhilov, Dmitriev & Mikhaluk (2022). They differ from the values `*MAT_CSCM_CONCRETE` generates internally from $f_{c}$ and $d_{\mathrm{max}}$.
+- $\mathrm{GFT} = \mathrm{GFS} = G_F$, $\mathrm{GFC} = 100\,G_F$, with $G_{F}$ from $f_{c}$ and $d_{\mathrm{max}}$.
 - `ERODE = 1.05`: elements are eroded when the maximum principal strain exceeds 5 %.
 
 ## Rate effects (IRATE)
 
-`IRATE = 0` (default) switches rate effects off. With `IRATE = 1` the Murray (2007) viscoplastic model is used: `η = η0 / ε̇^n`. Murray's fits for η0c and η0t take f'c in psi and give η0 in s^(1−n). The generator converts them to milliseconds:
+`IRATE = 0` (default) switches rate effects off. With `IRATE = 1` the Murray (2007) viscoplastic model is used: $\eta = \eta_0/\dot\varepsilon^{\,n}$. Murray's fits for η0c and η0t take f'c in psi and give η0 in s^(1−n). The generator converts them to milliseconds:
 
-- `ETA0C = η0c,s · 1000^(1 − NC)`, `NC = 0.78`
-- `ETA0T = η0t,s · 1000^(1 − NT)`, `NT = 0.48`
+- $\mathrm{ETA0C} = \eta_{0c,s}\cdot 1000^{1-\mathrm{NC}}$, `NC = 0.78`
+- $\mathrm{ETA0T} = \eta_{0t,s}\cdot 1000^{1-\mathrm{NT}}$, `NT = 0.48`
 
-At f_c = 30 MPa this gives ETA0C = 4.587E-4 and ETA0T = 2.242E-3, identical to the values LS-DYNA R13 prints for `*MAT_CSCM_CONCRETE` with FPC = 30 and UNITS = 1 (MPa, mm, ms). Before 2026-10-15 the generator wrote the values in seconds and evaluated η0t with f_c in MPa instead of psi (5.07E-5 instead of 2.24E-3); this had no effect while IRATE = 0.
+At $f_{c}$ = 30 MPa this gives ETA0C = 4.587E-4 and ETA0T = 2.242E-3, identical to the values LS-DYNA R13 prints for `*MAT_CSCM_CONCRETE` with FPC = 30 and UNITS = 1 (MPa, mm, ms). Before 2026-10-15 the generator wrote the values in seconds and evaluated η0t with $f_{c}$ in MPa instead of psi (5.07E-5 instead of 2.24E-3); this had no effect while IRATE = 0.
 
 ## Points to check before use
 
-- The tensile G_F dissipated in the notched-prism example was 1.41 × GFT (5 mm mesh). Check G_F against a test where tensile cracking governs.
+- The tensile $G_{F}$ dissipated in the notched-prism example was 1.41 × GFT (5 mm mesh). Check $G_{F}$ against a test where tensile cracking governs.
 - Calibration targets 20–58 MPa; outside that range check the uniaxial response.
 
 ## References

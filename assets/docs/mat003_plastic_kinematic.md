@@ -13,17 +13,17 @@ Units are `mm · ms · g · N · MPa` (density in g/mm³).
 
 The plastic hardening modulus follows from the tangent modulus:
 
-- `Ep = E · ETAN / (E − ETAN)`
+- $E_p = \dfrac{E\cdot\mathrm{ETAN}}{E - \mathrm{ETAN}}$
 
 and the yield stress is
 
-- `σy = [1 + (ε̇ / SRC)^(1/SRP)] · (SIGY + β · Ep · εp)`
+- $\sigma_y = \left[1 + \left(\dfrac{\dot\varepsilon}{\mathrm{SRC}}\right)^{1/\mathrm{SRP}}\right]\left(\mathrm{SIGY} + \beta E_p \varepsilon_p\right)$
 
 **BETA** sets the hardening type (LS-DYNA manual, MAT_003 Remark 2):
 
 - `BETA = 0`: kinematic hardening (the yield surface translates; Bauschinger effect)
 - `BETA = 1`: isotropic hardening (the yield surface expands)
-- `0 < BETA < 1`: combined
+- $0 < \beta < 1$: combined
 
 For monotonic loading the two give the same curve. For cyclic or reversed loading they differ a lot, so calibrate BETA against hysteresis data when the load reverses.
 
@@ -31,7 +31,7 @@ For monotonic loading the two give the same curve. For cyclic or reversed loadin
 
 `SRC` is a strain rate, so its unit follows the model time unit. In this unit system it is **1/ms**:
 
-- `SRC [1/ms] = C [1/s] / 1000`
+- $\mathrm{SRC}\,[\mathrm{ms^{-1}}] = C\,[\mathrm{s^{-1}}]/1000$
 - Mild steel, often quoted as C = 40.4 s⁻¹, P = 5 → `SRC = 0.0404`, `SRP = 5`
 
 Leave both blank to switch rate effects off. `VP = 1` puts the rate term inside the yield surface (viscoplastic) and is the formulation the manual recommends; `VP = 0` scales the yield stress.
@@ -44,7 +44,7 @@ Leave both blank to switch rate effects off. `VP = 1` puts the rate term inside 
 
 One 10 mm hexahedron (ELFORM 1) pulled at 0.1 mm/ms with LS-DYNA R13, default inputs (E = 207 000 MPa, SIGY = 390 MPa, ETAN = 10 350 MPa):
 
-- True stress matches `SIGY + Ep · εp` within 0.1 % up to 25 % strain.
+- True stress matches $\mathrm{SIGY} + E_p\,\varepsilon_p$ within 0.1 % up to 25 % strain.
 - With `SRC = 0.0404`, `SRP = 5` and `BETA = 0`, the initial yield rises by the Cowper–Symonds factor (≈ 1.75 at 10 s⁻¹), as expected for kinematic hardening.
 
 ## References

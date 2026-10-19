@@ -1,8 +1,8 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, qsa } from "../core/dom.js";
-import { mdToHtml } from "../core/md.js?v=20261018c";
+import { mdToHtml, renderMath } from "../core/md.js?v=20261019a";
 import { openSamples } from "../core/sampleViewer.js";
-import { modelFigure } from "../core/illus.js?v=20261018c";
+import { modelFigure } from "../core/illus.js?v=20261019a";
 
 setText("year", new Date().getFullYear());
 
@@ -185,6 +185,7 @@ async function renderDoc(docPath){
     // Default: treat as markdown/text
     const md = await loadText(docUrl);
     docBox.innerHTML = mdToHtml(md);
+    renderMath(docBox);
   }catch(e){
     docBox.textContent = `Could not load doc: ${docPath}`;
     console.error(e);

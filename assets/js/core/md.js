@@ -2,20 +2,41 @@ import { escapeHtml } from "./dom.js";
 
 // Small line-based Markdown renderer for assets/docs/*.md
 // Supports: # headings, ``` fences, - / * / 1. / 1) lists (nested by indent),
-// > quotes, | pipe | tables |, **bold**, *italic*, `code`, [links](url), bare URLs, paragraphs.
+// > quotes, | pipe | tables |, **bold**, *italic*, `code`, [links](url), bare URLs, paragraphs,
+// $inline$ and $$display$$ LaTeX math (typeset by KaTeX in renderMath).
+
+// A $ opens inline math only when followed by a non-space, and closes only when preceded by a
+// non-space and not followed by a digit, so "$" in LS-DYNA comments or prices stays plain text.
+function mathHtml(tex, display){
+  const t = escapeHtml(tex.trim());
+  return display
+    ? `<div class="math display" data-tex="${t}">${t}</div>`
+    : `<span class="math" data-tex="${t}">${t}</span>`;
+}
 
 function inline(text){
-  const codes = [];
-  let s = escapeHtml(text).replace(/`([^`]+)`/g, (m, c) => {
-    codes.push(c);
-    return `\u0000${codes.length - 1}\u0000`;
-  });
+  const keep = [];
+  const stash = (html) => { keep.push(html); return `\u0000${keep.length - 1}\u0000`; };
+  let s = text.replace(/`([^`]+)`/g, (m, c) => stash(`<code>${escapeHtml(c)}</code>`));
+  s = s.replace(/\$\$([^$]+?)\$\$/g, (m, tex) => stash(mathHtml(tex, true)));
+  s = s.replace(/(^|[^\\$\w])\$(?=\S)([^$\n]*?[^\s\\])\$(?!\d)/g, (m, pre, tex) => pre + stash(mathHtml(tex, false)));
+  s = escapeHtml(s);
   s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, `<a href="$2" target="_blank" rel="noopener">$1</a>`);
   s = s.replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, `$1<a href="$2" target="_blank" rel="noopener">$2</a>`);
   s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   s = s.replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\w)/g, "$1<em>$2</em>");
   s = s.replace(/ {2,}$/gm, "<br>");
-  return s.replace(/\u0000(\d+)\u0000/g, (m, i) => `<code>${codes[+i]}</code>`);
+  return s.replace(/\u0000(\d+)\u0000/g, (m, i) => keep[+i]);
+}
+
+// Typeset the math placeholders written by mdToHtml. Without window.katex the TeX source stays visible.
+export function renderMath(root){
+  if (!root || !window.katex) return;
+  root.querySelectorAll(".math[data-tex]").forEach(el => {
+    try {
+      window.katex.render(el.dataset.tex, el, { displayMode: el.classList.contains("display"), throwOnError: false });
+    } catch (e) { /* keep the source */ }
+  });
 }
 
 const LIST_RE = /^(\s*)([-*]|\d+[.)])\s+(.*)$/;
@@ -49,6 +70,21 @@ export function mdToHtml(md){
       const buf = [];
       while (++i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i]);
       out.push(`<pre><code>${escapeHtml(buf.join("\n"))}</code></pre>`);
+      continue;
+    }
+
+    // display math: "$$ TeX $$" on one line, or a block between two "$$" lines
+    const dm = line.match(/^\s*\$\$(.+)\$\$\s*$/);
+    if (dm){
+      if (stack.length && /^\s+/.test(line)) flushPara(); else flushAll();   // indented: stays in the list item
+      out.push(mathHtml(dm[1], true));
+      continue;
+    }
+    if (/^\s*\$\$\s*$/.test(line)){
+      flushAll();
+      const buf = [];
+      while (++i < lines.length && !/^\s*\$\$\s*$/.test(lines[i])) buf.push(lines[i]);
+      out.push(mathHtml(buf.join("\n"), true));
       continue;
     }
 

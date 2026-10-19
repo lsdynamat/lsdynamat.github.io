@@ -203,7 +203,7 @@
           "unit": "-",
           "default": 1.0,
           "min": 0.0,
-          "hint": "Slope of the extension as a multiple of the true stress at A_g. 1 = Considère slope, the neck starts at A_g (calibrated value). 0 = flat tail (versions ≤ 1.1)."
+          "hint": "Slope of the extension as a multiple of the true stress at A_g. 1 = H equals σ_true(A_g), so the Considère criterion (dσ/dε = σ) is met at A_g and the neck starts there (calibrated value). 0 = flat tail (versions ≤ 1.1)."
         },
         {
           "key": "z_pct",

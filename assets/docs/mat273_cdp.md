@@ -12,15 +12,15 @@ From the LS-DYNA R13 manual (Vol. II):
 
 E is written positive, which selects the anisotropic damage formulation (ISOFLAG = 0).
 
-## What the generator computes from f_c
+## What the generator computes from $f_{c}$
 
-The input f_c is the measured cylinder strength of the concrete you model, i.e. its mean strength fcm. Unless you override them, these quantities are derived:
+The input $f_{c}$ is the measured cylinder strength of the concrete you model, i.e. its mean strength fcm. Unless you override them, these quantities are derived:
 
-- `E = 22 000 · (f_c / 10)^0.3` (MPa): EN 1992-1-1 secant modulus
-- `FT = fctm = 0.30 · fck^(2/3)` with `fck = f_c − 8` for fck ≤ 50 MPa, otherwise `2.12 · ln(1 + f_c/10)` (EN 1992-1-1, Table 3.1)
-- `ECC = (1 + ε)/(2 − ε)` with `ε = FT(fbc² − f_c²) / (fbc(f_c² − FT²))` and `fbc = 1.16 f_c` (Jirásek & Bažant)
-- `GF = 73 · f_c^0.18 / 1000` (N/mm): fib Model Code 2010
-- Bilinear softening (`TYPE = 1`) with `WF1 = 0.15 WF` and `FT1 = 0.30 FT`. The area under the law is `0.225 · FT · WF`, so `WF = GF / (0.225 FT) = 4.444 GF / FT`
+- $E = 22\,000\,(f_c/10)^{0.3}$ (MPa): EN 1992-1-1 secant modulus
+- $\mathrm{FT} = f_{ctm} = 0.30\,f_{ck}^{2/3}$ with $f_{ck} = f_c - 8$ for fck ≤ 50 MPa, otherwise $2.12\ln(1 + f_c/10)$ (EN 1992-1-1, Table 3.1)
+- $\mathrm{ECC} = \dfrac{1+\epsilon}{2-\epsilon}$ with $\epsilon = \dfrac{\mathrm{FT}\,(f_{bc}^2 - f_c^2)}{f_{bc}\,(f_c^2 - \mathrm{FT}^2)}$ and $f_{bc} = 1.16\,f_c$ (Jirásek & Bažant)
+- $G_F = 73\,f_c^{0.18}/1000$ (N/mm): fib Model Code 2010
+- Bilinear softening (`TYPE = 1`) with $\mathrm{WF1} = 0.15\,\mathrm{WF}$ and $\mathrm{FT1} = 0.30\,\mathrm{FT}$. The area under the law is $0.225\,\mathrm{FT}\cdot\mathrm{WF}$, so $\mathrm{WF} = \dfrac{G_F}{0.225\,\mathrm{FT}} = 4.444\,G_F/\mathrm{FT}$
 
 Defaults when left blank: `RO = 0.0023 g/mm³`, `PR = 0.18`, `EFC = 1.0E-4`, `STRFLG = 0`.
 
@@ -33,7 +33,7 @@ Defaults when left blank: `RO = 0.0023 g/mm³`, `PR = 0.18`, `EFC = 1.0E-4`, `ST
 
 ## Notes
 
-- **FT.** Since 2026-10-15 FT follows EN 1992-1-1 with fck = f_c − 8 (2.35 MPa at f_c = 30 MPa; earlier versions applied the formula to f_c directly and gave 2.90 MPa). Enter FT directly if you have a measured splitting or direct tensile strength.
+- **FT.** Since 2026-10-15 FT follows EN 1992-1-1 with fck = $f_{c}$ − 8 (2.35 MPa at $f_{c}$ = 30 MPa; earlier versions applied the formula to $f_{c}$ directly and gave 2.90 MPa). Enter FT directly if you have a measured splitting or direct tensile strength.
 - **EFC** controls the compressive softening branch. The default 1E-4 suits plain concrete; confined cores need a calibrated, larger value.
 - **Mesh.** WF is a crack opening, so tensile regularisation is automatic. Compressive softening (EFC) is not regularised in the same way.
 

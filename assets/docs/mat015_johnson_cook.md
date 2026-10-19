@@ -4,11 +4,11 @@ Strain-, strain-rate- and temperature-dependent plasticity for metals under impa
 
 ## Flow stress
 
-- `σy = (A + B · εp^N) · (1 + C · ln ε̇*) · (1 − T*^M)`
-- `ε̇* = ε̇ / EPS0`
-- `T* = (T − TR) / (TM − TR)`
+- $\sigma_y = \left(A + B\,\varepsilon_p^{\,N}\right)\left(1 + C\ln\dot\varepsilon^*\right)\left(1 - T^{*M}\right)$
+- $\dot\varepsilon^* = \dot\varepsilon/\mathrm{EPS0}$
+- $T^* = \dfrac{T - \mathrm{TR}}{\mathrm{TM} - \mathrm{TR}}$
 
-With no thermal coupling, the temperature rise is adiabatic: `ΔT = ∫σ dεp / (ρ · CP)`.
+With no thermal coupling, the temperature rise is adiabatic: $\Delta T = \dfrac{\int \sigma\, d\varepsilon_p}{\rho\,\mathrm{CP}}$.
 
 ## Cards written by the generator
 
@@ -24,8 +24,8 @@ Set `EOSID` on your `*PART` to the material ID.
 
 ## Derived values
 
-- Shear modulus: `G = E / (2(1 + PR))`. Solids read G, while shells and beams read E and PR.
-- Bulk modulus for the EOS: `K = E / (3(1 − 2PR))`
+- Shear modulus: $G = \dfrac{E}{2(1+\mathrm{PR})}$. Solids read G, while shells and beams read E and PR.
+- Bulk modulus for the EOS: $K = \dfrac{E}{3(1-2\,\mathrm{PR})}$
 
 ## Units (mm · ms · g · N · MPa)
 
@@ -36,7 +36,7 @@ Set `EOSID` on your `*PART` to the material ID.
 ## Tension and failure
 
 - `PC = −1E20` with `SPALL = 2` switches off the spall check. Do not use `PC = 0`: with SPALL = 2, solids would lose all tensile stress.
-- `D1–D5`: Johnson–Cook fracture strain `εf = [D1 + D2·exp(D3·σ*)]·[1 + D4·ln ε̇*]·[1 + D5·T*]`. If all five are blank, the generator writes `EROD = 1` and no failure is used.
+- `D1–D5`: Johnson–Cook fracture strain $\varepsilon_f = \left[D_1 + D_2 \exp(D_3\,\sigma^*)\right]\left[1 + D_4\ln\dot\varepsilon^*\right]\left[1 + D_5\,T^*\right]$. If all five are blank, the generator writes `EROD = 1` and no failure is used.
 
 ## Check in LS-DYNA
 

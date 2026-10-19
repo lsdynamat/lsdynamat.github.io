@@ -13,9 +13,9 @@ The site's inputs **C10 and C01 are written as A and B**. When card 2 is zero, L
 
 ## Strain energy and derived values
 
-- `W = A(I₁ − 3) + B(I₂ − 3) + C(III⁻² − 1) + D(III − 1)²`, where C and D are computed internally from A, B and PR
-- Small-strain shear modulus: `G = 2(A + B)`
-- Bulk modulus implied by PR: `K = 2G(1 + PR) / (3(1 − 2PR))`
+- $W = A(I_1 - 3) + B(I_2 - 3) + C(III^{-2} - 1) + D(III - 1)^2$, where C and D are computed internally from A, B and PR
+- Small-strain shear modulus: $G = 2(A + B)$
+- Bulk modulus implied by PR: $K = \dfrac{2G(1+\mathrm{PR})}{3(1-2\,\mathrm{PR})}$
 
 MAT_027 has **no separate bulk-modulus input**: volumetric stiffness comes only from PR. The manual recommends PR between 0.49 and 0.5 and warns that lower values may not work, so the generator limits PR to 0.49–0.4999 (default 0.495). Higher PR gives a stiffer volumetric response and a smaller time step.
 
@@ -23,7 +23,7 @@ MAT_027 has **no separate bulk-modulus input**: volumetric stiffness comes only 
 
 For an incompressible material in uniaxial tension with stretch λ:
 
-- Cauchy stress: `σ = 2(λ² − 1/λ)(A + B/λ)`
+- Cauchy stress: $\sigma = 2\left(\lambda^2 - \dfrac{1}{\lambda}\right)\left(A + \dfrac{B}{\lambda}\right)$
 
 With the default A = 0.5 and B = 0.2 MPa and PR = 0.495, LS-DYNA R13 (one hexahedron, 100 % stretch) matched this expression within 1 % from 25 % to 100 % strain (about 5 % at 10 % strain, where stresses are small and the finite bulk modulus matters most).
 
