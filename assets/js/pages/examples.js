@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml } from "../core/dom.js";
-import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261019b";
+import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261019c";
 
 setText("year", new Date().getFullYear());
 
@@ -24,6 +24,7 @@ async function renderExample(ex, models, host) {
       <div class="ex-sketch" aria-label="problem sketch"></div>
       <div class="doc"><ul>${ex.setup.map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul></div>
     </div>
+    <div class="ex-input"></div>
     <h3 class="h2" style="margin-top:24px;">Result</h3>
     <div class="ex-chart"></div>
     <div class="tablewrap" style="margin-top:16px;"><table class="data ex-table"></table></div>
@@ -33,6 +34,22 @@ async function renderExample(ex, models, host) {
 
   const svg = await tryText(ex.sketch);
   if (svg) sec.querySelector(".ex-sketch").innerHTML = svg;
+
+  // optional chart of the input curves (e.g. the hardening curve LS-DYNA reads)
+  const ic = ex.inputChart;
+  if (ic) {
+    const ser = (await Promise.all(ic.series.map(async s => ({ ...s, csv: await tryText(`${base(s.case)}/${ic.file}`) }))))
+      .filter(s => s.csv);
+    if (ser.length) {
+      const box = sec.querySelector(".ex-input");
+      box.innerHTML = `<h3 class="h2" style="margin-top:24px;">${escapeHtml(ic.title)}</h3><div class="ex-inchart"></div>` +
+        (ic.caption ? `<p class="small" style="margin-top:8px; max-width:80ch;">${escapeHtml(ic.caption)}</p>` : "");
+      renderLineChart(box.querySelector(".ex-inchart"), ser.map(s => ({
+        label: s.label, slot: s.slot,
+        points: parseCsv(s.csv).map(o => [o[ic.x] * (ic.xScale || 1), o[ic.y]]),
+      })), { xLabel: ic.xLabel, yLabel: ic.yLabel, refLines: ic.ref || [], height: 280, xMax: ic.xMax, yMax: ic.yMax });
+    }
+  }
 
   const runs = await Promise.all(ex.runs.map(async r => ({
     ...r,
