@@ -3,7 +3,8 @@
 // Engineering envelope → true stress/strain → true plastic strain curve
 // IMPORTANT: Output order is solver-safe:
 //   *KEYWORD → header → *DEFINE_CURVE_TITLE → *MAT_PIECEWISE_LINEAR_PLASTICITY_TITLE → *END
-// Beyond A_g the curve continues as a straight line with slope H = σ_true(A_g) (Considère slope).
+// Beyond A_g the curve continues as a straight line with slope H = σ_true(A_g): by the Considère
+// criterion (dσ/dε = σ) this is the hardening rate at which necking starts.
 // Optional ductile fracture from the reduction of area Z: FAIL (erosion, scaled for the element size)
 // or *MAT_ADD_DAMAGE_GISSMO (damage with stress fade-out, regularised for any element size by LCREGD).
 //
@@ -13,7 +14,7 @@
 //
 // Units: mm–ms–g–N–MPa
 
-import { fitField } from "../core/units.js?v=20261018c";
+import { fitField } from "../core/units.js?v=20261019a";
 export const KEY = "mat024_piecewise_linear_plasticity";
 export const ID = 24;
 export const NAME = "Piecewise Linear Plasticity";
@@ -147,7 +148,7 @@ export const FIELDS = [
     min: 0,
     hint: "Length of the straight extension beyond A_g, in true plastic strain.",
   },
-  { key: "tail_h", label: "Slope beyond A_g, H / σ(A_g)", unit: "-", default: DEFAULTS.tail_h, min: 0, hint: "1 = Considère slope (calibrated). 0 = flat tail." },
+  { key: "tail_h", label: "Slope beyond A_g, H / σ(A_g)", unit: "-", default: DEFAULTS.tail_h, min: 0, hint: "1 = H equals σ_true(A_g), the Considère criterion at A_g (calibrated). 0 = flat tail." },
   { key: "z_pct", label: "Reduction of area Z (optional)", unit: "%", default: DEFAULTS.z_pct, hint: "From the tensile test. Blank = no fracture." },
   { key: "h_el", label: "Element size in the neck", unit: "mm", default: DEFAULTS.h_el, min: 0.1, hint: "Used only with Z and FAIL (damage = 0). GISSMO regularises every element size itself." },
   { key: "damage", label: "Fracture model", unit: "-", default: DEFAULTS.damage, min: 0, max: 1, hint: "Used only with Z. 0 = FAIL (element erosion), 1 = *MAT_ADD_DAMAGE_GISSMO (gradual load drop)." },
@@ -240,8 +241,8 @@ export function generate(input = {}) {
   eps_p = eps_p.slice(0, ipk + 1);
   sig_true = sig_true.slice(0, ipk + 1);
 
-  // Beyond A_g: straight line with slope tail_h · σ_true(A_g). tail_h = 1 is the Considère slope,
-  // so the neck starts at A_g and then grows gradually; tail_h = 0 gives the old flat tail.
+  // Beyond A_g: straight line with slope tail_h · σ_true(A_g). With tail_h = 1 the Considère criterion
+  // (dσ/dε = σ) is met at A_g, so the neck starts at A_g and then grows gradually; tail_h = 0 gives the old flat tail.
   if (tail_d_epsp > 0) {
     eps_p.push(eps_p[eps_p.length - 1] + tail_d_epsp);
     sig_true.push(sig_pk * (1 + tail_h * tail_d_epsp));
@@ -289,6 +290,8 @@ export function generate(input = {}) {
   );
   lines.push("$#                a               o");
   for (let i = 0; i < eps_p.length; i++) {
+    if (tail_d_epsp > 0 && i === eps_p.length - 1)
+      lines.push("$ last point only sets the slope beyond A_g; not reached before fracture");
     lines.push(`${fmt20(eps_p[i], 8)}${fmt20(sig_true[i], 6)}`);
   }
 

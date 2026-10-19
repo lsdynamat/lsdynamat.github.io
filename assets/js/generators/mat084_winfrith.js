@@ -3,7 +3,7 @@
 // Header style aligned with KCC sample
 // Units: mm-ms-g-N-MPa
 
-import { fitField } from "../core/units.js?v=20261018c";
+import { fitField } from "../core/units.js?v=20261019a";
 export const KEY = "mat084_winfrith";
 export const ID = 84;
 export const NAME = "Winfrith Concrete (*MAT_WINFRITH_CONCRETE)";

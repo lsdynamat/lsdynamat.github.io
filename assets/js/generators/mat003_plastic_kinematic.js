@@ -1,6 +1,6 @@
 // assets/js/generators/mat003_plastic_kinematic.js
 
-import { fitField } from "../core/units.js?v=20261018c";
+import { fitField } from "../core/units.js?v=20261019a";
 export const KEY = "mat003_plastic_kinematic";
 export const ID = 3;
 export const NAME = "Plastic Kinematic";
