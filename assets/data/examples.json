@@ -394,6 +394,116 @@
       ]
     },
     {
+      "id": "flat-tail",
+      "title": "S355 flat specimen — hardening beyond A_g: flat tail vs. slope at the Considère criterion",
+      "sketch": "./assets/examples/sketch-flat.svg",
+      "setup": [
+        "Same BAM S355 specimen, one-eighth model and tests as in the two examples above. The measured true stress–strain curve up to A_g (plastic strain 0.139, true stress 586 MPa) is continued in two ways: with slope H = σ_true(A_g), the generator default, at which the Considère criterion dσ/dε = σ is met at A_g; or flat (H = 0), as many hand-made curves end and as the generator did up to version 1.1.",
+        "Runs without a fracture model show the neck alone (1 mm mesh). Runs with FAIL use the generator values for Z = 59 %: 1.150, 1.008 and 0.722 for h = 0.5, 1 and 3 mm, which were calibrated with H = σ_true(A_g).",
+        "Z at 20 % elongation is the reduction of the mid-length cross-section, read from the deformed model.",
+        "Grey dashed lines: BAM tests Zx2–Zx4."
+      ],
+      "chart": {
+        "x": "eng_strain",
+        "y": "eng_stress_MPa",
+        "xScale": 100,
+        "xLabel": "engineering strain (%)",
+        "yLabel": "engineering stress (MPa)",
+        "ref": []
+      },
+      "summary": [
+        {
+          "key": "Rm_MPa",
+          "label": "R_m (MPa)",
+          "digits": 1
+        },
+        {
+          "key": "Ag_strain",
+          "label": "A_g (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "Z_20",
+          "label": "Z at 20 % elongation (%)",
+          "scale": 100,
+          "digits": 0
+        },
+        {
+          "key": "A_strain",
+          "label": "Elongation at fracture A (%)",
+          "scale": 100,
+          "digits": 1
+        }
+      ],
+      "runs": [
+        {
+          "case": "BAM-TEST-Zx2",
+          "label": "test Zx2",
+          "legendLabel": "BAM tests Zx2–Zx4",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "BAM-TEST-Zx3",
+          "label": "test Zx3",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "BAM-TEST-Zx4",
+          "label": "test Zx4",
+          "slot": 0,
+          "test": true,
+          "legend": false
+        },
+        {
+          "case": "TAIL-H1-NF",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "H = σ(A_g), no fracture, h = 1 mm",
+          "slot": 1
+        },
+        {
+          "case": "TAIL-H0-NF",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "flat tail, no fracture, h = 1 mm",
+          "slot": 2
+        },
+        {
+          "case": "BAM-FIN-H1",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "H = σ(A_g) + FAIL, h = 1 mm",
+          "slot": 3
+        },
+        {
+          "case": "TAIL-H0-F-H1",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "flat tail + FAIL, h = 1 mm",
+          "slot": 4
+        },
+        {
+          "case": "TAIL-H0-F-H0p5",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "flat tail + FAIL, h = 0.5 mm",
+          "slot": 5
+        },
+        {
+          "case": "TAIL-H0-F-H3",
+          "model": "mat024_piecewise_linear_plasticity",
+          "label": "flat tail + FAIL, h = 3 mm",
+          "slot": 6
+        }
+      ],
+      "notes": [
+        "Up to the force maximum the two curves are the same material: R_m = 508.2–508.6 MPa in every run (tests 504–519 MPa). The flat tail lets the neck start a little earlier, A_g = 14.0–14.2 % against 15.4 % (tests 14.9–15.5 %).",
+        "Without a fracture model the difference is the neck itself. With H = σ_true(A_g) the specimen still carries 508 MPa at 20 % elongation with Z = 23 %, and 482 MPa with Z = 49 % at 30 %; the neck is long and diffuse (peak plastic strain 0.69 at 30 %, see the plots). With the flat tail the load falls to 389 MPa with Z = 42 % at 20 %, and to 152 MPa with Z = 97 % at 30 %: the strain concentrates in a crossed band (peak plastic strain 2.3) and the neck collapses. The curve is shown up to 31 %; after that the collapsed elements make the force noisy and the run stops at 33 % (error termination for excessive mass scaling).",
+        "With the same FAIL values the flat tail breaks the specimen at A = 24.0, 24.6 and 24.5 % for h = 0.5, 1 and 3 mm, against 34.9 % with H = σ_true(A_g) (35.1 / 34.8 % for 0.5 / 3 mm) and 35 % in the tests. FAIL is reached about 10 points of elongation too early because the neck thins much faster, not because of the element size: A hardly changes with the mesh in either case, since FAIL is scaled with h.",
+        "Why the flat tail is wrong: after the force maximum the engineering stress falls because the section shrinks, but the true stress of steel keeps rising up to fracture. A flat true curve says the steel stops hardening exactly at A_g, so nothing slows the neck down. With a slope equal to σ_true(A_g) the Considère criterion places the onset of necking exactly at A_g, and the hardening that continues beyond it lets the neck grow gradually, as in the tests.",
+        "In practice: never end a MAT_024 curve at R_m or A_g with a flat line. Continue it to plastic strains well above the fracture strain (the generator adds 2.0), and calibrate FAIL or GISSMO together with that extension, because the fracture strain only makes sense for one post-necking curve."
+      ]
+    },
+    {
       "id": "hb-cyl",
       "title": "Open-data benchmark 1 — cylinder 75 × 150 mm, f_c = 55.6 MPa (Hoover et al. 2013)",
       "sketch": "./assets/examples/sketch-hb-cyl.svg",
