@@ -403,6 +403,35 @@
         "Z at 20 % elongation is the reduction of the mid-length cross-section, read from the deformed model.",
         "Grey dashed lines: BAM tests Zx2–Zx4."
       ],
+      "inputChart": {
+        "title": "Input: hardening curve LCSS (what LS-DYNA reads)",
+        "file": "lcss.csv",
+        "x": "plastic_strain",
+        "y": "true_stress_MPa",
+        "xLabel": "effective plastic strain (-)",
+        "yLabel": "true stress (MPa)",
+        "xMax": 2.0,
+        "yMax": 1800,
+        "ref": [
+          {
+            "y": 585.9,
+            "label": "σ_true(A_g) = 586 MPa"
+          }
+        ],
+        "caption": "Both curves are the measured true curve up to A_g (plastic strain 0.139, 586 MPa); they differ only beyond it. Flat tail: the last point repeats 586 MPa at plastic strain 2.0, so the steel stops hardening at A_g. Slope at the Considère criterion: a straight line with slope dσ/dε_p = σ_true(A_g) = 586 MPa per unit plastic strain, reaching 1676 MPa at plastic strain 2.0. That end point is never reached: the neck breaks at plastic strains of about 1 (FAIL = 1.01 for 1 mm elements); it only fixes the slope. LS-DYNA interpolates linearly between the points.",
+        "series": [
+          {
+            "case": "TAIL-H1-NF",
+            "label": "slope σ_true(A_g) beyond A_g (generator default)",
+            "slot": 1
+          },
+          {
+            "case": "TAIL-H0-NF",
+            "label": "flat tail beyond A_g",
+            "slot": 2
+          }
+        ]
+      },
       "chart": {
         "x": "eng_strain",
         "y": "eng_stress_MPa",
