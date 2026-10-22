@@ -90,6 +90,12 @@ export function renderLineChart(host, series, opts = {}) {
 
   // lines
   for (const s of series) {
+    if (s.scatter) {
+      // one marker per point (8 px, surface ring so overlapping markers stay apart)
+      for (const p of s.points) el("circle", { cx: X(p[0]).toFixed(1), cy: Y(p[1]).toFixed(1), r: 4, class: "viz-mark",
+        style: `fill:var(--series-${s.slot})` });
+      continue;
+    }
     const d = s.points.filter(p => p[0] <= xMax).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
     el("path", { d, class: "viz-line", style: `stroke:var(--series-${s.slot})${s.dash ? ";stroke-dasharray:5 3" : ""}` });
   }
@@ -117,7 +123,18 @@ export function renderLineChart(host, series, opts = {}) {
     const x = xMin + (px - m.l) / pw * (xMax - xMin);
     if (x < xMin || x > xMax) return;
     cross.setAttribute("x1", X(x)); cross.setAttribute("x2", X(x)); cross.setAttribute("visibility", "visible");
+    const tol = (xMax - xMin) * 0.03;
     const rows = series.map((s, i) => {
+      if (s.scatter) {
+        // nearest point within 3 % of the x range, named by s.names
+        let k = -1, best = tol;
+        s.points.forEach((p, j) => { const dd = Math.abs(p[0] - x); if (dd <= best) { best = dd; k = j; } });
+        if (k < 0) { dots[i].setAttribute("visibility", "hidden"); return ""; }
+        const p = s.points[k];
+        dots[i].setAttribute("cx", X(p[0])); dots[i].setAttribute("cy", Y(p[1])); dots[i].setAttribute("visibility", "visible");
+        const nm = s.names?.[k] ? `${escapeHtml(s.names[k])}: ` : "";
+        return `<div><i style="background:var(--series-${s.slot})"></i>${nm}${escapeHtml(s.label)}<b>${fmt(p[1])}</b></div>`;
+      }
       const y = at(s.points, x);
       if (y == null) { dots[i].setAttribute("visibility", "hidden"); return ""; }
       dots[i].setAttribute("cx", X(x)); dots[i].setAttribute("cy", Y(y)); dots[i].setAttribute("visibility", "visible");

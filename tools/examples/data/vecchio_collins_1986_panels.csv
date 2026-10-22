@@ -1,0 +1,17 @@
+# Vecchio, F. J., & Collins, M. P. (1986). The modified compression-field theory for reinforced concrete elements
+# subjected to shear. ACI Journal, 83(2), 219-231. doi:10.14359/10416. Table 1 (p. 220), read on the PDF page.
+# Panels 890 x 890 x 70 mm, two layers of welded wire mesh, d_max 6 mm (p. 223). Monotonic pure shear (v:fx:fy = 1:0:0),
+# without edge failure, precracking, voids or wire fracture. fc = cylinder strength (Table 1 gives it negative).
+panel,rho_x,fyx_MPa,rho_y,fyy_MPa,eps_c,fc_MPa,v_cr_MPa,v_u_MPa
+PV4,0.0106,242,0.0106,242,-0.0025,26.6,1.79,2.89
+PV6,0.0179,266,0.0179,266,-0.0025,29.8,2.00,4.55
+PV10,0.0179,276,0.0100,276,-0.0027,14.5,1.86,3.97
+PV11,0.0179,235,0.0131,235,-0.0026,15.6,1.66,3.56
+PV12,0.0179,469,0.0045,269,-0.0025,16.0,1.73,3.13
+PV13,0.0179,248,0,0,-0.0027,18.2,1.73,2.01
+PV16,0.0074,255,0.0074,255,-0.0020,21.7,2.07,2.14
+PV19,0.0179,458,0.0071,299,-0.0022,19.0,2.07,3.95
+PV20,0.0179,460,0.0089,297,-0.0018,19.6,2.21,4.26
+PV21,0.0179,458,0.0130,302,-0.0018,19.5,2.35,5.03
+PV22,0.0179,458,0.0152,420,-0.0020,19.6,2.42,6.07
+PV27,0.0179,442,0.0179,442,-0.0019,20.5,2.04,6.35

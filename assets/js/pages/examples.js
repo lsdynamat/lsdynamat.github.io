@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml } from "../core/dom.js";
-import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261022a";
+import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261022b";
 
 setText("year", new Date().getFullYear());
 
@@ -64,8 +64,10 @@ async function renderExample(ex, models, host) {
     const ys = ex.chart.yScale || 1;
     renderLineChart(chartHost, ready.map(r => ({
       label: r.label, slot: r.slot, dash: !!r.test, legend: r.legend, legendLabel: r.legendLabel,
+      scatter: !!r.scatter, names: r.names,
       points: parseCsv(r.csv).map(o => [o[ex.chart.x] * (ex.chart.xScale || 1), o[ex.chart.y] * ys]),
-    })), { xLabel: ex.chart.xLabel, yLabel: ex.chart.yLabel, refLines: ex.chart.ref || [], height: 340 });
+    })), { xLabel: ex.chart.xLabel, yLabel: ex.chart.yLabel, refLines: ex.chart.ref || [], height: 340,
+      xMax: ex.chart.xMax, yMax: ex.chart.yMax });
   } else {
     chartHost.innerHTML = `<p class="small">Results are not available yet.</p>`;
   }
@@ -77,7 +79,7 @@ async function renderExample(ex, models, host) {
     return `<tr>
       <td><span class="viz-root"><i style="display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px;background:var(--series-${r.slot})"></i></span>${name}${escapeHtml(r.label)}</td>
       ${ex.summary.map(f => `<td class="num">${fmtVal(r.sum?.[f.key], f)}</td>`).join("")}
-      <td class="actions">${r.test
+      <td class="actions">${r.ref ? `<span class="small">reference line</span>` : r.test
         ? `<span class="small">measured</span>${r.csv ? `<a href="${base(r.case)}/results.csv" download>csv</a>` : ""}`
         : `<a href="${base(r.case)}/case.zip" download>deck (.k, zip)</a>${r.csv ? `<a href="${base(r.case)}/results.csv" download>csv</a>` : `<span class="small">run in progress</span>`}`}</td>
     </tr>`;

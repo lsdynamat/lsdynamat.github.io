@@ -538,7 +538,7 @@
       "sketch": "./assets/examples/sketch-hb-cyl.svg",
       "setup": [
         "A blind check of the generators against published tests: one concrete batch (d_max = 10 mm, w/c 0.41) tested as cylinders and as notched beams of several sizes. This example and the next two use the cylinders and the D = 93 and 215 mm beams.",
-        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a 75 × 150 mm plane-stress strip of 3.75 mm shells (ELFORM 16) whose thickness, 58.9 mm, gives the cylinder's cross-section area; its card is the generator output for f_c = 55.6 MPa, h = 3.75 mm, TYPEC = 9.",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a 75 × 150 mm plane-stress strip of 3.75 mm shells (ELFORM 16) whose thickness, 58.9 mm, gives the cylinder's cross-section area; its card is the generator output (version 1.1) for f_c = 55.6 MPa, h = 3.75 mm, TYPEC = 9.",
 
         "Full cylinder, O-grid mesh of 16 000 hexahedra (3.75 mm), ELFORM 1 with IHQ 4 / QM 0.05. Frictionless platens; top face pushed down 0.75 mm (5 ‰) in 30 ms. Stress = bottom reaction / (π · 37.5²), strain = platen displacement / 150 mm.",
         "Test data: Hoover, Bažant, Vorel, Wendner, Hubler, Eng. Fract. Mech. 114 (2013) 92–103, doi:10.1016/j.engfracmech.2013.08.007, and Wendner et al., Mater. Struct. 48 (2015) 3603–3626, doi:10.1617/s11527-014-0426-0; curves from the ConcreteTestCollection that BOKU Vienna publishes for model calibration. Grey dashed line: measured mean curve; its min/max envelopes snap back after the peak and are left out."
@@ -619,7 +619,7 @@
         "Shape before the peak. The test peaks at 1.76 ‰ and rounds off from about 45 MPa. Winfrith and CSCM stay linear up to about 1.45 ‰ and then run flat (54–57 MPa) like an elastic–perfectly plastic material, so their peak strains in the table (2.8 and 5 ‰) are just points on that plateau. KCC and CDP round off and peak at 2.0 and 2.3 ‰.",
         "Post-peak. The measured mean curve snaps back (the strain decreases while the load falls), which a displacement-controlled model with uniform strain cannot follow. Only CDP softens (40.5 MPa at 4.9 ‰); KCC, Winfrith and CSCM stay at 54–57 MPa up to 5 ‰. For KCC part of this comes from the regularisation: the generator stretches the whole λ–η softening branch to the element size, so a 3.75 mm element also softens slowly in compression.",
         "Hourglass energy is below 0.3 % and kinetic energy below 0.03 % of the external work for all four models. No fringe images are shown: with frictionless platens the field stays uniform up to 5 ‰, so the pictures carry no information.",
-        "MAT_172 (EC2, shell strip) starts at 36.6 GPa (E_cm = 36.8 GPa from EN 1992-1-1, Table 3.1, against 34.4 GPa measured), follows the EC2 curve to 55.6 MPa at 2.43 ‰ and then collapses: past the peak the stress falls to zero by about 5 ‰ and this branch is not regularised, so one row of elements crushes and the strip loses its load within 0.1 ‰ of further shortening (a snap-back the uniform test curve also shows). The curve is cut there; afterwards the crushed strip deforms freely and kinetic energy reaches 27 % of the work."
+        "MAT_172 (EC2, shell strip, generator 1.1) starts at 36.6 GPa (E_cm = 36.8 GPa from EN 1992-1-1, Table 3.1, against 34.4 GPa measured) and follows the EC2 curve to 55.6 MPa at 2.43 ‰. Right after the peak the stress drops in steps (about 21 MPa at 2.5–2.9 ‰, 7 MPa at 3.0–3.5 ‰, 2.4 MPa at 5 ‰): between ε_c1 and ε_cu1 = 3.5 ‰ the EC2 curve falls by a third over 1 ‰ of strain, so one row of 3.75 mm elements after the other softens faster than the rest of the 150 mm strip unloads (a snap-back, as in the measured curve). Beyond ε_cu1 the generator's ECSP69 spreads the remaining softening over G_c = 100 G_F; kinetic energy stays below 0.01 % of the work. With generator 1.0 (default ECSP69) the stress went to zero and the crushed strip flew apart (kinetic energy 27 %)."
       ]
     },
     {
@@ -628,7 +628,7 @@
       "sketch": "./assets/examples/sketch-hb-beam.svg",
       "setup": [
         "Beam D = 93 mm, thickness 40 mm, span 202 mm (2.176 D), central notch 27 mm deep (a/D = 0.29 on the 3 mm grid; test 0.3) and one element wide. 30 108 hexahedra of 3 mm, ELFORM 2.",
-        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a plane-stress shell model in the vertical plane with the same element size, supports and loading (ELFORM 16, thickness = beam width 40 mm); its card is the generator output for f_c = 55.6 MPa with h = element size, TYPEC = 9.",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a plane-stress shell model in the vertical plane with the same element size, supports and loading (ELFORM 16, thickness = beam width 40 mm); its card is the generator output (version 1.1) for f_c = 55.6 MPa with h = element size, TYPEC = 9, d_max left blank (plain concrete).",
 
         "Supports and load line are rows of nodes (three node lines at each support, two at midspan); midspan pushed down 0.45 mm in 30 ms. Load = sum of the support reactions; deflection = mean of the two top nodes at midspan.",
         "Work / ligament = area under the load–deflection curve up to the end of the run, divided by 40 × (D − a). The same integral of the measured mean curve (to 0.43 mm) is 0.126 N/mm; the paper's work-of-fracture G_F of this concrete is 0.097–0.111 N/mm.",
@@ -727,7 +727,7 @@
         "Energy against the input. CDP dissipates 0.151 N/mm, the area of its bilinear card (0.150 N/mm, the fib MC2010 G_F = 73 f_cm^0.18). That is 35–55 % above the measured G_F of this concrete; Hoover et al. note that the fib formula overestimates it by about 50 %. KCC targets the same fib value and dissipates 0.130 N/mm, close to the 0.126 N/mm of the test curve. Winfrith and CSCM start from the lower MC90 value (0.088 N/mm) and dissipate 0.110 and 0.124 N/mm.",
         "Hourglass energy is zero except for Winfrith (6.4 %, one-point element only); kinetic energy is below 0.15 % of the work.",
         "In the fringe plots the crack runs straight up from the notch in all four models; CSCM erodes it (white gap). KCC and CSCM also show local crushing over the supports, which are rows of fixed nodes without bearing plates.",
-        "MAT_172 (EC2, plane-stress shells) peaks at 3.93 kN (+14 %), like Winfrith and CSCM, and softens more slowly than the test: 1.94 kN at 0.1 mm (test 1.08) and 0.65 kN at 0.2 mm (test 0.40). It dissipates 0.182 N/mm, 21 % above its card's G_F (0.150 N/mm), although the crack stays in one column of elements. The tension-softening shape of MAT_172 is fixed (0.33 f_t at 0.22 of the opening) and keeps about half of G_F in the tail. Hourglass energy is zero (fully integrated shells)."
+        "MAT_172 (EC2, plane-stress shells, generator 1.1) peaks at 3.93 kN (+14 %), like Winfrith and CSCM, and softens more slowly than the test: 1.93 kN at 0.1 mm (test 1.08) and 0.63 kN at 0.2 mm (test 0.40). It dissipates 0.178 N/mm, 18 % above its card's G_F (0.150 N/mm). Checks on this beam: with the measured G_F of this concrete (0.104 N/mm, mean of the paper's 0.097–0.111) instead of the fib estimate the peak is 3.64 kN (+5 %) and the load 1.21 kN at 0.1 mm, so most of the excess comes from the fib G_F, which Hoover et al. note is about 50 % too high for this concrete. Splitting the beam into parts shows that about a quarter of the energy is dissipated by local cracking at the loaded node and the support nodes, not in the main crack. The 2-crack option (TYPEC = 109), half the loading rate and a 1.5 mm mesh (3.70 kN, 0.187 N/mm) change little. Hourglass energy is zero (fully integrated shells)."
       ]
     },
     {
@@ -736,7 +736,7 @@
       "sketch": "./assets/examples/sketch-hb-beam.svg",
       "setup": [
         "Beam D = 215 mm, thickness 40 mm, span 469 mm, notch 65 mm (a/D = 0.30), one element wide. 36 016 hexahedra of 5 mm, ELFORM 2; midspan pushed down 0.9 mm in 40 ms. Load, deflection and work / ligament as in the D = 93 mm example (measured mean curve: 0.138 N/mm to 0.55 mm).",
-        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a plane-stress shell model in the vertical plane with the same element size, supports and loading (ELFORM 16, thickness = beam width 40 mm); its card is the generator output for f_c = 55.6 MPa with h = element size, TYPEC = 9.",
+        "Every card is the site's generator output for f_c = 55.6 MPa (measured mean of the 75 × 150 mm cylinders at 400 days) and d_max = 10 mm; nothing was fitted to these tests. KCC runs with LCRATE = 0 and is regularised for each mesh (h input = element size).",        "MAT_172 works only with shells and beams, so its run is a plane-stress shell model in the vertical plane with the same element size, supports and loading (ELFORM 16, thickness = beam width 40 mm); its card is the generator output (version 1.1) for f_c = 55.6 MPa with h = element size, TYPEC = 9, d_max left blank (plain concrete).",
 
         "Same cards as for D = 93 mm except KCC, which the generator regularises for 5 mm instead of 3 mm elements.",
         "Test data: Hoover, Bažant, Vorel, Wendner, Hubler, Eng. Fract. Mech. 114 (2013) 92–103, doi:10.1016/j.engfracmech.2013.08.007, and Wendner et al., Mater. Struct. 48 (2015) 3603–3626, doi:10.1617/s11527-014-0426-0; curves from the ConcreteTestCollection that BOKU Vienna publishes for model calibration. Grey dashed lines: measured mean curve and its min/max envelope."
@@ -834,7 +834,107 @@
         "KCC up to generator version 1.5 was 19 % low in both sizes. The cause was the tensile damage law, not the inputs: one element with the same card reaches its tensile strength in uniaxial, plane-strain and biaxial tension and dissipates the target G_F in uniaxial tension. In the beam, a cracked KCC element is left in near-hydrostatic tension (σxx ≈ σyy ≈ σzz ≈ 2.8 MPa) because the crack opening goes into elastic volumetric strain that the surrounding concrete does not let it relieve, and KCC's damage grows with (1 + p/f_t)^−b2. With the K&C value b2 = 1.86 each cracked element dissipated about 0.08 instead of 0.15 N/mm. Since version 1.6 the generator writes b2 = 1.0 and re-stretches λ so that uniaxial tension still dissipates G_F: the beams now peak at 3.39 and 6.72 kN (−2 and +2 %) and dissipate 0.130 and 0.144 N/mm. Other changes tried on the D = 93 mm beam did not help: ω = 0 / 0.9 / 1.0 gave 2.60 / 3.79 / 6.13 kN with no softening left from ω = 0.9 on, b3 had no effect, steel bearing pads added 4 %, and scaling the EOS with f_c (version 1.5) 1–3 %. b2 = 1.0 was chosen so that the beams dissipate the card's G_F, on this one data set (f_c = 55.6 MPa).",
         "Energy. CDP again dissipates its card value (0.153 N/mm), about 40 % above the paper's G_F; KCC 0.144, CSCM 0.126 and Winfrith 0.165 N/mm. When a fracture test of the concrete is available, scale CDP's WF and WF1 (or KCC's gf input) to the measured G_F instead of using the fib estimate.",
         "Hourglass energy is zero except for Winfrith (7.1 %); kinetic energy is below 0.7 % of the work.",
-        "MAT_172 (EC2, plane-stress shells) peaks at 7.28 kN (+11 %) and dissipates 0.224 N/mm (card: 0.150 N/mm). Its size-effect ratio σ_N(215)/σ_N(93) is 0.804 (test 0.826)."
+        "MAT_172 (EC2, plane-stress shells, generator 1.1) peaks at 7.28 kN (+11 %) and dissipates 0.220 N/mm (card: 0.150 N/mm). Its size-effect ratio σ_N(215)/σ_N(93) is 0.804 (test 0.826)."
+      ]
+    },
+    {
+      "id": "vc-panels",
+      "title": "Open-data benchmark 4 — reinforced concrete panels in pure shear (Vecchio & Collins 1986), MAT_172",
+      "sketch": "./assets/examples/sketch-vc-panel.svg",
+      "setup": [
+        "Twelve of the 30 panels of Vecchio & Collins (1986): 890 × 890 × 70 mm, two layers of welded wire mesh, d_max = 6 mm, loaded through shear keys in monotonic pure shear. Kept: every panel loaded 1:0:0 that did not fail at the edges, was not precracked or poorly cast and did not fail by wire fracture (PV4, PV6, PV10–PV13, PV16, PV19–PV22, PV27). f_c 14.5–29.8 MPa, ρ_x 0.74–1.79 %, ρ_y 0–1.79 %.",
+        "The stress field in the tests is uniform, so each panel is one 50 × 50 mm shell (ELFORM 16) with a *PART_COMPOSITE section: concrete / x-steel layer (t = ρ_x · 70 mm) / y-steel layer / concrete. All three cards are generator output (version 1.1) for the panel's f_c with h = 50 mm and d_max = 6 mm; the steel layers use rho = 100 % in one direction and that direction's measured f_y (MAT_172 has one yield stress per card). E_s = 200 GPa (not given in the paper).",
+        "Load control as in the test: self-equilibrated nodal shear forces ramped to 1.5 v_u(test) in 60 ms on a statically determinate support. v_u (model) = largest shear stress in the element before the shear strain exceeds 50 ‰ (after failure it grows by orders of magnitude).",
+        "Test data: Vecchio, F. J., & Collins, M. P. (1986). The modified compression-field theory for reinforced concrete elements subjected to shear. ACI Journal, 83(2), 219–231, doi:10.14359/10416, Table 1 (also in tools/examples/data/vecchio_collins_1986_panels.csv)."
+      ],
+      "chart": {
+        "x": "v_test_MPa",
+        "y": "v_model_MPa",
+        "xLabel": "measured shear strength v_u (MPa)",
+        "yLabel": "MAT_172 shear strength v_u (MPa)",
+        "xMax": 8,
+        "yMax": 8
+      },
+      "summary": [
+        {
+          "key": "mean_ratio",
+          "label": "Mean model / test",
+          "digits": 2
+        },
+        {
+          "key": "cov_ratio",
+          "label": "CoV (%)",
+          "scale": 100,
+          "digits": 1
+        },
+        {
+          "key": "min_ratio",
+          "label": "Min",
+          "digits": 2
+        },
+        {
+          "key": "max_ratio",
+          "label": "Max",
+          "digits": 2
+        }
+      ],
+      "runs": [
+        {
+          "case": "VC-PANELS-1TO1",
+          "label": "model = test",
+          "slot": 0,
+          "test": true,
+          "ref": true
+        },
+        {
+          "case": "VC-PANELS-M172",
+          "model": "mat172_concrete_ec2",
+          "label": "generator 1.1 (d_max, DEGRAD = 1)",
+          "slot": 1,
+          "scatter": true,
+          "names": [
+            "PV4",
+            "PV6",
+            "PV10",
+            "PV11",
+            "PV12",
+            "PV13",
+            "PV16",
+            "PV19",
+            "PV20",
+            "PV21",
+            "PV22",
+            "PV27"
+          ]
+        },
+        {
+          "case": "VC-PANELS-M172-V10",
+          "model": "mat172_concrete_ec2",
+          "label": "generator 1.0 (no d_max, DEGRAD = 0)",
+          "slot": 8,
+          "scatter": true,
+          "names": [
+            "PV4",
+            "PV6",
+            "PV10",
+            "PV11",
+            "PV12",
+            "PV13",
+            "PV16",
+            "PV19",
+            "PV20",
+            "PV21",
+            "PV22",
+            "PV27"
+          ]
+        }
+      ],
+      "notes": [
+        "Generator 1.1 cards: mean model / test 1.01, CoV 10.5 %, range 0.80 (PV12) to 1.16 (PV27). Per panel: PV4 1.00, PV6 1.11, PV10 0.95, PV11 1.10, PV12 0.80, PV13 0.97, PV16 1.02, PV19 0.89, PV20 0.95, PV21 1.02, PV22 1.14, PV27 1.16.",
+        "Generator 1.0 cards gave a mean of 0.94 with CoV 19 % (0.64–1.25). Two options of MAT_172 made the difference, both switched on in version 1.1. AGGSZ = d_max (NS 3473 aggregate interlock) raised the panels with little transverse steel, whose strength after the y-steel yields depends on shear transfer across the fixed cracks: PV12 0.64 → 0.80, PV13 0.76 → 0.97, PV19 0.76 → 0.89. DEGRAD = 1 reduces the compressive strength parallel to open cracks and lowered the heavily reinforced panels that fail by crushing: PV27 1.25 → 1.16. Its formula, 1/(0.8 + 100 ε_t,max), has the same form as the compression softening Vecchio & Collins derived from these tests, 1/(0.8 − 0.34 ε_1/ε'_c).",
+        "Remaining errors follow the fixed-crack limitation of MAT_172: the panels with the least transverse steel are still 11–20 % low, and the crushing-governed panels with the most steel (PV22, PV27) 14–16 % high.",
+        "AGGSZ is not written by default: on the plain-concrete Hoover beams it adds shear transfer that spreads cracking to the neighbouring columns of elements and raises the post-peak energy by about 30 %. Enter d_max for reinforced members in shear.",
+        "The panels check strength only (one element, no localisation). The model cracks at v ≈ f_ctm, 1.1–2.3 MPa: 11 and 15 % above the test for PV4 and PV6 (f_c 26.6 and 29.8 MPa), 17–40 % below it for the ten panels with f_c ≤ 21.7 MPa (PV10: 1.11 against 1.86 MPa). Below f_c = 20 MPa, f_ck = f_cm − 8 MPa falls under C12 and the EN 1992-1-1 formula for f_ctm is extrapolated."
       ]
     }
   ]
