@@ -2,6 +2,20 @@
   {
     "id": "mat172_concrete_ec2",
     "date": "2026-10-22",
+    "version": "1.1",
+    "model": "MAT_172 Concrete EC2",
+    "change": "DEGRAD = 1 (compressive strength of cracked concrete reduced), optional d_max input written as AGGSZ (NS 3473 aggregate interlock), and ECSP69 set from G_c = 100 G_F (Murray 2007) so that compressive softening is regularised to the element size (TYPEC 9). f_c down to 14 MPa (Table 3.1 extrapolated below C12). On 12 Vecchio & Collins (1986) panels in pure shear the shear strength ratio model/test went from 0.94 (CoV 19 %) to 1.01 (CoV 10.5 %); the Hoover beam peaks are unchanged (d_max left blank for plain concrete)."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-22",
+    "version": "",
+    "model": "Examples",
+    "change": "New benchmark: 12 reinforced concrete panels of Vecchio & Collins (1986) in pure shear with MAT_172 (scatter of model against measured shear strength). Hoover MAT_172 runs repeated with generator 1.1 and diagnosed: with the measured G_F the D = 93 mm beam peaks at +5 % instead of +14 %."
+  },
+  {
+    "id": "mat172_concrete_ec2",
+    "date": "2026-10-22",
     "version": "1.0",
     "model": "MAT_172 Concrete EC2",
     "change": "New generator for *MAT_CONCRETE_EC2 (shells and Hughes–Liu beams only). Input f_c = f_cm; f_ck = f_cm − 8 MPa, f_ctm from EN 1992-1-1 Table 3.1, PR 0.2, E_s 200 GPa; TYPEC 9 (EN 1992-1-1) or 7/8 (EN 1992-1-2 fire); optional smeared reinforcement in two directions. Tension softening regularised with LCHAR = h and ECUTEN = G_F/(0.275 f_ctm h). Single shell elements reach f_ctm, E_cm, f_cm at ε_c1 and dissipate G_F within 3 % for 5 and 20 mm elements."

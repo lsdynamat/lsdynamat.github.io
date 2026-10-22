@@ -1,0 +1,70 @@
+{
+ "case": "VC-PANELS-M172",
+ "n_panels": 12,
+ "mean_ratio": 1.008571765955065,
+ "cov_ratio": 0.10502834503142167,
+ "min_ratio": 0.7972905814696487,
+ "max_ratio": 1.1564326299212597,
+ "per_panel": {
+  "PV4": {
+   "v_test": 2.89,
+   "v_model": 2.896,
+   "ratio": 1.002
+  },
+  "PV6": {
+   "v_test": 4.55,
+   "v_model": 5.034,
+   "ratio": 1.106
+  },
+  "PV10": {
+   "v_test": 3.97,
+   "v_model": 3.786,
+   "ratio": 0.954
+  },
+  "PV11": {
+   "v_test": 3.56,
+   "v_model": 3.909,
+   "ratio": 1.098
+  },
+  "PV12": {
+   "v_test": 3.13,
+   "v_model": 2.496,
+   "ratio": 0.797
+  },
+  "PV13": {
+   "v_test": 2.01,
+   "v_model": 1.947,
+   "ratio": 0.969
+  },
+  "PV16": {
+   "v_test": 2.14,
+   "v_model": 2.173,
+   "ratio": 1.015
+  },
+  "PV19": {
+   "v_test": 3.95,
+   "v_model": 3.532,
+   "ratio": 0.894
+  },
+  "PV20": {
+   "v_test": 4.26,
+   "v_model": 4.041,
+   "ratio": 0.948
+  },
+  "PV21": {
+   "v_test": 5.03,
+   "v_model": 5.131,
+   "ratio": 1.02
+  },
+  "PV22": {
+   "v_test": 6.07,
+   "v_model": 6.933,
+   "ratio": 1.142
+  },
+  "PV27": {
+   "v_test": 6.35,
+   "v_model": 7.343,
+   "ratio": 1.156
+  }
+ }
+}

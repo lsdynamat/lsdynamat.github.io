@@ -220,7 +220,7 @@ def build_beam_ec2(out, case):
           "*BOUNDARY_PRESCRIBED_MOTION_SET", card(3, 3, 0, 1, 1.0)]
     L += ramp_curve(1, v, 1.0, tend)
     L += ["*DATABASE_HISTORY_NODE_SET", card(4)]
-    L += [material_block({3.0: "hb_e172_h3", 5.0: "hb_e172_h5"}[h]), "*END"]
+    L += [material_block("hb_e172_h" + f"{h:g}".replace(".", "p")), "*END"]
     write(os.path.join(out, f"HB-{case}-EC2", "case.k"), L)
 
 

@@ -23,7 +23,10 @@ $$
 | PRT36 | 0.2 | EN 1992-1-1, 3.1.3(4), uncracked concrete; MAT_172 default is 0.25 |
 | YMREINF | 200 GPa | EN 1992-1-1, 3.2.7(4) |
 | ECUTEN, LCHAR | from $G_F$ and the element size, see below | |
-| MU, TAUMXF, TAUMXC, ECRAGG, AGGSZ | manual defaults | |
+| AGGSZ, UNITL | optional $d_{max}$ (blank = 0), 1 | NS 3473 aggregate interlock when $d_{max}$ is given, see below |
+| MU, TAUMXF, TAUMXC, ECRAGG | manual defaults | |
+| DEGRAD | 1 | compression softening of cracked concrete, see below |
+| ECSP69 | from $G_c$ and the element size (TYPEC = 9) | see below |
 | UNLFAC | 0.5 (manual default) | |
 
 With TYPEC = 9 LS-DYNA computes $E_{cm}$ and $\varepsilon_{c1}$ itself from $f_{ck}$ and follows EN 1992-1-1, Expression (3.14):
@@ -58,7 +61,22 @@ $$
 G_F = 0.275\,\mathrm{FT}\cdot\mathrm{ECUTEN}\cdot\mathrm{LCHAR}
 $$
 
-The generator sets LCHAR = h (the element size input) and $\mathrm{ECUTEN} = G_F/(0.275\, f_{ctm}\, h)$, with $G_F$ = the optional input or fib Model Code 2010, $73\,f_{cm}^{0.18}$ N/m. LCHAR is also the crack spacing of the NS 3473 aggregate-interlock formula, which is used only when AGGSZ > 0 (not by default).
+The generator sets LCHAR = h (the element size input) and $\mathrm{ECUTEN} = G_F/(0.275\, f_{ctm}\, h)$, with $G_F$ = the optional input or fib Model Code 2010, $73\,f_{cm}^{0.18}$ N/m. LCHAR is also the crack spacing of the NS 3473 aggregate-interlock formula, which is used only when AGGSZ > 0 (the optional $d_{max}$ input).
+
+## Compressive softening and element size
+
+With TYPEC = 9 LS-DYNA follows Expression (3.14) up to $\varepsilon_{cu1}$ (3.5 ‰ for $f_{ck}$ < 50 MPa, $2.8 + 27[(98 - f_{cm})/100]^4$ ‰ above) and then lets the stress fall linearly to zero at ECSP69. This was checked on single elements: ECSP69 = 0.01 and 0.02 moved the end of the curve to 10 and 20 ‰. Left at its default, the stress reaches zero at about 5 ‰ in any element, so a crushing band dissipates less energy the smaller the elements. The generator sets ECSP69 so that the area under the curve beyond the peak is $G_c/h$:
+
+$$
+\mathrm{ECSP69} = \varepsilon_{cu1} + \frac{2\,(G_c/h - A_1)}{\sigma(\varepsilon_{cu1})}, \qquad G_c = 100\,G_F
+$$
+
+where $A_1$ is the area under (3.14) from $\varepsilon_{c1}$ to $\varepsilon_{cu1}$. $G_c = 100\,G_F$ is the default compressive fracture energy of the CSCM model (Murray 2007). For elements too large for this ($G_c/h < A_1$, about 280 mm and larger for $f_c$ = 55.6 MPa) ECSP69 = 1.1 $\varepsilon_{cu1}$. The steep part of the curve between $\varepsilon_{c1}$ and $\varepsilon_{cu1}$ is EN 1992-1-1 data and is not regularised.
+
+## Cracked concrete: DEGRAD and aggregate interlock
+
+- **DEGRAD = 1** (always written). The compressive strength parallel to an open crack is multiplied by $\min\left(1,\ 1/(0.8 + 100\,\varepsilon_{t,max})\right)$ (manual, from BS 8110), where $\varepsilon_{t,max}$ is the largest crack-opening strain so far. Vecchio & Collins (1986) derived the same form from their panel tests, $1/(0.8 - 0.34\,\varepsilon_1/\varepsilon'_c)$.
+- **AGGSZ = $d_{max}$** (only when $d_{max}$ is entered). The shear stress a crack can carry follows the NS 3473 aggregate-interlock formula of the manual, with crack width = crack-opening strain × LCHAR. Without it MAT_172 uses its default shear-transfer law (TAUMXC, ECRAGG). Enter $d_{max}$ for reinforced members in shear; leave it blank for plain concrete governed by tensile cracking (see the benchmarks below).
 
 ## Checks
 
@@ -72,24 +90,49 @@ One shell element (ELFORM 16) in uniaxial plane stress, LS-DYNA R13, generator c
 | Compression, TYPEC = 9 | peak $f_{cm}$ = 55.6 MPa at $\varepsilon_{c1}$ = 2.43 ‰ | 55.6 MPa at 2.45 ‰ |
 | Compression, TYPEC = 9, $f_c$ = 38 MPa | 38.0 MPa at 2.16 ‰ | 38.0 MPa at 2.17 ‰ |
 | Compression, TYPEC = 7 | E = 1.5 · 55.6 / 0.0025 = 33.4 GPa, peak at 2.5 ‰ | 33.2 GPa, 55.6 MPa at 2.50 ‰ |
+| Compression to 20 % strain, TYPEC = 9, h = 5 mm | area beyond the peak $G_c/h$ = 3.01 MPa, zero stress at ECSP69 = 0.166 | 2.87 MPa (−4.5 %), zero at a logarithmic strain of 0.164 |
 
 The element size inside the card (LCHAR) does not need to match the mesh: the h = 10 card gave the same results on 5 and 20 mm elements as the cards made for those sizes.
 
-In compression TYPEC = 9 follows Expression (3.14) up to $\varepsilon_{cu1}$ = 3.5 ‰ and then falls linearly to zero at about 5 ‰ for both strengths. This branch is not regularised, so crushing zones soften faster in finer meshes. TYPEC = 7 descends linearly to zero at 20 ‰.
+TYPEC = 7 descends linearly to zero at 20 ‰; card 8 is not read for TYPEC = 7 and 8, so their compressive softening is not regularised.
 
-## Open-data benchmark
+## Open-data benchmarks
 
-The Examples page runs this generator on the Hoover et al. (2013) tests together with the four solid-element concrete models, as plane-stress shells with the same element sizes ($f_c$ = 55.6 MPa, fib $G_F$, nothing fitted):
+Both are on the Examples page, with the decks. Nothing was fitted to the tests.
 
-| | Test | MAT_172 |
+### Plain concrete: Hoover et al. (2013)
+
+Plane-stress shells with the element sizes of the solid models ($f_c$ = 55.6 MPa, fib $G_F$, $d_{max}$ left blank), next to the four solid-element concrete models:
+
+| | Test | MAT_172 (generator 1.1) |
 |---|---|---|
 | Beam D = 93 mm, peak load | 3.46 kN | 3.93 kN (+14 %) |
 | Beam D = 215 mm, peak load | 6.57 kN | 7.28 kN (+11 %) |
 | Size-effect ratio $\sigma_N(215)/\sigma_N(93)$ | 0.826 | 0.804 |
-| Work / ligament, D = 93 and 215 mm | 0.126 and 0.138 N/mm (to the end of the test) | 0.182 and 0.224 N/mm |
-| Cylinder strip: initial modulus, peak | 34.4 GPa, 55.6 MPa at 1.76 ‰ | 36.6 GPa, 55.6 MPa at 2.43 ‰, then collapse |
+| Work / ligament, D = 93 and 215 mm | 0.126 and 0.138 N/mm (to the end of the test) | 0.178 and 0.220 N/mm |
+| Cylinder strip: initial modulus, peak | 34.4 GPa, 55.6 MPa at 1.76 ‰ | 36.6 GPa, 55.6 MPa at 2.43 ‰ |
 
-The beams dissipate 21–49 % more than the card's $G_F$ although the crack stays in one column of elements, and the load after the peak stays above the test (1.94 against 1.08 kN at 0.1 mm for D = 93 mm). The cause has not been isolated; when the post-peak response matters, check the card against a fracture test of your concrete.
+What was checked on the D = 93 mm beam:
+
+- **$G_F$.** With the measured $G_F$ of this concrete (0.104 N/mm) instead of the fib estimate (0.150 N/mm) the peak is 3.64 kN (+5 %). Most of the overshoot comes from the fib $G_F$, which Hoover et al. note is about 50 % too high for this concrete. Enter a measured $G_F$ when you have one.
+- **Where the energy goes.** About a quarter is dissipated by local cracking around the loaded node and the support nodes; the main crack stays in one column of elements but still dissipates 15–20 % more than $G_F$ per element.
+- **No effect:** 2 cracks instead of 4 (TYPEC = 109), half the loading rate, ECSP69, DEGRAD. A 1.5 mm mesh gives 3.70 kN and 0.187 N/mm (3 mm: 3.93 kN, 0.178 N/mm).
+- **$d_{max}$.** AGGSZ = 10 mm leaves the peak unchanged but spreads cracking to the neighbouring columns and raises the energy by about 30 %, which is why $d_{max}$ is optional.
+
+In the cylinder strip the stress drops in steps right after the peak: the EC2 curve between $\varepsilon_{c1}$ and $\varepsilon_{cu1}$ is too steep for a 3.75 mm crushing band in a 150 mm strip (snap-back). With generator 1.0 (default ECSP69) the stress then went to zero and the strip flew apart; with ECSP69 from $G_c$ it keeps a residual stress and kinetic energy stays below 0.01 % of the work.
+
+### Reinforced concrete: Vecchio & Collins (1986) panels
+
+Twelve panels in monotonic pure shear (890 × 890 × 70 mm, $f_c$ 14.5–29.8 MPa, $\rho_x$ 0.74–1.79 %, $\rho_y$ 0–1.79 %, $d_{max}$ = 6 mm). Each panel is one shell with a `*PART_COMPOSITE` section of generator cards: concrete / x-steel / y-steel.
+
+| Cards | Mean $v_u$ model / test | CoV | Range |
+|---|---|---|---|
+| Generator 1.0 (no $d_{max}$, DEGRAD = 0) | 0.94 | 19 % | 0.64–1.25 |
+| DEGRAD = 1 only | 0.94 | 19 % | 0.64–1.16 |
+| AGGSZ = $d_{max}$ only | 1.02 | 13 % | 0.80–1.25 |
+| **Generator 1.1 ($d_{max}$ = 6 mm, DEGRAD = 1)** | **1.01** | **10.5 %** | **0.80–1.16** |
+
+Aggregate interlock raises the panels with little transverse steel (PV13: 0.76 → 0.97), DEGRAD lowers the crushing-governed panels (PV27: 1.25 → 1.16). The fixed cracks still leave the panels with the least transverse steel 11–20 % low and the most heavily reinforced 14–16 % high.
 
 ## Reinforcement
 
@@ -110,4 +153,6 @@ To model a section with bars at their real depth, define one plain-concrete card
 - LS-DYNA Keyword User's Manual, Vol. II, R13 — *MAT_CONCRETE_EC2.
 - EN 1992-1-1:2004. *Eurocode 2: Design of concrete structures — Part 1-1: General rules and rules for buildings*. CEN. Table 3.1; 3.1.3(4); 3.1.5, Expression (3.14); 3.2.7(4).
 - fib (2013). *fib Model Code for Concrete Structures 2010*. Ernst & Sohn.
+- Murray, Y. D. (2007). *Users Manual for LS-DYNA Concrete Material Model 159*. Federal Highway Administration, FHWA-HRT-05-062.
+- Vecchio, F. J., & Collins, M. P. (1986). The modified compression-field theory for reinforced concrete elements subjected to shear. *ACI Journal*, 83(2), 219–231. doi:10.14359/10416
 - Hoover, C. G., Bažant, Z. P., Vorel, J., Wendner, R., & Hubler, M. H. (2013). Comprehensive concrete fracture tests: Description and results. *Engineering Fracture Mechanics*, 114, 92–103. doi:10.1016/j.engfracmech.2013.08.007

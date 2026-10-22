@@ -3,7 +3,7 @@
 // properties from Eurocode 2. Shell and Hughes-Liu beam elements only.
 // Units: mm-ms-g-N-MPa
 
-import { fitField } from "../core/units.js?v=20261022a";
+import { fitField } from "../core/units.js?v=20261022b";
 export const KEY = "mat172_concrete_ec2";
 export const ID = 172;
 export const NAME = "Concrete EC2 (*MAT_CONCRETE_EC2)";
@@ -48,7 +48,7 @@ export function generate(input = {}) {
   const inp = normalizeInput(input);
 
   const mid = mustIntPositive("MID", inp.mid ?? 172);
-  const fcm = mustInRange("f_c", inp.fc ?? 38, 20, 98);
+  const fcm = mustInRange("f_c", inp.fc ?? 38, 14, 98);   // below 20 MPa (C12) the Table 3.1 formulas are extrapolated
   const typec = [7, 8, 9].includes(Number(inp.typec)) ? Number(inp.typec) : 9;
   const h = mustPositive("Element size h", inp.elm_size ?? 25);
   const ro = inp.ro !== undefined ? mustPositive("RO", inp.ro) : 0.0023;
@@ -57,18 +57,31 @@ export function generate(input = {}) {
   const fy = inp.fy !== undefined ? mustPositive("f_y", inp.fy) : 500;
   const typer = [7, 8].includes(Number(inp.typer)) ? Number(inp.typer) : 7;
   const gfIn = Number(inp.gf);
+  const dmax = inp.dmax !== undefined ? mustPositive("d_max", inp.dmax) : 0;
 
   // EN 1992-1-1:2004, Table 3.1
   const fck = fcm - 8;
   const fctm = fck <= 50 ? 0.30 * Math.pow(fck, 2 / 3) : 2.12 * Math.log(1 + fcm / 10);
   const Ecm = 22000 * Math.pow(fcm / 10, 0.3);
   const ec1 = Math.min(0.7 * Math.pow(fcm, 0.31), 2.8) / 1000;
+  const ecu1 = (fck < 50 ? 3.5 : 2.8 + 27 * Math.pow((98 - fcm) / 100, 4)) / 1000;
 
   // Tension softening regularised to the element size: LCHAR x ECUTEN is the crack opening
   // displacement at which the crack is fully open, so G_F = 0.275 FT ECUTEN LCHAR for any mesh.
   const gf = Number.isFinite(gfIn) && gfIn > 0 ? gfIn : 73 * Math.pow(fcm, 0.18) / 1000;   // N/mm, fib MC2010
   const wc = gf / (SOFT_AREA * fctm);
   const ecuten = wc / h;
+
+  // Compression (TYPEC = 9): LS-DYNA follows Expression (3.14) to eps_cu1, then falls linearly to zero
+  // at ECSP69 (checked on single elements). ECSP69 is set so that the area beyond the peak is G_c / h,
+  // with G_c = 100 G_F (the CSCM default, Murray 2007). Elements too large for that keep 1.1 eps_cu1.
+  const gc = 100 * gf;
+  const kk = 1.05 * Ecm * ec1 / fcm;
+  const s314 = (e) => { const n = e / ec1; return fcm * (kk * n - n * n) / (1 + (kk - 2) * n); };
+  let A1 = 0;
+  for (let i = 0; i < 100; i++) A1 += s314(ec1 + (ecu1 - ec1) * (i + 0.5) / 100) * (ecu1 - ec1) / 100;
+  const scu = s314(ecu1);
+  const ecsp = Math.max(ecu1 + 2 * (gc / h - A1) / scu, 1.1 * ecu1);
 
   // TYPEC = 9: FC is f_ck, FCC the actual strength (f_cm). TYPEC = 7, 8: FC is the actual strength.
   const FC = typec === 9 ? fck : fcm;
@@ -100,6 +113,11 @@ export function generate(input = {}) {
   }
   lines.push(`$ G_F = ${gf.toFixed(4)} N/mm (${Number.isFinite(gfIn) && gfIn > 0 ? "input" : "fib MC2010"}): crack fully open at w_c = ${wc.toFixed(4)} mm`);
   lines.push(`$ ECUTEN = w_c / LCHAR with LCHAR = h = ${h} mm`);
+  if (typec === 9) {
+    lines.push(`$ compression: G_c = 100 G_F = ${gc.toFixed(2)} N/mm over h: stress zero at ECSP69 = ${ecsp.toFixed(4)} (eps_cu1 = ${(ecu1 * 1000).toFixed(2)} permil)`);
+  }
+  lines.push(`$ DEGRAD = 1: compressive strength parallel to open cracks reduced (manual, BS 8110 formula)`);
+  if (dmax > 0) lines.push(`$ aggregate interlock: NS 3473 with AGGSZ = d_max = ${dmax} mm, crack spacing LCHAR`);
   if (rhoX > 0 || rhoY > 0) {
     lines.push(`$ smeared reinforcement: ${rhoX} % (local x), ${rhoY} % (local y), ${TYPER_LABEL[typer]}`);
   }
@@ -108,14 +126,14 @@ export function generate(input = {}) {
   lines.push("$#     mid        ro        fc        ft     typec     unitc    ecuten       fcc");
   lines.push(i10(mid) + f(ro) + f(round(FC, 4)) + f(round(fctm, 4)) + f(typec) + f(1.0) + f(round(ecuten, 6)) + f(round(FCC, 4)));
   lines.push("$#   esoft     lchar        mu    taumxf    taumxc    ecragg     aggsz     unitl");
-  lines.push(f(0) + f(h) + f(0.4) + f(1.0e20) + f(0) + f(0.001) + f(0) + f(1.0));
+  lines.push(f(0) + f(h) + f(0.4) + f(1.0e20) + f(0) + f(0.001) + f(dmax) + f(1.0));
   lines.push("$# ymreinf   prreinf   sureinf     typer    fracrx    fracry     lcrsu    lcalps");
   lines.push(f(Es) + f(0.3) + f(fy) + f(typer) + f(rhoX / 100) + f(rhoY / 100) + i10(0) + i10(0));
   lines.push("$#    aopt      et36     prt36    ecut36    lcalpc    degrad    ishchk    unlfac");
-  lines.push(f(0) + f(0) + f(pr) + f(0) + i10(0) + f(0) + i10(0) + f(0.5));
+  lines.push(f(0) + f(0) + f(pr) + f(0) + i10(0) + f(1.0) + i10(0) + f(0.5));
   if (typec === 9) {
     lines.push("$#   ec1_6    ecsp69    gamce9    phief9");
-    lines.push(f(0) + f(0) + f(1.0) + f(0));
+    lines.push(f(0) + f(round(ecsp, 5)) + f(1.0) + f(0));
   }
   lines.push("*END");
   return { filename: `${KEY}.k`, keyword: lines.join("\n") };
