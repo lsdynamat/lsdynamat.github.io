@@ -1,0 +1,11 @@
+{
+ "case": "HB-B215-EC2",
+ "peak_force_kN": 7.276271428742755,
+ "peak_nominal_stress_MPa": 2.7684461601517185,
+ "defl_at_peak_mm": 0.064609,
+ "work_Nmm": 1345.2254238829062,
+ "GF_Nmm": 0.2242042373138177,
+ "final_force_ratio": 0.05036370668532352,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.30937240047534165
+}

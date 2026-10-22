@@ -14,6 +14,7 @@ for c in "$@"; do
             CAP="effective plastic strain at the end of the run (70 ms, after fracture); one-eighth model mirrored about its symmetry planes";;
     GIS-FIN-*|BAM-FIN-*) VIEW="rz 90"; LAST=32; FLAT=1
             CAP="effective plastic strain at the end of the run (70 ms, after fracture); one-eighth model mirrored about its symmetry planes";;
+    HB-CYL-EC2) VIEW="rx -90";  LAST=32; CAP="";;
     HB-CYL-*) VIEW="rx -70
 rz 30";  LAST=32; CAP="effective plastic strain at the end of the test (0.75 mm shortening)";;
     HB-B*)  VIEW="rx -90";        LAST=32; CAP="effective plastic strain at the end of the test, side view";;
@@ -27,6 +28,8 @@ ry 90";  LAST=32; CAP="effective plastic strain at 24 mm elongation of the 80 mm
   FR=7
   case $c in
     HB-B*-WIN) FR=77; CAP="maximum principal strain at the end of the test (Winfrith stores cracks as strain, not as plastic strain), side view";;
+    HB-B*-EC2) FR=77; CAP="maximum principal strain at the end of the test (MAT_172 stores cracks as strain), plane-stress shell model, side view";;
+    HB-CYL-EC2) FR=77; CAP="maximum principal strain at the end of the test (0.75 mm shortening), plane-stress shell strip";;
     HB-B*-CDP) FR=77; CAP="maximum principal strain at the end of the test, side view";;
     HB-CYL-CDP) CAP="value MAT_273 writes in the plastic-strain slot at the end of the test (0.75 mm shortening): an internal softening measure, not a strain";;
     BEAM-WIN) FR=77; CAP="maximum principal strain at the end of the test (Winfrith stores cracks as strain, not as plastic strain), side view";;

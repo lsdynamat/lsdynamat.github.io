@@ -1,0 +1,11 @@
+{
+ "case": "HB-B93-EC2",
+ "peak_force_kN": 3.931042468644236,
+ "peak_nominal_stress_MPa": 3.442900531851091,
+ "defl_at_peak_mm": 0.036464,
+ "work_Nmm": 479.5842008610405,
+ "GF_Nmm": 0.1816606821443335,
+ "final_force_ratio": 0.06729258259355128,
+ "hourglass_pct": 0.0,
+ "kinetic_pct": 0.07385174112550322
+}

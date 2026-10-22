@@ -1,5 +1,19 @@
 [
   {
+    "id": "mat172_concrete_ec2",
+    "date": "2026-10-22",
+    "version": "1.0",
+    "model": "MAT_172 Concrete EC2",
+    "change": "New generator for *MAT_CONCRETE_EC2 (shells and Hughes–Liu beams only). Input f_c = f_cm; f_ck = f_cm − 8 MPa, f_ctm from EN 1992-1-1 Table 3.1, PR 0.2, E_s 200 GPa; TYPEC 9 (EN 1992-1-1) or 7/8 (EN 1992-1-2 fire); optional smeared reinforcement in two directions. Tension softening regularised with LCHAR = h and ECUTEN = G_F/(0.275 f_ctm h). Single shell elements reach f_ctm, E_cm, f_cm at ε_c1 and dissipate G_F within 3 % for 5 and 20 mm elements."
+  },
+  {
+    "id": "examples",
+    "date": "2026-10-22",
+    "version": "",
+    "model": "Examples",
+    "change": "MAT_172 added to the Hoover et al. (2013) benchmark as plane-stress shell models: beams peak at 3.93 and 7.28 kN (tests 3.46 and 6.57 kN, +14 and +11 %), size-effect ratio 0.804 (test 0.826); the cylinder strip reaches f_cm at ε_c1 and then collapses because compressive softening is not regularised."
+  },
+  {
     "id": "examples",
     "date": "2026-10-19",
     "version": "",
