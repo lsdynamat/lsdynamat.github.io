@@ -1,0 +1,8 @@
+{
+ "case": "HB-CYL-EC2",
+ "peak_stress_MPa": 55.62189392493716,
+ "strain_at_peak": 0.0024322748204108685,
+ "peak_force_kN": 245.73,
+ "hourglass_pct": 0.0,
+ "note": "curve cut at 15 ms: the strip crushes and collapses right after the peak"
+}

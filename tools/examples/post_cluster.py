@@ -34,6 +34,10 @@ def read_nodout(path):
             cur = (float(m.group(1)), {})
             out.append(cur)
             continue
+        if cur is not None and "x-rot" in line:
+            out.pop()                  # shell/beam nodes: rotation block with the same time, not displacements
+            cur = None
+            continue
         if cur is not None:
             p = line.split(None, 1)
             if len(p) == 2 and p[0].isdigit():

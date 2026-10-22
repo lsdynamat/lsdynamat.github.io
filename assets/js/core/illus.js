@@ -58,6 +58,7 @@ const CURVE_OF = {
   mat024_piecewise_linear_plasticity: ["plateau", "Tabulated hardening; necks after the force maximum"],
   mat027_mooney_rivlin: ["hyper", "Hyperelastic, nonlinear from the origin"],
   mat084_winfrith: ["noSoften", "No softening in compression; smeared cracks in tension"],
+  mat172_concrete_ec2: ["soften", "EC2 curve in compression; fixed smeared cracks in tension"],
 };
 
 function curvePath(c, X, Y) {
