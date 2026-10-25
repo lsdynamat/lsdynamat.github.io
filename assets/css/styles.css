@@ -519,3 +519,106 @@ body.lsd-modal-open{overflow:hidden}
 /* math in docs (KaTeX) */
 .math.display{display:block; margin:12px 0; overflow-x:auto; overflow-y:hidden; text-align:center}
 .math .katex{font-size:1.05em}
+
+/* =========================================================
+   Generator, three panes: keyword tree | inputs + model figures | keyword card.
+   The figure panes and the card use a fixed dark "viewport" look (as in a pre-processor
+   graphics window) in both themes; their colours are tokens below.
+   ========================================================= */
+:root{
+  --vp-top:#56687f; --vp-bot:#1b2230; --vp-rule:#39424f; --vp-ink:#e3e8ee; --vp-muted:#aab4c0;
+  --vp-code:#0d1117; --vp-hot:#ffd166; --vp-hot-ink:#1b1c1e;
+}
+.wrap.wide{max-width:1480px}
+.pagesub{font-family:var(--mono); font-size:15px; font-weight:400; color:var(--muted); margin-left:6px}
+.gen3{display:grid; grid-template-columns:200px minmax(0,1fr) minmax(340px,430px); gap:16px; margin-top:16px; align-items:start}
+.gencenter{display:grid; grid-template-columns:minmax(260px,330px) minmax(0,1fr); gap:16px; align-items:start}
+.gencenter > *{min-width:0}
+.gencenter .narrow-only{grid-column:1 / -1}
+.gen3 > *{min-width:0}
+.boxhead{font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
+  padding:8px 12px; border-bottom:1px solid var(--rule); background:var(--sunken)}
+.row-between{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.row-between .btn{text-transform:none; letter-spacing:0; font-weight:400}
+
+.kwtree{border:1px solid var(--rule); border-radius:var(--r); background:var(--surface); position:sticky; top:16px;
+  max-height:calc(100vh - 32px); overflow:auto}
+.kwfilter{display:block; width:calc(100% - 16px); margin:8px; font:inherit; font-size:13px; padding:4px 8px;
+  border:1px solid var(--rule-strong); border-radius:var(--r); background:var(--surface); color:var(--text)}
+.kwtree details{margin:0}
+.kwtree summary{cursor:pointer; padding:4px 12px; font-size:13px; font-weight:600; list-style:none}
+.kwtree summary::before{content:"▸"; display:inline-block; width:14px; color:var(--faint)}
+.kwtree details[open] > summary::before{content:"▾"}
+.kwtree a{display:block; padding:3px 12px 3px 28px; font-family:var(--mono); font-size:12px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.kwtree a:hover{background:var(--sunken); text-decoration:none}
+.kwtree a.on{background:var(--accent); color:var(--accent-ink)}
+.kwtree a .no{display:inline-block; min-width:42px; color:inherit; opacity:.75}
+.kwtree nav{padding-bottom:8px}
+
+.narrow-only{display:none}
+.inbox{border:1px solid var(--rule); border-radius:var(--r); background:var(--surface)}
+.inbox .formgrid{padding:4px 14px 4px}
+.inbox .inputbox:first-child{padding-top:10px}
+.inbox-note{margin:0; padding:8px 14px 12px; border-top:1px solid var(--rule)}
+.inputbox.hot input,.inputbox.hot select{border-color:var(--vp-hot); box-shadow:0 0 0 2px color-mix(in srgb, var(--vp-hot) 45%, transparent)}
+
+.figgrid{display:grid; grid-template-columns:minmax(0,1fr); gap:12px; position:sticky; top:16px}
+.figcard{margin:0; border:1px solid var(--vp-rule); border-radius:var(--r); overflow:hidden;
+  background:linear-gradient(var(--vp-top), var(--vp-bot)); color:var(--vp-ink); transition:box-shadow .15s}
+.figcard.hot{box-shadow:0 0 0 2px var(--vp-hot)}
+.figcard .fighead{display:flex; justify-content:space-between; gap:8px; padding:8px 10px 0; font-size:13px; font-weight:600}
+.figcard .fighead .by{font-family:var(--mono); font-size:11px; font-weight:400; color:var(--vp-muted); text-align:right}
+.figcard .figbody{padding:2px 8px 4px}
+.figcard figcaption{padding:0 10px 8px; font-size:11.5px; color:var(--vp-muted); line-height:1.4}
+/* chart tokens inside the viewport: same in both themes */
+.figcard .viz-root,
+:root[data-theme="dark"] .figcard .viz-root{
+  --series-1:#ffb020; --series-2:#4dd2ff; --series-3:#7ddc7d; --series-4:#ff6b6b;
+  --series-5:#c9a0ff; --series-6:#ffffff; --series-7:#9aa5b1; --series-8:#ff9ecb; --series-0:#cfd6df;
+  --viz-grid:rgba(255,255,255,.10); --viz-axis:rgba(255,255,255,.35);
+  --muted:var(--vp-muted); --surface:#11161e; --rule-strong:var(--vp-rule); --text:var(--vp-ink);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .figcard .viz-root{
+    --series-1:#ffb020; --series-2:#4dd2ff; --series-3:#7ddc7d; --series-4:#ff6b6b;
+    --series-5:#c9a0ff; --series-6:#ffffff; --series-7:#9aa5b1; --series-8:#ff9ecb; --series-0:#cfd6df;
+    --viz-grid:rgba(255,255,255,.10); --viz-axis:rgba(255,255,255,.35);
+    --muted:var(--vp-muted); --surface:#11161e; --rule-strong:var(--vp-rule); --text:var(--vp-ink);
+  }
+}
+.figcard .viz-legend{font-size:11.5px; margin:4px 2px 0}
+.figcard .viz-tick{font-size:10px}
+.figcard .viz-title{font-size:11px}
+.figcard .viz-tip{box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.viz-pt{stroke:#0d1117; stroke-width:1.5}
+.viz-ptlabel{font-family:var(--mono); font-size:10.5px}
+
+.viewport{border:1px solid var(--vp-rule); border-radius:var(--r); padding:10px;
+  background:linear-gradient(var(--vp-top), var(--vp-bot)); color:var(--vp-ink)}
+.vphead{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+.vphead .fname{font-family:var(--mono); font-size:12.5px; color:var(--vp-ink); overflow-wrap:anywhere}
+.vpsel{font:inherit; font-size:12.5px; color:var(--vp-ink); background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.3); border-radius:var(--r); padding:3px 6px; max-width:13em}
+.vpsel option{color:#1b1c1e}
+.btn.ghost{background:transparent; color:var(--vp-ink); border-color:rgba(255,255,255,.3)}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.hot{background:var(--vp-hot); color:var(--vp-hot-ink); border-color:var(--vp-hot); font-weight:600}
+.btn.hot:hover{filter:brightness(1.05); background:var(--vp-hot)}
+.viewport .preview{--code-bg:var(--vp-code); --code-text:#d6dbe1; --code-kw:var(--vp-hot); --code-cm:#6c7a89;
+  --code-hd:#8fb3d9; --code-ruler:#4b5563; --rule:var(--vp-rule);
+  border:1px solid var(--vp-rule); border-radius:var(--r); max-height:calc(100vh - 150px); font-size:12px}
+.vpstatus{margin-top:6px; font-family:var(--mono); font-size:11.5px; color:var(--vp-muted); min-height:1.4em}
+.vpstatus .status{margin-left:0; color:var(--vp-muted)}
+.vpstatus .status.err{color:#ff9b9b}
+
+@media (max-width:1280px){
+  .gen3{grid-template-columns:minmax(0,1fr) minmax(320px,420px)}
+  .kwtree{display:none}
+  .narrow-only{display:flex; margin-bottom:12px}
+}
+@media (max-width:1000px){
+  .gen3,.gencenter{grid-template-columns:minmax(0,1fr)}
+  .figgrid{position:static}
+  .viewport{position:static}
+}

@@ -116,3 +116,96 @@ function mustInRange(name, x, lo, hi) {
   if (v < lo || v > hi) throw new Error(`${name} must be in [${lo}, ${hi}]`);
   return v;
 }
+
+// ----------------------- figures (generator page) -----------------------
+// Drawn from the parameters LS-DYNA generates for this f_c (FIXED, lerp above; AF, NF, PCO, NP, EPM,
+// A1-A3 are the 35 MPa set of Borrvall & Riedel 2011 / Grunwald et al. 2017 Table 1, which the d3hsp
+// table in the theory notes shows unchanged for other f_c).
+// Equations: Borrvall & Riedel 2011 (failure, elastic and residual surfaces, Lode factor, failure strain,
+// DIF), Grunwald et al. 2017 Eq. 26 (p-alpha). Fr = 1 (static).
+const LATE = { AF: 1.60, NF: 0.61, PCO: 6000, NP: 3.0, EPM: 0.01, A1: 35270, A2: 39580, A3: 9040 };
+const logTick = v => Number.isInteger(v) ? `1e${v}` : Math.pow(10, v).toExponential(1);
+
+function rhtSurfaces(fc) {
+  const { A, N, FS, FT, Q0, B, GC, GT, D1, D2 } = FIXED;
+  const R3 = (c, Q) => (2 * (1 - Q * Q) * c + (2 * Q - 1) * Math.sqrt(4 * (1 - Q * Q) * c * c + 5 * Q * Q - 4 * Q)) /
+    (4 * (1 - Q * Q) * c * c + (1 - 2 * Q) ** 2);
+  const Q1 = R3(Math.cos(Math.PI / 6), Q0);                       // shear meridian factor at p* = 0
+  const pt = Q0 * FS * FT / (3 * (Q1 * FT - Q0 * FS));             // tensile pressure limit p_t* (< 0)
+  const Qp = p => Math.min(1, Q0 + B * p);
+  const fail = p => {                                              // TXC failure surface sigma_f*(p*)
+    if (p >= 1 / 3) return A * Math.pow(p - 1 / 3 + Math.pow(A, -1 / N), N);
+    if (p >= 0) return FS / Q1 + 3 * p * (1 - FS / Q1);
+    if (p >= pt) return FS / Q1 - 3 * p * (1 / Qp(p) - FS / (Q1 * FT));
+    return 0;
+  };
+  const pel = lerp(fc, 23.3, 93.3) / fc, pu = GC / 3;
+  const elastic = p => {
+    const t = 3 * p;
+    const Fe = t >= GC ? GC : t <= -GT * FT ? GT : GT + (GC - GT) * (t + GT * FT) / (GC + GT * FT);
+    const Fc = p <= pu ? 1 : p >= pel ? 0 : Math.sqrt(1 - ((p - pu) / (pel - pu)) ** 2);
+    const g = Fe * Fc;
+    return g > 0 ? fail(p / g) * g : 0;
+  };
+  const resid = p => p >= 0 ? LATE.AF * Math.pow(p, LATE.NF) : 0;
+  const shear = p => fail(p) * R3(Math.sqrt(3) / 2, Qp(p));
+  const txe = p => fail(p) * Qp(p);
+  const epsF = p => p < pt ? null : Math.max(LATE.EPM, D1 * Math.pow(p - pt, D2));
+  return { fail, elastic, resid, shear, txe, epsF, pt, pel };
+}
+
+export function figures(input = {}) {
+  const fc = Number(input.fc);
+  if (!(fc >= 10 && fc <= 200)) return [];
+  const S = rhtSurfaces(fc);
+  const { FT } = FIXED;
+  const P = (lo, hi, n, f) => { const o = []; for (let i = 0; i <= n; i++) { const p = lo + (hi - lo) * i / n; const y = f(p); if (y != null) o.push([p, y]); } return o; };
+  const out = [];
+  out.push({
+    title: "Strength surfaces (meridians)", inputs: ["fc"],
+    series: [
+      { label: "failure, compressive meridian", slot: 1, points: P(S.pt, 3, 160, S.fail) },
+      { label: "failure, tensile meridian", slot: 4, points: P(S.pt, 3, 160, S.txe), dash: true },
+      { label: "elastic limit", slot: 2, points: P(S.pt, S.pel, 120, S.elastic) },
+      { label: "residual", slot: 3, points: P(0, 3, 120, S.resid) },
+    ],
+    marks: [{ x: 1 / 3, y: 1, label: "f_c", slot: 6 }, { x: -FT / 3, y: FT, label: "f_t", slot: 6 }],
+    xMin: Math.floor(S.pt * 10) / 10, xLabel: "pressure p / f_c", yLabel: "equivalent stress / f_c",
+    caption: "Normalised by f_c. Elastic limit closes at the crush pressure PEL; Lode-angle factor from Q0 and B.",
+  });
+  // p-alpha compaction with the solid polynomial EOS (internal energy taken as zero)
+  const a0 = lerp(fc, 1.1884, 1.0913), pel = lerp(fc, 23.3, 93.3), { PCO, NP, A1, A2, A3 } = LATE;
+  const alpha = p => Math.max(1, Math.min(a0, 1 + (a0 - 1) * Math.pow(Math.max(0, (PCO - p) / (PCO - pel)), NP)));
+  const eta = ps => { let lo = 0, hi = 1; for (let k = 0; k < 60; k++) { const m = (lo + hi) / 2; (A1 * m + A2 * m * m + A3 * m ** 3 < ps ? lo = m : hi = m); } return (lo + hi) / 2; };
+  const hyd = [];
+  for (let i = 0; i <= 120; i++) {
+    const p = PCO * 1.15 * Math.pow(i / 120, 2);
+    const a = alpha(p), e = eta(p * a);
+    hyd.push([1 - a / ((1 + e) * a0), p]);
+  }
+  out.push({
+    title: "Compaction (p–α) and equation of state", inputs: ["fc"],
+    series: [{ label: "pressure", slot: 2, points: hyd, legend: false }],
+    marks: [{ x: hyd.find(q => q[1] >= pel)?.[0] ?? 0, y: pel, label: "PEL", slot: 4 },
+      { x: hyd.find(q => q[1] >= PCO)?.[0] ?? 0, y: PCO, label: "PCO", slot: 4 }],
+    xLabel: "volumetric strain (–)", yLabel: "pressure (MPa)",
+    caption: `Porosity α0 = ${a0.toFixed(4)} crushes between PEL = ${pel.toFixed(1)} MPa and PCO = ${PCO} MPa (NP = ${NP}).`,
+  });
+  out.push({
+    title: "Plastic strain at failure", inputs: ["fc"],
+    series: [{ label: "ε_p,failure", slot: 4, points: P(S.pt, 3, 120, S.epsF), legend: false }],
+    xMin: Math.floor(S.pt * 10) / 10, xLabel: "pressure p / f_c", yLabel: "plastic strain (–)",
+    caption: `D1 (p* − p_t*)^D2, at least EPM = ${LATE.EPM}. EPSF = ${input.epsf ?? 2} (erosion) is separate.`,
+  });
+  const bc = 1 / (5 + 0.75 * fc), bt = 1 / (10 + 0.5 * fc);
+  const dif = (r, e0, b) => r <= e0 ? 1 : Math.pow(r / e0, b);
+  const C = [], T = [];
+  for (let i = 0; i <= 70; i++) { const lg = -5 + 8 * i / 70, r = 10 ** lg; C.push([lg, dif(r, 3e-5, bc)]); T.push([lg, dif(r, 3e-6, bt)]); }
+  out.push({
+    title: "Strain-rate enhancement", inputs: ["fc"],
+    series: [{ label: "compression", slot: 2, points: C }, { label: "tension", slot: 4, points: T }],
+    xMin: -5, xMax: 3, yMin: 1, xTick: logTick, xLabel: "strain rate (1/s)", yLabel: "DIF",
+    caption: `(rate / E0)^β: compression E0 = 3e-5 /s, β = ${bc.toFixed(4)}; tension E0 = 3e-6 /s, β = ${bt.toFixed(4)}.`,
+  });
+  return out;
+}

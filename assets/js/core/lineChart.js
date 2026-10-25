@@ -28,7 +28,8 @@ function fmt(v) {
 /**
  * series: [{ label, slot, points: [[x, y], ...], dash?, legend? }]  (dash: dashed line, e.g. measured data;
  *   legend: false hides a repeat of the same entity, e.g. replicate tests)
- * opts: { xLabel, yLabel, height, xMax, yMax, refLines: [{ y, label }] }
+ * opts: { xLabel, yLabel, height, xMin, xMax, yMin, yMax, refLines: [{ y, label }],
+ *   marks: [{ x, y, label, slot }] (labelled points, e.g. f_c on a meridian), xTick: v => text (e.g. log axes) }
  */
 export function renderLineChart(host, series, opts = {}) {
   host.innerHTML = "";
@@ -52,7 +53,7 @@ export function renderLineChart(host, series, opts = {}) {
   const all = series.flatMap(s => s.points);
   const xMax = opts.xMax ?? Math.max(...all.map(p => p[0]));
   const yMax = opts.yMax ?? Math.max(...all.map(p => p[1])) * 1.08;
-  const xMin = 0, yMin = Math.min(0, ...all.map(p => p[1]));
+  const xMin = opts.xMin ?? 0, yMin = opts.yMin ?? Math.min(0, ...all.map(p => p[1]));
   const X = x => m.l + (x - xMin) / (xMax - xMin) * pw;
   const Y = y => m.t + ph - (y - yMin) / (yMax - yMin) * ph;
 
@@ -75,7 +76,7 @@ export function renderLineChart(host, series, opts = {}) {
   }
   for (const t of niceTicks(xMin, xMax)) {
     el("line", { x1: X(t), x2: X(t), y1: m.t + ph, y2: m.t + ph + 4, class: "viz-axis" });
-    el("text", { x: X(t), y: m.t + ph + 18, class: "viz-tick", "text-anchor": "middle" }).textContent = fmt(t);
+    el("text", { x: X(t), y: m.t + ph + 18, class: "viz-tick", "text-anchor": "middle" }).textContent = (opts.xTick || fmt)(t);
   }
   el("line", { x1: m.l, x2: m.l + pw, y1: Y(Math.max(0, yMin)), y2: Y(Math.max(0, yMin)), class: "viz-axis" });
   el("text", { x: m.l + pw / 2, y: H - 6, class: "viz-title", "text-anchor": "middle" }).textContent = opts.xLabel || "";
@@ -96,8 +97,16 @@ export function renderLineChart(host, series, opts = {}) {
         style: `fill:var(--series-${s.slot})` });
       continue;
     }
-    const d = s.points.filter(p => p[0] <= xMax).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
+    const d = s.points.filter(p => p[0] <= xMax && p[0] >= xMin).map((p, i) => `${i ? "L" : "M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
     el("path", { d, class: "viz-line", style: `stroke:var(--series-${s.slot})${s.dash ? ";stroke-dasharray:5 3" : ""}` });
+  }
+
+  for (const k of opts.marks || []) {
+    if (k.x < xMin || k.x > xMax || k.y < yMin || k.y > yMax) continue;
+    el("circle", { cx: X(k.x).toFixed(1), cy: Y(k.y).toFixed(1), r: 4, class: "viz-pt", style: `fill:var(--series-${k.slot ?? 6})` });
+    const right = X(k.x) > m.l + pw * 0.8;
+    el("text", { x: (X(k.x) + (right ? -7 : 7)).toFixed(1), y: (Y(k.y) - 6).toFixed(1), class: "viz-ptlabel",
+      "text-anchor": right ? "end" : "start", style: `fill:var(--series-${k.slot ?? 6})` }).textContent = k.label;
   }
 
   // hover layer
@@ -140,7 +149,7 @@ export function renderLineChart(host, series, opts = {}) {
       dots[i].setAttribute("cx", X(x)); dots[i].setAttribute("cy", Y(y)); dots[i].setAttribute("visibility", "visible");
       return `<div><i style="background:var(--series-${s.slot})"></i>${escapeHtml(s.label)}<b>${fmt(y)}</b></div>`;
     }).join("");
-    tip.innerHTML = `<div class="viz-tip-h">${escapeHtml(opts.xLabel || "x")} = ${fmt(x)}</div>${rows}`;
+    tip.innerHTML = `<div class="viz-tip-h">${escapeHtml(opts.xLabel || "x")} = ${(opts.xTick || fmt)(x)}</div>${rows}`;
     tip.hidden = false;
     const left = (X(x) / W) * r.width;
     tip.style.left = `${Math.min(left + 12, r.width - tip.offsetWidth - 4)}px`;

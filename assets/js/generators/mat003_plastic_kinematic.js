@@ -205,3 +205,41 @@ function fitW(s, v, w) {
   if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
   return s;
 }
+
+// ----------------------- figures (generator page) -----------------------
+// Bilinear curve: sigma = E eps up to SIGY, then slope ETAN; FS marks element erosion
+// (effective plastic strain, so total strain = sigma/E + FS). Cowper-Symonds yield scaling
+// 1 + (rate/SRC)^(1/SRP) (LS-DYNA Keyword manual, *MAT_PLASTIC_KINEMATIC).
+const logTick = v => Number.isInteger(v) ? `1e${v}` : Math.pow(10, v).toExponential(1);
+
+export function figures(input = {}) {
+  const E = Number(input.E), fy = Number(input.sigy), Et = Number(input.etan);
+  if (!(E > 0) || !(fy >= 0) || !(Et >= 0)) return [];
+  const fs = Number(input.fs), hasFs = String(input.fs ?? "").trim() !== "" && fs > 0;
+  const ey = fy / E;
+  const Ep = Et >= E ? 0 : E * Et / (E - Et);            // plastic modulus from the tangent modulus
+  const epMax = hasFs ? fs * 1.15 : Math.max(0.10, 30 * ey);
+  const pts = [[0, 0], [ey, fy]];
+  for (let i = 1; i <= 40; i++) { const ep = epMax * i / 40; const s = fy + Ep * ep; pts.push([s / E + ep, s]); }
+  const marks = [{ x: ey, y: fy, label: "SIGY", slot: 6 }];
+  if (hasFs) { const s = fy + Ep * fs; marks.push({ x: s / E + fs, y: s, label: "FS (erosion)", slot: 4 }); }
+  const out = [{
+    title: "Stress–strain (uniaxial)", inputs: ["E", "sigy", "etan", "fs"],
+    series: [{ label: "stress", slot: 1, points: pts, legend: false }],
+    marks, xLabel: "strain (–)", yLabel: "stress (MPa)",
+    caption: "Elastic to SIGY, then linear hardening with tangent modulus ETAN.",
+  }];
+  const C = Number(input.src), P = Number(input.srp);
+  if (C > 0 && P > 0) {
+    const ser = [];
+    for (let i = 0; i <= 60; i++) { const lg = -5 + 9 * i / 60; const r = Math.pow(10, lg) / 1000;   // 1/s -> 1/ms
+      ser.push([lg, 1 + Math.pow(r / C, 1 / P)]); }
+    out.push({
+      title: "Strain-rate scaling of SIGY", inputs: ["src", "srp"],
+      series: [{ label: "Cowper–Symonds factor", slot: 2, points: ser }], xMin: -5, xMax: 4, yMin: 1,
+      xTick: logTick, xLabel: "strain rate (1/s)", yLabel: "dynamic / static yield",
+      caption: "1 + (rate / SRC)^(1/SRP), rate converted to 1/ms as SRC.",
+    });
+  }
+  return out;
+}
