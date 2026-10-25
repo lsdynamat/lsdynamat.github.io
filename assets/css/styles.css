@@ -622,3 +622,187 @@ body.lsd-modal-open{overflow:hidden}
   .figgrid{position:static}
   .viewport{position:static}
 }
+
+/* =========================================================
+   "pp" skin (generator page): plain engineering-software look, as in LS-PrePost dialogs.
+   Grey panels, square corners, 1 px bevels, Tahoma 12 px, black XY plots with white axes,
+   white keyword editor. No gradients, no rounded cards, no shadows.
+   ========================================================= */
+body.pp{
+  --pp-face:#e1e1e1; --pp-bg:#d6d6d6; --pp-hi:#ffffff; --pp-lo:#8c8c8c; --pp-dk:#5a5a5a;
+  --pp-ink:#000000; --pp-sel:#0a246a; --pp-sel-ink:#ffffff; --pp-plot:#000000;
+  --pp-ui:Tahoma, "Segoe UI", Verdana, Arial, sans-serif; --pp-mono:Consolas, "Courier New", monospace;
+  background:var(--pp-bg); color:var(--pp-ink); font-family:var(--pp-ui); font-size:12px;
+}
+body.pp .topbar{background:var(--pp-face); border-bottom:1px solid var(--pp-lo); box-shadow:inset 0 -1px 0 var(--pp-hi)}
+body.pp .topbar-row{height:30px}
+body.pp .logo{font-family:var(--pp-ui); font-size:12px; font-weight:bold; color:var(--pp-ink)}
+body.pp .logo span{color:var(--pp-ink); font-weight:normal}
+body.pp .nav a{font-size:12px; color:var(--pp-ink); padding:3px 9px; border:1px solid transparent; border-radius:0}
+body.pp .nav a:hover{background:var(--pp-face); border-color:var(--pp-hi) var(--pp-lo) var(--pp-lo) var(--pp-hi)}
+body.pp .nav a.active{box-shadow:none; font-weight:normal; background:var(--pp-bg); border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp.gen .pagehead{display:none}
+body.pp .gen3{margin-top:8px; gap:6px; grid-template-columns:190px minmax(0,1fr) minmax(340px,440px)}
+body.pp .gencenter{gap:6px; grid-template-columns:minmax(270px,330px) minmax(0,1fr)}
+body.pp .footer{border-top:1px solid var(--pp-lo); color:#333; font-size:11px; margin-top:12px; padding:6px 0 10px}
+
+/* panels: raised frame + flat title strip */
+body.pp .kwtree, body.pp .inbox, body.pp .figcard, body.pp .viewport{
+  background:var(--pp-face); color:var(--pp-ink); border-radius:0; box-shadow:none;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) var(--pp-dk) var(--pp-hi); padding:0;
+}
+body.pp .boxhead, body.pp .figcard .fighead, body.pp .vphead{
+  background:var(--pp-bg); color:var(--pp-ink); font:bold 12px var(--pp-ui); text-transform:none; letter-spacing:0;
+  padding:3px 6px; margin:0; border-bottom:1px solid var(--pp-lo);
+}
+body.pp .row-between .btn{font-weight:normal}
+
+/* buttons, fields: Windows-classic bevels */
+body.pp .btn, body.pp .btn.sm, body.pp .btn.ghost, body.pp .btn.hot{
+  font:12px var(--pp-ui); color:var(--pp-ink); background:var(--pp-face); border-radius:0; padding:1px 10px; filter:none;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) var(--pp-dk) var(--pp-hi); box-shadow:inset -1px -1px 0 var(--pp-lo);
+}
+body.pp .btn:hover{background:#ececec; text-decoration:none}
+body.pp .btn:active{border-color:var(--pp-dk) var(--pp-hi) var(--pp-hi) var(--pp-dk); box-shadow:inset 1px 1px 0 var(--pp-lo)}
+body.pp .btn.hot{font-weight:bold}
+body.pp input, body.pp select, body.pp .vpsel, body.pp .kwfilter{
+  font:12px var(--pp-ui); color:var(--pp-ink); background:#fff; border-radius:0; box-shadow:none;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo);
+}
+body.pp .vpsel option{color:var(--pp-ink)}
+body.pp :focus-visible{outline:1px dotted #000 !important; outline-offset:1px}
+
+/* keyword tree: white list box */
+body.pp .kwtree{max-height:calc(100vh - 60px)}
+body.pp .kwfilter{width:calc(100% - 8px); margin:4px; padding:2px 4px}
+body.pp .kwtree nav{background:#fff; margin:0 4px 4px; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo); padding:2px 0}
+body.pp .kwtree summary{font:bold 12px var(--pp-ui); padding:1px 4px}
+body.pp .kwtree summary::before{content:"+"; width:12px; font-family:var(--pp-mono)}
+body.pp .kwtree details[open] > summary::before{content:"-"}
+body.pp .kwtree a{font:12px var(--pp-mono); color:var(--pp-ink); padding:0 4px 0 18px}
+body.pp .kwtree a:hover{background:#e8e8e8}
+body.pp .kwtree a.on{background:var(--pp-sel); color:var(--pp-sel-ink)}
+
+/* inputs as dialog rows: label | value | unit; hints move to the tooltip */
+body.pp .inbox .formgrid{padding:6px 8px}
+body.pp .inbox .inputbox{display:grid; grid-template-columns:minmax(0,1fr) 92px 64px; gap:4px; align-items:center;
+  padding:2px 0; border:0}
+body.pp .inbox .inputbox .k{display:contents}
+body.pp .inbox .inputbox label{grid-column:1; grid-row:1; font:12px var(--pp-ui); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+body.pp .inbox .inputbox > input, body.pp .inbox .inputbox > select, body.pp .inbox .inputbox > .switch{grid-column:2; grid-row:1; margin:0}
+body.pp .inbox .inputbox > select{grid-column:2 / 4}
+body.pp .inbox .inputbox > input{width:100%; padding:1px 3px; text-align:right; font-family:var(--pp-mono)}
+body.pp .inbox .inputbox .unitsel, body.pp .inbox .inputbox .unit{grid-column:3; grid-row:1; max-width:none; font:11px var(--pp-ui); color:var(--pp-ink)}
+body.pp .inbox .inputbox .unitsel{padding:0 1px}
+body.pp .inbox .inputbox .h{display:none}
+body.pp .inbox .inputbox.hot input, body.pp .inbox .inputbox.hot select{box-shadow:none; background:#ffffc8}
+body.pp .inbox .inputbox input.invalid{background:#ffd0d0}
+body.pp .switch{margin:0; gap:4px}
+body.pp .switch .track{width:13px; height:13px; border-radius:0; background:#fff; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .switch .track::after{display:none}
+body.pp .switch input:checked + .track{background:#fff}
+body.pp .switch input:checked + .track::before{content:"x"; position:absolute; left:2px; top:-3px; font:bold 12px var(--pp-mono); color:#000}
+body.pp .switch .state{font-size:11px}
+body.pp .inbox-note{font-size:11px; color:#333; border-top:1px solid var(--pp-lo); padding:4px 8px 6px}
+
+/* XY plots: black field, white axes and text, bright series as in LS-PrePost */
+body.pp .figgrid{gap:6px}
+body.pp .figcard{background:var(--pp-face)}
+body.pp .figcard.hot{box-shadow:none; outline:2px solid #c8a000; outline-offset:-1px}
+body.pp .figcard .fighead .by{font:11px var(--pp-mono); color:#333}
+body.pp .figcard .figbody{background:var(--pp-plot); margin:4px; padding:2px 4px;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .figcard .viz-root{
+  --series-1:#ff3030; --series-2:#30ff30; --series-3:#30a0ff; --series-4:#ffff30;
+  --series-5:#ff30ff; --series-6:#ffffff; --series-7:#30ffff; --series-8:#ff9030; --series-0:#c0c0c0;
+  --viz-grid:#2a2a2a; --viz-axis:#ffffff; --muted:#ffffff; --surface:#000; --rule-strong:#fff; --text:#fff;
+}
+body.pp .figcard .viz-tick, body.pp .figcard .viz-title, body.pp .figcard .viz-legend, body.pp .viz-ptlabel{font-family:var(--pp-mono)}
+body.pp .figcard .viz-legend{color:#fff; font-size:11px}
+body.pp .figcard .viz-key i{height:2px; border-radius:0}
+body.pp .figcard .viz-line{stroke-width:1.5}
+body.pp .figcard .viz-tip{border-radius:0; border:1px solid #fff; background:#000; color:#fff; box-shadow:none; font-family:var(--pp-mono)}
+body.pp .viz-pt{stroke:#000}
+body.pp .figcard figcaption{font:11px var(--pp-ui); color:#333; padding:0 6px 4px}
+
+/* keyword editor: white text area + status line */
+body.pp .viewport{position:sticky; top:8px}
+body.pp .vphead{display:flex; gap:4px; flex-wrap:wrap}
+body.pp .vphead .fname{font:bold 12px var(--pp-ui); color:var(--pp-ink)}
+body.pp .viewport .preview{--code-bg:#ffffff; --code-text:#000; --code-kw:#0000c0; --code-cm:#008000; --code-hd:#808080; --code-ruler:#a0a0a0; --rule:#c0c0c0;
+  margin:4px; border-radius:0; font:12px/1.35 var(--pp-mono); max-height:calc(100vh - 110px);
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .vpstatus{margin:0; padding:2px 6px; border-top:1px solid var(--pp-lo); font:11px var(--pp-ui); color:#000; background:var(--pp-bg)}
+body.pp .vpstatus .status{color:#000}
+body.pp .vpstatus .status.err{color:#c00000}
+body.pp .narrow-only label{font:12px var(--pp-ui); color:#000}
+
+/* pp skin, all pages: text, tables, tabs, figures and charts in the same software look */
+body.pp .topbar .wrap, body.pp .footer .wrap{max-width:1480px}
+body.pp main.wrap:not(.wide){max-width:1180px}
+body.pp h1{font:bold 17px var(--pp-ui); color:var(--pp-ink); letter-spacing:0; margin:0 0 4px}
+body.pp h2, body.pp .h2{font:bold 14px var(--pp-ui); color:var(--pp-ink); letter-spacing:0;
+  border-bottom:1px solid var(--pp-lo); box-shadow:0 1px 0 var(--pp-hi); padding-bottom:2px; margin:18px 0 8px}
+body.pp h3, body.pp h4{font:bold 13px var(--pp-ui); color:var(--pp-ink); letter-spacing:0}
+body.pp p, body.pp li, body.pp td, body.pp th, body.pp dd, body.pp dt{font-family:var(--pp-ui)}
+body.pp .doc, body.pp .doc p, body.pp .doc li{font-size:13px; line-height:1.55}
+body.pp .lead{font:13px/1.5 var(--pp-ui); color:#222; max-width:90ch}
+body.pp .small, body.pp .eyebrow, body.pp .item-meta{font-family:var(--pp-ui); font-size:11px; color:#333; letter-spacing:0; text-transform:none}
+body.pp .pagehead{border-bottom:1px solid var(--pp-lo); box-shadow:0 1px 0 var(--pp-hi); padding:10px 0 8px; margin-bottom:10px}
+body.pp .section-title{font:bold 12px var(--pp-ui); letter-spacing:0; text-transform:none; color:var(--pp-ink)}
+body.pp a{color:#0000c0}
+body.pp a:visited{color:#551a8b}
+body.pp .nav a, body.pp .nav a:visited, body.pp .logo, body.pp .logo:visited, body.pp .btn, body.pp .btn:visited, body.pp .kwtree a{color:var(--pp-ink)}
+body.pp .kwtree a.on{color:var(--pp-sel-ink)}
+
+/* inline code and code blocks: white field, sunken */
+body.pp code, body.pp kbd{font-family:var(--pp-mono); font-size:12px; background:#fff; border:1px solid #b0b0b0; border-radius:0; padding:0 3px; color:#000}
+body.pp pre{border-radius:0}
+body.pp pre code{border:0; padding:0; background:none}
+body.pp .lsd-code, body.pp .doc pre{background:#fff; color:#000; font:12px/1.4 var(--pp-mono);
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+
+/* tables: grid like a spreadsheet / property list */
+body.pp table{border-collapse:collapse; background:#fff; font-size:12px}
+body.pp th, body.pp td{border:1px solid #a0a0a0; padding:2px 6px; vertical-align:top}
+body.pp th{background:var(--pp-face); font-weight:bold; color:#000; text-align:left; text-transform:none; letter-spacing:0}
+body.pp tr:hover td{background:#f0f4ff}
+body.pp .tablewrap, body.pp .card, body.pp .list, body.pp .lsd-list{border-radius:0; box-shadow:none; background:#fff;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .tablewrap table{border:0}
+
+/* tabs: Windows property-sheet tabs */
+body.pp .tabs{border-bottom:1px solid var(--pp-hi); box-shadow:0 1px 0 var(--pp-lo); gap:2px; margin:12px 0 10px}
+body.pp .tab{font:12px var(--pp-ui); color:#000; background:var(--pp-face); padding:3px 12px; margin-bottom:-1px;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) transparent var(--pp-hi); border-radius:0}
+body.pp .tab[aria-selected="true"], body.pp .tab.active{background:var(--pp-bg); font-weight:bold; box-shadow:none; position:relative; top:-1px}
+
+/* tags, chips, fields */
+body.pp .tag, body.pp .lsd-tag{border-radius:0; font:11px var(--pp-ui); background:var(--pp-face); color:#000; border:1px solid var(--pp-lo)}
+body.pp .field label{font:12px var(--pp-ui); color:#000}
+body.pp .field input, body.pp .field select{padding:2px 4px}
+
+/* drawings and photos: white sunken frames */
+body.pp .ex-sketch, body.pp .il-fig, body.pp .ex-figs img{background:#fff; border-radius:0;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .ex-figs figcaption, body.pp .il-fig figcaption{font:11px var(--pp-ui); color:#333}
+
+/* every chart is an XY plot window: black field, white axes, bright series */
+body.pp .viz-root{
+  --series-1:#ff3030; --series-2:#30ff30; --series-3:#30a0ff; --series-4:#ffff30;
+  --series-5:#ff30ff; --series-6:#ffffff; --series-7:#30ffff; --series-8:#ff9030; --series-0:#c0c0c0;
+  --viz-grid:#2a2a2a; --viz-axis:#ffffff;
+}
+body.pp .viz-plot{background:#000; padding:4px; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .viz-tick, body.pp .viz-title, body.pp .viz-ptlabel{fill:#fff; font-family:var(--pp-mono)}
+body.pp .viz-ref{stroke:#c0c0c0}
+body.pp .viz-legend{font:11px var(--pp-mono); color:#000}
+body.pp .viz-key i{height:2px; border-radius:0}
+body.pp .viz-line{stroke-width:1.5}
+body.pp .viz-dot, body.pp .viz-mark{stroke:#000}
+body.pp .viz-cross{stroke:#808080}
+body.pp .viz-tip{border-radius:0; border:1px solid #000; background:#ffffe1; color:#000; box-shadow:none; font:11px var(--pp-mono)}
+body.pp .figcard .viz-legend{color:#000}
+body.pp .figcard .figbody{background:var(--pp-face); border:0; margin:2px 4px; padding:0}
+body.pp .tabpanel{padding:8px 12px}
+body.pp .ex-section h2, body.pp main h2{font-size:14px}

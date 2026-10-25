@@ -32,6 +32,7 @@ function renderForm(formEl, inputs, values){
     const div = document.createElement("div");
     div.className = "inputbox";
     div.dataset.key = inp.key;
+    if (inp.hint) div.title = inp.hint;      // tooltip where the hint line is hidden
     const id = `in_${escapeHtml(inp.key)}`;
     const v = values[inp.key];
     let control;
