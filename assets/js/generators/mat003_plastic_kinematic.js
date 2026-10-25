@@ -221,7 +221,7 @@ export function figures(input = {}) {
   const epMax = hasFs ? fs * 1.15 : Math.max(0.10, 30 * ey);
   const pts = [[0, 0], [ey, fy]];
   for (let i = 1; i <= 40; i++) { const ep = epMax * i / 40; const s = fy + Ep * ep; pts.push([s / E + ep, s]); }
-  const marks = [{ x: ey, y: fy, label: "SIGY", slot: 6 }];
+  const marks = [{ x: ey, y: fy, label: "SIGY", slot: 9 }];
   if (hasFs) { const s = fy + Ep * fs; marks.push({ x: s / E + fs, y: s, label: "FS (erosion)", slot: 4 }); }
   const out = [{
     title: "Stress–strain (uniaxial)", inputs: ["E", "sigy", "etan", "fs"],

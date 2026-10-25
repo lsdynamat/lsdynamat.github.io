@@ -103,10 +103,10 @@ export function renderLineChart(host, series, opts = {}) {
 
   for (const k of opts.marks || []) {
     if (k.x < xMin || k.x > xMax || k.y < yMin || k.y > yMax) continue;
-    el("circle", { cx: X(k.x).toFixed(1), cy: Y(k.y).toFixed(1), r: 4, class: "viz-pt", style: `fill:var(--series-${k.slot ?? 6})` });
+    el("circle", { cx: X(k.x).toFixed(1), cy: Y(k.y).toFixed(1), r: 4, class: "viz-pt", style: `fill:var(--series-${k.slot ?? 9})` });
     const right = X(k.x) > m.l + pw * 0.8;
     el("text", { x: (X(k.x) + (right ? -7 : 7)).toFixed(1), y: (Y(k.y) - 6).toFixed(1), class: "viz-ptlabel",
-      "text-anchor": right ? "end" : "start", style: `fill:var(--series-${k.slot ?? 6})` }).textContent = k.label;
+      "text-anchor": right ? "end" : "start", style: `fill:var(--series-${k.slot ?? 9})` }).textContent = k.label;
   }
 
   // hover layer

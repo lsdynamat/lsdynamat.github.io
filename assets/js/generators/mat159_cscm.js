@@ -417,7 +417,7 @@ export function figures(input = {}) {
       { label: "tensile meridian (TXE)", slot: 4, points: pts(J => S3 * Q2(J) * Ff(J), Jtop), dash: true },
       { label: "TXC with initial cap", slot: 2, points: pts(J => S3 * Ff(J) * Math.sqrt(Fc(J)), rx.XD) },
     ],
-    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 6 }, { x: -ft / 3, y: ft, label: `f_t ${ft.toFixed(2)}`, slot: 6 }],
+    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 9 }, { x: -ft / 3, y: ft, label: `f_t ${ft.toFixed(2)}`, slot: 9 }],
     xMin: J1min / 3, xLabel: "pressure J1/3 (MPa)", yLabel: "√(3 J2) (MPa)",
     caption: `Cap starts at J1 = L0 = ${L0.toFixed(1)} MPa and meets the J1 axis at X0 = ${rx.XD.toFixed(1)} MPa (R = ${rx.R.toFixed(3)}).`,
   }];

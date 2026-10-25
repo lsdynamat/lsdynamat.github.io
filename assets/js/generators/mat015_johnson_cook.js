@@ -214,7 +214,7 @@ export function figures(input = {}) {
   const out = [{
     title: "Stress–strain at room temperature", inputs: ["e", "a", "b", "n", "c", "eps0"],
     series: rates.map((r, i) => curve(r, [3, 1, 4][i])),
-    marks: [{ x: A / E, y: A, label: "A", slot: 6 }],
+    marks: [{ x: A / E, y: A, label: "A", slot: 9 }],
     xLabel: "strain (–)", yLabel: "true stress (MPa)",
     caption: "(A + B ε_p^n)(1 + C ln(rate / EPS0)), elastic slope E, plastic strain to 0.3.",
   }];

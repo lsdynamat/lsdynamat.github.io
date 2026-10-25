@@ -1,14 +1,14 @@
 // assets/js/generators/index.js
 
-import * as mat003 from "./mat003_plastic_kinematic.js?v=20261025";
-import * as mat015 from "./mat015_johnson_cook.js?v=20261025";
-import * as mat024 from "./mat024_piecewise_linear_plasticity.js?v=20261025c";
+import * as mat003 from "./mat003_plastic_kinematic.js?v=20261025x";
+import * as mat015 from "./mat015_johnson_cook.js?v=20261025x";
+import * as mat024 from "./mat024_piecewise_linear_plasticity.js?v=20261025x";
 import * as mat027 from "./mat027_mooney_rivlin.js?v=20261022b";
-import * as mat072 from "./mat072_kcc_rel3.js?v=20261025";
-import * as mat084 from "./mat084_winfrith.js?v=20261025";
-import * as mat159 from "./mat159_cscm.js?v=20261025";
+import * as mat072 from "./mat072_kcc_rel3.js?v=20261025x";
+import * as mat084 from "./mat084_winfrith.js?v=20261025x";
+import * as mat159 from "./mat159_cscm.js?v=20261025x";
 import * as mat172 from "./mat172_concrete_ec2.js?v=20261022b";
-import * as mat272 from "./mat272_rht.js?v=20261025";
+import * as mat272 from "./mat272_rht.js?v=20261025x";
 import * as mat273 from "./mat273_cdp.js?v=20261022b";
 
 export const GENERATORS = {

@@ -1,10 +1,10 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261025d";
+import { getGenerator } from "../generators/index.js?v=20261025x";
 import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261022b";
 import { unitOptions, toBase, fromBase, fmtNum, preferredUnit, rememberUnit } from "../core/inputUnits.js?v=20261022b";
-import { renderLineChart } from "../core/lineChart.js?v=20261025";
+import { renderLineChart } from "../core/lineChart.js?v=20261025x";
 
 setText("year", new Date().getFullYear());
 

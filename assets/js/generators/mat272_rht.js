@@ -169,7 +169,7 @@ export function figures(input = {}) {
       { label: "elastic limit", slot: 2, points: P(S.pt, S.pel, 120, S.elastic) },
       { label: "residual", slot: 3, points: P(0, 3, 120, S.resid) },
     ],
-    marks: [{ x: 1 / 3, y: 1, label: "f_c", slot: 6 }, { x: -FT / 3, y: FT, label: "f_t", slot: 6 }],
+    marks: [{ x: 1 / 3, y: 1, label: "f_c", slot: 9 }, { x: -FT / 3, y: FT, label: "f_t", slot: 9 }],
     xMin: Math.floor(S.pt * 10) / 10, xLabel: "pressure p / f_c", yLabel: "equivalent stress / f_c",
     caption: "Normalised by f_c. Elastic limit closes at the crush pressure PEL; Lode-angle factor from Q0 and B.",
   });

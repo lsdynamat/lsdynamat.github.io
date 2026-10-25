@@ -437,8 +437,8 @@ export function figures(input = {}) {
       { label: "yield", slot: 2, points: P(-fta, 3 * fc, yldS) },
       { label: "residual", slot: 3, points: P(0, 3 * fc, resS) },
     ],
-    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 6 }, { x: fyc / 3, y: fyc, label: `yield ${(fyc / fc).toFixed(2)} f_c`, slot: 6 },
-      { x: -fta, y: 0, label: "-f_t", slot: 6 }],
+    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 9 }, { x: fyc / 3, y: fyc, label: `yield ${(fyc / fc).toFixed(2)} f_c`, slot: 9 },
+      { x: -fta, y: 0, label: "-f_t", slot: 9 }],
     xMin: -fta, xLabel: "pressure (MPa)", yLabel: "principal stress difference (MPa)",
     caption: "Δσ = a0 + p / (a1 + a2 p) above f_c/3; damage moves the surface from yield to maximum and then towards residual.",
   }];
@@ -448,7 +448,7 @@ export function figures(input = {}) {
   out.push({
     title: "Damage function η(λ)", inputs: ["fc", "elm_size", "gf"],
     series: [{ label: "η", slot: 4, points: le, legend: false }],
-    marks: [{ x: lambda_out[4], y: 1, label: "peak (λm)", slot: 6 }], yMin: 0, yMax: 1.1,
+    marks: [{ x: lambda_out[4], y: 1, label: "peak (λm)", slot: 9 }], yMin: 0, yMax: 1.1,
     xTick: v => v.toExponential(0), xLabel: "modified effective plastic strain λ (–)", yLabel: "η (–)",
     caption: "Points written to the card. The softening branch is stretched with the element size so that the card dissipates G_F.",
   });

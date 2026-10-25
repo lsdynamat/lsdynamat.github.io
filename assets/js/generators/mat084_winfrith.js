@@ -249,14 +249,14 @@ export function figures(input = {}) {
   const out = [{
     title: "Ottosen failure surface (meridians)", inputs: ["fc"],
     series: [{ label: "compressive meridian", slot: 1, points: mer(lamC) }, { label: "tensile meridian", slot: 4, points: mer(lamT), dash: true }],
-    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 6 }, { x: -uts / 3, y: uts, label: `f_t ${uts.toFixed(2)}`, slot: 6 }],
+    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 9 }, { x: -uts / 3, y: uts, label: `f_t ${uts.toFixed(2)}`, slot: 9 }],
     xMin: apex, xLabel: "pressure (MPa)", yLabel: "√(3 J2) (MPa)",
     caption: `Four-parameter surface through f_c, f_t and the biaxial strength 1.16 f_c; apex at p = ${apex.toFixed(2)} MPa.`,
   }];
   out.push({
     title: "Crack softening (RATE = 1)", inputs: ["fc", "dmax"],
     series: [{ label: "crack-normal stress", slot: 4, points: [[0, uts], [fe, 0], [fe * 1.2, 0]], legend: false }],
-    marks: [{ x: fe, y: 0, label: `FE = ${fe.toFixed(3)} mm`, slot: 6 }],
+    marks: [{ x: fe, y: 0, label: `FE = ${fe.toFixed(3)} mm`, slot: 9 }],
     xLabel: "crack opening (mm)", yLabel: "stress (MPa)",
     caption: `Linear from UTS = ${uts.toFixed(2)} MPa to zero at FE; area = G_F = ${(uts * fe / 2 * 1000).toFixed(0)} N/m.`,
   });

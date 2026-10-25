@@ -491,12 +491,12 @@ export function figures(input = {}) {
       { label: "engineering", slot: 3, points: eng_eps.map((e, i) => [e, eng_sig[i]]) },
       { label: "true", slot: 1, points: tru_eps.map((e, i) => [e, tru_sig[i]]) },
     ],
-    marks: [{ x: fy / E, y: fy, label: "f_y", slot: 6 }, { x: eng_eps[ip], y: eng_sig[ip], label: `f_u at A_g = ${(eps_u * 100).toFixed(1)} %`, slot: 6 }],
+    marks: [{ x: fy / E, y: fy, label: "f_y", slot: 9 }, { x: eng_eps[ip], y: eng_sig[ip], label: `f_u at A_g = ${(eps_u * 100).toFixed(1)} %`, slot: 9 }],
     xLabel: "strain (–)", yLabel: "stress (MPa)",
     caption: "Engineering curve to the uniform elongation A_g; true = engineering (1 + ε), ln(1 + ε).",
   }];
   const pts = eps_p.map((e, i) => [e, sig_true[i]]);
-  const marks = [{ x: epsAg, y: sig_true[eps_p.indexOf(epsAg)] ?? sig_true[sig_true.length - 1], label: "A_g", slot: 6 }];
+  const marks = [{ x: epsAg, y: sig_true[eps_p.indexOf(epsAg)] ?? sig_true[sig_true.length - 1], label: "A_g", slot: 9 }];
   const xEnd = Math.min(eps_p[eps_p.length - 1], Math.max(3 * epsAg, 1.15 * (failStrain ?? 0), 1.15 * (eps0 ?? 0)));
   const yAt = x => { for (let i = 1; i < pts.length; i++) if (pts[i][0] >= x) {
     const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return pts[pts.length - 1][1]; };

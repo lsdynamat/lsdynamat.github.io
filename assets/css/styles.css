@@ -806,3 +806,29 @@ body.pp .figcard .viz-legend{color:#000}
 body.pp .figcard .figbody{background:var(--pp-face); border:0; margin:2px 4px; padding:0}
 body.pp .tabpanel{padding:8px 12px}
 body.pp .ex-section h2, body.pp main h2{font-size:14px}
+
+/* pp skin: one fixed light palette with strong contrast (pages carry data-theme="light"; the base
+   tokens are redefined here so every older rule that reads them stays dark-on-light) */
+body.pp{
+  color-scheme:light;
+  --bg:#d6d6d6; --surface:#ffffff; --sunken:#e1e1e1; --rule:#a0a0a0; --rule-strong:#808080;
+  --text:#000000; --muted:#222222; --faint:#444444;
+  --accent:#0000c0; --accent-ink:#ffffff; --accent-soft:#dde4f5; --danger:#b00000; --danger-soft:#ffe0e0;
+  --code-bg:#ffffff; --code-text:#000000; --code-kw:#0000c0; --code-cm:#006000; --code-hd:#505050; --code-ruler:#808080;
+}
+body.pp .il-fig, body.pp .il-icon{color:#000}
+body.pp .il-fig figcaption{color:#222; font:11px var(--pp-ui)}
+body.pp .il-s{opacity:1}
+body.pp .viz-legend, body.pp .figcard .viz-legend{color:#000}
+body.pp .small, body.pp .eyebrow, body.pp .item-meta, body.pp .inbox-note, body.pp figcaption{color:#222}
+body.pp .lead{color:#111}
+body.pp ::placeholder{color:#606060; opacity:1}
+body.pp .figcard .fighead .by{color:#222}
+body.pp .viewport .preview .cm{color:#006000}
+body.pp .viewport .preview .hd{color:#505050}
+
+/* slot 9 = labelled marks (white on the black plot field); slot 6 is a normal series colour */
+.viz-root{--series-9:#1b1c1e}
+body.pp .viz-root, body.pp .figcard .viz-root{--series-6:#ff9030; --series-8:#c080ff; --series-9:#ffffff}
+/* colour swatches outside the black plot field get a dark outline so yellow / cyan stay visible on grey or white */
+body.pp .viz-key i, body.pp td .viz-root i{height:4px !important; border-radius:0 !important; outline:1px solid #000}
