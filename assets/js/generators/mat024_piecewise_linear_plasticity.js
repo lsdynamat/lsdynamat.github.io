@@ -154,7 +154,8 @@ export const FIELDS = [
   { key: "damage", label: "Fracture model", unit: "-", default: DEFAULTS.damage, min: 0, max: 1, hint: "Used only with Z. 0 = FAIL (element erosion), 1 = *MAT_ADD_DAMAGE_GISSMO (gradual load drop)." },
 ];
 
-export function generate(input = {}) {
+// Curve and fracture parameters of the card (also used by figures()).
+function compute(input = {}) {
   const inp = { ...DEFAULTS, ...normalizeInput(input) };
 
   const mid = mustIntPositive("mid", inp.mid);
@@ -257,6 +258,12 @@ export function generate(input = {}) {
   const failStrain = kFail != null ? kFail * lnZ : null;
   const eps0 = useGissmo ? failFactor(1.0, GISSMO_K) * lnZ : null;
   const epsAg = eps_p[ipk];
+
+  return { inp, mid, ro, E, pr, fy, fu, n_plateau, n_hardening, tail_d_epsp, tail_h, zIn, h_el, damage, eps_y, eps_sh_formula, eps_sh, eps_u_formula, eps_u, eps_el, sig_el, eps_pl, sig_pl, eps_h, sig_h, eng_eps, eng_sig, tru_eps, tru_sig, eps_p, i0, sig_true, ep0, ipk, sig_pk, useGissmo, lnZ, kFail, failStrain, eps0, epsAg };
+}
+
+export function generate(input = {}) {
+  const { inp, mid, ro, E, pr, fy, fu, n_plateau, n_hardening, tail_d_epsp, tail_h, zIn, h_el, damage, eps_y, eps_sh_formula, eps_sh, eps_u_formula, eps_u, eps_el, sig_el, eps_pl, sig_pl, eps_h, sig_h, eng_eps, eng_sig, tru_eps, tru_sig, eps_p, i0, sig_true, ep0, ipk, sig_pk, useGissmo, lnZ, kFail, failStrain, eps0, epsAg } = compute(input);
 
   // ---------------- Keyword output (order matters) ----------------
   const lcss = mid * 1000 + 24;
@@ -468,4 +475,39 @@ function fitW(s, v, w) {
   if (!Number.isFinite(n)) return s;
   if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
   return s;
+}
+
+// ----------------------- figures (generator page) -----------------------
+// The Yun & Gardner engineering curve, its true-stress conversion, and the curve written to LCSS
+// (true stress vs true plastic strain, with the tail beyond A_g and the fracture strain if Z is given).
+export function figures(input = {}) {
+  let c;
+  try { c = compute(input); } catch { return []; }
+  const { E, fy, fu, eng_eps, eng_sig, tru_eps, tru_sig, eps_p, sig_true, eps_u, epsAg, failStrain, eps0 } = c;
+  const ip = eng_sig.indexOf(Math.max(...eng_sig));
+  const out = [{
+    title: "Stress–strain (Yun & Gardner)", inputs: ["E", "fy", "fu"],
+    series: [
+      { label: "engineering", slot: 3, points: eng_eps.map((e, i) => [e, eng_sig[i]]) },
+      { label: "true", slot: 1, points: tru_eps.map((e, i) => [e, tru_sig[i]]) },
+    ],
+    marks: [{ x: fy / E, y: fy, label: "f_y", slot: 9 }, { x: eng_eps[ip], y: eng_sig[ip], label: `f_u at A_g = ${(eps_u * 100).toFixed(1)} %`, slot: 9 }],
+    xLabel: "strain (–)", yLabel: "stress (MPa)",
+    caption: "Engineering curve to the uniform elongation A_g; true = engineering (1 + ε), ln(1 + ε).",
+  }];
+  const pts = eps_p.map((e, i) => [e, sig_true[i]]);
+  const marks = [{ x: epsAg, y: sig_true[eps_p.indexOf(epsAg)] ?? sig_true[sig_true.length - 1], label: "A_g", slot: 9 }];
+  const xEnd = Math.min(eps_p[eps_p.length - 1], Math.max(3 * epsAg, 1.15 * (failStrain ?? 0), 1.15 * (eps0 ?? 0)));
+  const yAt = x => { for (let i = 1; i < pts.length; i++) if (pts[i][0] >= x) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return pts[pts.length - 1][1]; };
+  const shown = pts.filter(q => q[0] < xEnd).concat([[xEnd, yAt(xEnd)]]);   // clip at the frame edge
+  if (failStrain != null) marks.push({ x: failStrain, y: yAt(failStrain), label: `FAIL ${failStrain.toFixed(3)}`, slot: 4 });
+  if (eps0 != null) marks.push({ x: eps0, y: yAt(eps0), label: `GISSMO ε0 ${eps0.toFixed(3)}`, slot: 4 });
+  out.push({
+    title: "Curve written to LCSS", inputs: ["fy", "fu", "tail_d_epsp", "tail_h", "z_pct", "h_el", "damage"],
+    series: [{ label: "true stress", slot: 1, points: shown, legend: false }],
+    marks, xMax: xEnd, xLabel: "true plastic strain (–)", yLabel: "true stress (MPa)",
+    caption: "Yield stress vs effective plastic strain as LS-DYNA reads it (shown to 3 A_g or past the fracture strain; the tail continues linearly).",
+  });
+  return out;
 }

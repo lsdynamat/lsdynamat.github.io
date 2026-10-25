@@ -1,6 +1,6 @@
 import { loadJSON, loadText } from "../core/fetch.js";
 import { getEl, setText, escapeHtml } from "../core/dom.js";
-import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261022b";
+import { renderLineChart, parseCsv } from "../core/lineChart.js?v=20261025x";
 
 setText("year", new Date().getFullYear());
 

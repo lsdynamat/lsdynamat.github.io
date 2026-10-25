@@ -519,3 +519,316 @@ body.lsd-modal-open{overflow:hidden}
 /* math in docs (KaTeX) */
 .math.display{display:block; margin:12px 0; overflow-x:auto; overflow-y:hidden; text-align:center}
 .math .katex{font-size:1.05em}
+
+/* =========================================================
+   Generator, three panes: keyword tree | inputs + model figures | keyword card.
+   The figure panes and the card use a fixed dark "viewport" look (as in a pre-processor
+   graphics window) in both themes; their colours are tokens below.
+   ========================================================= */
+:root{
+  --vp-top:#56687f; --vp-bot:#1b2230; --vp-rule:#39424f; --vp-ink:#e3e8ee; --vp-muted:#aab4c0;
+  --vp-code:#0d1117; --vp-hot:#ffd166; --vp-hot-ink:#1b1c1e;
+}
+.wrap.wide{max-width:1480px}
+.pagesub{font-family:var(--mono); font-size:15px; font-weight:400; color:var(--muted); margin-left:6px}
+.gen3{display:grid; grid-template-columns:200px minmax(0,1fr) minmax(340px,430px); gap:16px; margin-top:16px; align-items:start}
+.gencenter{display:grid; grid-template-columns:minmax(260px,330px) minmax(0,1fr); gap:16px; align-items:start}
+.gencenter > *{min-width:0}
+.gencenter .narrow-only{grid-column:1 / -1}
+.gen3 > *{min-width:0}
+.boxhead{font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--muted);
+  padding:8px 12px; border-bottom:1px solid var(--rule); background:var(--sunken)}
+.row-between{display:flex; justify-content:space-between; align-items:center; gap:8px}
+.row-between .btn{text-transform:none; letter-spacing:0; font-weight:400}
+
+.kwtree{border:1px solid var(--rule); border-radius:var(--r); background:var(--surface); position:sticky; top:16px;
+  max-height:calc(100vh - 32px); overflow:auto}
+.kwfilter{display:block; width:calc(100% - 16px); margin:8px; font:inherit; font-size:13px; padding:4px 8px;
+  border:1px solid var(--rule-strong); border-radius:var(--r); background:var(--surface); color:var(--text)}
+.kwtree details{margin:0}
+.kwtree summary{cursor:pointer; padding:4px 12px; font-size:13px; font-weight:600; list-style:none}
+.kwtree summary::before{content:"▸"; display:inline-block; width:14px; color:var(--faint)}
+.kwtree details[open] > summary::before{content:"▾"}
+.kwtree a{display:block; padding:3px 12px 3px 28px; font-family:var(--mono); font-size:12px; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.kwtree a:hover{background:var(--sunken); text-decoration:none}
+.kwtree a.on{background:var(--accent); color:var(--accent-ink)}
+.kwtree a .no{display:inline-block; min-width:42px; color:inherit; opacity:.75}
+.kwtree nav{padding-bottom:8px}
+
+.narrow-only{display:none}
+.inbox{border:1px solid var(--rule); border-radius:var(--r); background:var(--surface)}
+.inbox .formgrid{padding:4px 14px 4px}
+.inbox .inputbox:first-child{padding-top:10px}
+.inbox-note{margin:0; padding:8px 14px 12px; border-top:1px solid var(--rule)}
+.inputbox.hot input,.inputbox.hot select{border-color:var(--vp-hot); box-shadow:0 0 0 2px color-mix(in srgb, var(--vp-hot) 45%, transparent)}
+
+.figgrid{display:grid; grid-template-columns:minmax(0,1fr); gap:12px; position:sticky; top:16px}
+.figcard{margin:0; border:1px solid var(--vp-rule); border-radius:var(--r); overflow:hidden;
+  background:linear-gradient(var(--vp-top), var(--vp-bot)); color:var(--vp-ink); transition:box-shadow .15s}
+.figcard.hot{box-shadow:0 0 0 2px var(--vp-hot)}
+.figcard .fighead{display:flex; justify-content:space-between; gap:8px; padding:8px 10px 0; font-size:13px; font-weight:600}
+.figcard .fighead .by{font-family:var(--mono); font-size:11px; font-weight:400; color:var(--vp-muted); text-align:right}
+.figcard .figbody{padding:2px 8px 4px}
+.figcard figcaption{padding:0 10px 8px; font-size:11.5px; color:var(--vp-muted); line-height:1.4}
+/* chart tokens inside the viewport: same in both themes */
+.figcard .viz-root,
+:root[data-theme="dark"] .figcard .viz-root{
+  --series-1:#ffb020; --series-2:#4dd2ff; --series-3:#7ddc7d; --series-4:#ff6b6b;
+  --series-5:#c9a0ff; --series-6:#ffffff; --series-7:#9aa5b1; --series-8:#ff9ecb; --series-0:#cfd6df;
+  --viz-grid:rgba(255,255,255,.10); --viz-axis:rgba(255,255,255,.35);
+  --muted:var(--vp-muted); --surface:#11161e; --rule-strong:var(--vp-rule); --text:var(--vp-ink);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .figcard .viz-root{
+    --series-1:#ffb020; --series-2:#4dd2ff; --series-3:#7ddc7d; --series-4:#ff6b6b;
+    --series-5:#c9a0ff; --series-6:#ffffff; --series-7:#9aa5b1; --series-8:#ff9ecb; --series-0:#cfd6df;
+    --viz-grid:rgba(255,255,255,.10); --viz-axis:rgba(255,255,255,.35);
+    --muted:var(--vp-muted); --surface:#11161e; --rule-strong:var(--vp-rule); --text:var(--vp-ink);
+  }
+}
+.figcard .viz-legend{font-size:11.5px; margin:4px 2px 0}
+.figcard .viz-tick{font-size:10px}
+.figcard .viz-title{font-size:11px}
+.figcard .viz-tip{box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.viz-pt{stroke:#0d1117; stroke-width:1.5}
+.viz-ptlabel{font-family:var(--mono); font-size:10.5px}
+
+.viewport{border:1px solid var(--vp-rule); border-radius:var(--r); padding:10px;
+  background:linear-gradient(var(--vp-top), var(--vp-bot)); color:var(--vp-ink)}
+.vphead{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:8px}
+.vphead .fname{font-family:var(--mono); font-size:12.5px; color:var(--vp-ink); overflow-wrap:anywhere}
+.vpsel{font:inherit; font-size:12.5px; color:var(--vp-ink); background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.3); border-radius:var(--r); padding:3px 6px; max-width:13em}
+.vpsel option{color:#1b1c1e}
+.btn.ghost{background:transparent; color:var(--vp-ink); border-color:rgba(255,255,255,.3)}
+.btn.ghost:hover{background:rgba(255,255,255,.1)}
+.btn.hot{background:var(--vp-hot); color:var(--vp-hot-ink); border-color:var(--vp-hot); font-weight:600}
+.btn.hot:hover{filter:brightness(1.05); background:var(--vp-hot)}
+.viewport .preview{--code-bg:var(--vp-code); --code-text:#d6dbe1; --code-kw:var(--vp-hot); --code-cm:#6c7a89;
+  --code-hd:#8fb3d9; --code-ruler:#4b5563; --rule:var(--vp-rule);
+  border:1px solid var(--vp-rule); border-radius:var(--r); max-height:calc(100vh - 150px); font-size:12px}
+.vpstatus{margin-top:6px; font-family:var(--mono); font-size:11.5px; color:var(--vp-muted); min-height:1.4em}
+.vpstatus .status{margin-left:0; color:var(--vp-muted)}
+.vpstatus .status.err{color:#ff9b9b}
+
+@media (max-width:1280px){
+  .gen3{grid-template-columns:minmax(0,1fr) minmax(320px,420px)}
+  .kwtree{display:none}
+  .narrow-only{display:flex; margin-bottom:12px}
+}
+@media (max-width:1000px){
+  .gen3,.gencenter{grid-template-columns:minmax(0,1fr)}
+  .figgrid{position:static}
+  .viewport{position:static}
+}
+
+/* =========================================================
+   "pp" skin (generator page): plain engineering-software look, as in LS-PrePost dialogs.
+   Grey panels, square corners, 1 px bevels, Tahoma 12 px, black XY plots with white axes,
+   white keyword editor. No gradients, no rounded cards, no shadows.
+   ========================================================= */
+body.pp{
+  --pp-face:#e1e1e1; --pp-bg:#d6d6d6; --pp-hi:#ffffff; --pp-lo:#8c8c8c; --pp-dk:#5a5a5a;
+  --pp-ink:#000000; --pp-sel:#0a246a; --pp-sel-ink:#ffffff; --pp-plot:#000000;
+  --pp-ui:Tahoma, "Segoe UI", Verdana, Arial, sans-serif; --pp-mono:Consolas, "Courier New", monospace;
+  background:var(--pp-bg); color:var(--pp-ink); font-family:var(--pp-ui); font-size:12px;
+}
+body.pp .topbar{background:var(--pp-face); border-bottom:1px solid var(--pp-lo); box-shadow:inset 0 -1px 0 var(--pp-hi)}
+body.pp .topbar-row{height:30px}
+body.pp .logo{font-family:var(--pp-ui); font-size:12px; font-weight:bold; color:var(--pp-ink)}
+body.pp .logo span{color:var(--pp-ink); font-weight:normal}
+body.pp .nav a{font-size:12px; color:var(--pp-ink); padding:3px 9px; border:1px solid transparent; border-radius:0}
+body.pp .nav a:hover{background:var(--pp-face); border-color:var(--pp-hi) var(--pp-lo) var(--pp-lo) var(--pp-hi)}
+body.pp .nav a.active{box-shadow:none; font-weight:normal; background:var(--pp-bg); border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp.gen .pagehead{display:none}
+body.pp .gen3{margin-top:8px; gap:6px; grid-template-columns:190px minmax(0,1fr) minmax(340px,440px)}
+body.pp .gencenter{gap:6px; grid-template-columns:minmax(270px,330px) minmax(0,1fr)}
+body.pp .footer{border-top:1px solid var(--pp-lo); color:#333; font-size:11px; margin-top:12px; padding:6px 0 10px}
+
+/* panels: raised frame + flat title strip */
+body.pp .kwtree, body.pp .inbox, body.pp .figcard, body.pp .viewport{
+  background:var(--pp-face); color:var(--pp-ink); border-radius:0; box-shadow:none;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) var(--pp-dk) var(--pp-hi); padding:0;
+}
+body.pp .boxhead, body.pp .figcard .fighead, body.pp .vphead{
+  background:var(--pp-bg); color:var(--pp-ink); font:bold 12px var(--pp-ui); text-transform:none; letter-spacing:0;
+  padding:3px 6px; margin:0; border-bottom:1px solid var(--pp-lo);
+}
+body.pp .row-between .btn{font-weight:normal}
+
+/* buttons, fields: Windows-classic bevels */
+body.pp .btn, body.pp .btn.sm, body.pp .btn.ghost, body.pp .btn.hot{
+  font:12px var(--pp-ui); color:var(--pp-ink); background:var(--pp-face); border-radius:0; padding:1px 10px; filter:none;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) var(--pp-dk) var(--pp-hi); box-shadow:inset -1px -1px 0 var(--pp-lo);
+}
+body.pp .btn:hover{background:#ececec; text-decoration:none}
+body.pp .btn:active{border-color:var(--pp-dk) var(--pp-hi) var(--pp-hi) var(--pp-dk); box-shadow:inset 1px 1px 0 var(--pp-lo)}
+body.pp .btn.hot{font-weight:bold}
+body.pp input, body.pp select, body.pp .vpsel, body.pp .kwfilter{
+  font:12px var(--pp-ui); color:var(--pp-ink); background:#fff; border-radius:0; box-shadow:none;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo);
+}
+body.pp .vpsel option{color:var(--pp-ink)}
+body.pp :focus-visible{outline:1px dotted #000 !important; outline-offset:1px}
+
+/* keyword tree: white list box */
+body.pp .kwtree{max-height:calc(100vh - 60px)}
+body.pp .kwfilter{width:calc(100% - 8px); margin:4px; padding:2px 4px}
+body.pp .kwtree nav{background:#fff; margin:0 4px 4px; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo); padding:2px 0}
+body.pp .kwtree summary{font:bold 12px var(--pp-ui); padding:1px 4px}
+body.pp .kwtree summary::before{content:"+"; width:12px; font-family:var(--pp-mono)}
+body.pp .kwtree details[open] > summary::before{content:"-"}
+body.pp .kwtree a{font:12px var(--pp-mono); color:var(--pp-ink); padding:0 4px 0 18px}
+body.pp .kwtree a:hover{background:#e8e8e8}
+body.pp .kwtree a.on{background:var(--pp-sel); color:var(--pp-sel-ink)}
+
+/* inputs as dialog rows: label | value | unit; hints move to the tooltip */
+body.pp .inbox .formgrid{padding:6px 8px}
+body.pp .inbox .inputbox{display:grid; grid-template-columns:minmax(0,1fr) 92px 64px; gap:4px; align-items:center;
+  padding:2px 0; border:0}
+body.pp .inbox .inputbox .k{display:contents}
+body.pp .inbox .inputbox label{grid-column:1; grid-row:1; font:12px var(--pp-ui); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+body.pp .inbox .inputbox > input, body.pp .inbox .inputbox > select, body.pp .inbox .inputbox > .switch{grid-column:2; grid-row:1; margin:0}
+body.pp .inbox .inputbox > select{grid-column:2 / 4}
+body.pp .inbox .inputbox > input{width:100%; padding:1px 3px; text-align:right; font-family:var(--pp-mono)}
+body.pp .inbox .inputbox .unitsel, body.pp .inbox .inputbox .unit{grid-column:3; grid-row:1; max-width:none; font:11px var(--pp-ui); color:var(--pp-ink)}
+body.pp .inbox .inputbox .unitsel{padding:0 1px}
+body.pp .inbox .inputbox .h{display:none}
+body.pp .inbox .inputbox.hot input, body.pp .inbox .inputbox.hot select{box-shadow:none; background:#ffffc8}
+body.pp .inbox .inputbox input.invalid{background:#ffd0d0}
+body.pp .switch{margin:0; gap:4px}
+body.pp .switch .track{width:13px; height:13px; border-radius:0; background:#fff; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .switch .track::after{display:none}
+body.pp .switch input:checked + .track{background:#fff}
+body.pp .switch input:checked + .track::before{content:"x"; position:absolute; left:2px; top:-3px; font:bold 12px var(--pp-mono); color:#000}
+body.pp .switch .state{font-size:11px}
+body.pp .inbox-note{font-size:11px; color:#333; border-top:1px solid var(--pp-lo); padding:4px 8px 6px}
+
+/* XY plots: black field, white axes and text, bright series as in LS-PrePost */
+body.pp .figgrid{gap:6px}
+body.pp .figcard{background:var(--pp-face)}
+body.pp .figcard.hot{box-shadow:none; outline:2px solid #c8a000; outline-offset:-1px}
+body.pp .figcard .fighead .by{font:11px var(--pp-mono); color:#333}
+body.pp .figcard .figbody{background:var(--pp-plot); margin:4px; padding:2px 4px;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .figcard .viz-root{
+  --series-1:#ff3030; --series-2:#30ff30; --series-3:#30a0ff; --series-4:#ffff30;
+  --series-5:#ff30ff; --series-6:#ffffff; --series-7:#30ffff; --series-8:#ff9030; --series-0:#c0c0c0;
+  --viz-grid:#2a2a2a; --viz-axis:#ffffff; --muted:#ffffff; --surface:#000; --rule-strong:#fff; --text:#fff;
+}
+body.pp .figcard .viz-tick, body.pp .figcard .viz-title, body.pp .figcard .viz-legend, body.pp .viz-ptlabel{font-family:var(--pp-mono)}
+body.pp .figcard .viz-legend{color:#fff; font-size:11px}
+body.pp .figcard .viz-key i{height:2px; border-radius:0}
+body.pp .figcard .viz-line{stroke-width:1.5}
+body.pp .figcard .viz-tip{border-radius:0; border:1px solid #fff; background:#000; color:#fff; box-shadow:none; font-family:var(--pp-mono)}
+body.pp .viz-pt{stroke:#000}
+body.pp .figcard figcaption{font:11px var(--pp-ui); color:#333; padding:0 6px 4px}
+
+/* keyword editor: white text area + status line */
+body.pp .viewport{position:sticky; top:8px}
+body.pp .vphead{display:flex; gap:4px; flex-wrap:wrap}
+body.pp .vphead .fname{font:bold 12px var(--pp-ui); color:var(--pp-ink)}
+body.pp .viewport .preview{--code-bg:#ffffff; --code-text:#000; --code-kw:#0000c0; --code-cm:#008000; --code-hd:#808080; --code-ruler:#a0a0a0; --rule:#c0c0c0;
+  margin:4px; border-radius:0; font:12px/1.35 var(--pp-mono); max-height:calc(100vh - 110px);
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .vpstatus{margin:0; padding:2px 6px; border-top:1px solid var(--pp-lo); font:11px var(--pp-ui); color:#000; background:var(--pp-bg)}
+body.pp .vpstatus .status{color:#000}
+body.pp .vpstatus .status.err{color:#c00000}
+body.pp .narrow-only label{font:12px var(--pp-ui); color:#000}
+
+/* pp skin, all pages: text, tables, tabs, figures and charts in the same software look */
+body.pp .topbar .wrap, body.pp .footer .wrap{max-width:1480px}
+body.pp main.wrap:not(.wide){max-width:1180px}
+body.pp h1{font:bold 17px var(--pp-ui); color:var(--pp-ink); letter-spacing:0; margin:0 0 4px}
+body.pp h2, body.pp .h2{font:bold 14px var(--pp-ui); color:var(--pp-ink); letter-spacing:0;
+  border-bottom:1px solid var(--pp-lo); box-shadow:0 1px 0 var(--pp-hi); padding-bottom:2px; margin:18px 0 8px}
+body.pp h3, body.pp h4{font:bold 13px var(--pp-ui); color:var(--pp-ink); letter-spacing:0}
+body.pp p, body.pp li, body.pp td, body.pp th, body.pp dd, body.pp dt{font-family:var(--pp-ui)}
+body.pp .doc, body.pp .doc p, body.pp .doc li{font-size:13px; line-height:1.55}
+body.pp .lead{font:13px/1.5 var(--pp-ui); color:#222; max-width:90ch}
+body.pp .small, body.pp .eyebrow, body.pp .item-meta{font-family:var(--pp-ui); font-size:11px; color:#333; letter-spacing:0; text-transform:none}
+body.pp .pagehead{border-bottom:1px solid var(--pp-lo); box-shadow:0 1px 0 var(--pp-hi); padding:10px 0 8px; margin-bottom:10px}
+body.pp .section-title{font:bold 12px var(--pp-ui); letter-spacing:0; text-transform:none; color:var(--pp-ink)}
+body.pp a{color:#0000c0}
+body.pp a:visited{color:#551a8b}
+body.pp .nav a, body.pp .nav a:visited, body.pp .logo, body.pp .logo:visited, body.pp .btn, body.pp .btn:visited, body.pp .kwtree a{color:var(--pp-ink)}
+body.pp .kwtree a.on{color:var(--pp-sel-ink)}
+
+/* inline code and code blocks: white field, sunken */
+body.pp code, body.pp kbd{font-family:var(--pp-mono); font-size:12px; background:#fff; border:1px solid #b0b0b0; border-radius:0; padding:0 3px; color:#000}
+body.pp pre{border-radius:0}
+body.pp pre code{border:0; padding:0; background:none}
+body.pp .lsd-code, body.pp .doc pre{background:#fff; color:#000; font:12px/1.4 var(--pp-mono);
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+
+/* tables: grid like a spreadsheet / property list */
+body.pp table{border-collapse:collapse; background:#fff; font-size:12px}
+body.pp th, body.pp td{border:1px solid #a0a0a0; padding:2px 6px; vertical-align:top}
+body.pp th{background:var(--pp-face); font-weight:bold; color:#000; text-align:left; text-transform:none; letter-spacing:0}
+body.pp tr:hover td{background:#f0f4ff}
+body.pp .tablewrap, body.pp .card, body.pp .list, body.pp .lsd-list{border-radius:0; box-shadow:none; background:#fff;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .tablewrap table{border:0}
+
+/* tabs: Windows property-sheet tabs */
+body.pp .tabs{border-bottom:1px solid var(--pp-hi); box-shadow:0 1px 0 var(--pp-lo); gap:2px; margin:12px 0 10px}
+body.pp .tab{font:12px var(--pp-ui); color:#000; background:var(--pp-face); padding:3px 12px; margin-bottom:-1px;
+  border:1px solid; border-color:var(--pp-hi) var(--pp-dk) transparent var(--pp-hi); border-radius:0}
+body.pp .tab[aria-selected="true"], body.pp .tab.active{background:var(--pp-bg); font-weight:bold; box-shadow:none; position:relative; top:-1px}
+
+/* tags, chips, fields */
+body.pp .tag, body.pp .lsd-tag{border-radius:0; font:11px var(--pp-ui); background:var(--pp-face); color:#000; border:1px solid var(--pp-lo)}
+body.pp .field label{font:12px var(--pp-ui); color:#000}
+body.pp .field input, body.pp .field select{padding:2px 4px}
+
+/* drawings and photos: white sunken frames */
+body.pp .ex-sketch, body.pp .il-fig, body.pp .ex-figs img{background:#fff; border-radius:0;
+  border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .ex-figs figcaption, body.pp .il-fig figcaption{font:11px var(--pp-ui); color:#333}
+
+/* every chart is an XY plot window: black field, white axes, bright series */
+body.pp .viz-root{
+  --series-1:#ff3030; --series-2:#30ff30; --series-3:#30a0ff; --series-4:#ffff30;
+  --series-5:#ff30ff; --series-6:#ffffff; --series-7:#30ffff; --series-8:#ff9030; --series-0:#c0c0c0;
+  --viz-grid:#2a2a2a; --viz-axis:#ffffff;
+}
+body.pp .viz-plot{background:#000; padding:4px; border:1px solid; border-color:var(--pp-lo) var(--pp-hi) var(--pp-hi) var(--pp-lo)}
+body.pp .viz-tick, body.pp .viz-title, body.pp .viz-ptlabel{fill:#fff; font-family:var(--pp-mono)}
+body.pp .viz-ref{stroke:#c0c0c0}
+body.pp .viz-legend{font:11px var(--pp-mono); color:#000}
+body.pp .viz-key i{height:2px; border-radius:0}
+body.pp .viz-line{stroke-width:1.5}
+body.pp .viz-dot, body.pp .viz-mark{stroke:#000}
+body.pp .viz-cross{stroke:#808080}
+body.pp .viz-tip{border-radius:0; border:1px solid #000; background:#ffffe1; color:#000; box-shadow:none; font:11px var(--pp-mono)}
+body.pp .figcard .viz-legend{color:#000}
+body.pp .figcard .figbody{background:var(--pp-face); border:0; margin:2px 4px; padding:0}
+body.pp .tabpanel{padding:8px 12px}
+body.pp .ex-section h2, body.pp main h2{font-size:14px}
+
+/* pp skin: one fixed light palette with strong contrast (pages carry data-theme="light"; the base
+   tokens are redefined here so every older rule that reads them stays dark-on-light) */
+body.pp{
+  color-scheme:light;
+  --bg:#d6d6d6; --surface:#ffffff; --sunken:#e1e1e1; --rule:#a0a0a0; --rule-strong:#808080;
+  --text:#000000; --muted:#222222; --faint:#444444;
+  --accent:#0000c0; --accent-ink:#ffffff; --accent-soft:#dde4f5; --danger:#b00000; --danger-soft:#ffe0e0;
+  --code-bg:#ffffff; --code-text:#000000; --code-kw:#0000c0; --code-cm:#006000; --code-hd:#505050; --code-ruler:#808080;
+}
+body.pp .il-fig, body.pp .il-icon{color:#000}
+body.pp .il-fig figcaption{color:#222; font:11px var(--pp-ui)}
+body.pp .il-s{opacity:1}
+body.pp .viz-legend, body.pp .figcard .viz-legend{color:#000}
+body.pp .small, body.pp .eyebrow, body.pp .item-meta, body.pp .inbox-note, body.pp figcaption{color:#222}
+body.pp .lead{color:#111}
+body.pp ::placeholder{color:#606060; opacity:1}
+body.pp .figcard .fighead .by{color:#222}
+body.pp .viewport .preview .cm{color:#006000}
+body.pp .viewport .preview .hd{color:#505050}
+
+/* slot 9 = labelled marks (white on the black plot field); slot 6 is a normal series colour */
+.viz-root{--series-9:#1b1c1e}
+body.pp .viz-root, body.pp .figcard .viz-root{--series-6:#ff9030; --series-8:#c080ff; --series-9:#ffffff}
+/* colour swatches outside the black plot field get a dark outline so yellow / cyan stay visible on grey or white */
+body.pp .viz-key i, body.pp td .viz-root i{height:4px !important; border-radius:0 !important; outline:1px solid #000}

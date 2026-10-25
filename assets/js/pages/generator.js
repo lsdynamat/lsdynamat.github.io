@@ -1,9 +1,10 @@
 import { loadJSON } from "../core/fetch.js";
 import { getEl, setText, escapeHtml, on } from "../core/dom.js";
 import { asNum } from "../core/format.js";
-import { getGenerator } from "../generators/index.js?v=20261022b";
+import { getGenerator } from "../generators/index.js?v=20261025x";
 import { UNIT_SYSTEMS, BASE_UNITS, getUnitSystem, convertDeck, tidyDeck } from "../core/units.js?v=20261022b";
 import { unitOptions, toBase, fromBase, fmtNum, preferredUnit, rememberUnit } from "../core/inputUnits.js?v=20261022b";
+import { renderLineChart } from "../core/lineChart.js?v=20261025x";
 
 setText("year", new Date().getFullYear());
 
@@ -30,6 +31,8 @@ function renderForm(formEl, inputs, values){
   (inputs || []).forEach(inp=>{
     const div = document.createElement("div");
     div.className = "inputbox";
+    div.dataset.key = inp.key;
+    if (inp.hint) div.title = inp.hint;      // tooltip where the hint line is hidden
     const id = `in_${escapeHtml(inp.key)}`;
     const v = values[inp.key];
     let control;
@@ -143,6 +146,48 @@ function highlight(text){
   })).join("");
 }
 
+// Keyword tree: one folder per category, filtered by the search box. Clicking a model drives the
+// (narrow-screen) select, so both stay in sync.
+function renderTree(treeEl, materials, curId, filter){
+  const q = (filter || "").trim().toLowerCase();
+  const cats = [];
+  materials.forEach(m => { if (!cats.includes(m.category)) cats.push(m.category); });
+  treeEl.innerHTML = cats.map(c => {
+    const ms = materials.filter(m => m.category === c &&
+      (!q || `${m.mat} ${m.name} ${c}`.toLowerCase().includes(q)));
+    if (!ms.length) return "";
+    return `<details open><summary>${escapeHtml(c)}</summary>${ms.map(m =>
+      `<a href="?id=${encodeURIComponent(m.id)}" data-id="${escapeHtml(m.id)}"${m.id === curId ? ' class="on" aria-current="page"' : ""}>` +
+      `<span class="no">${escapeHtml(m.mat)}</span>${escapeHtml(m.name)}</a>`).join("")}</details>`;
+  }).join("") || `<p class="small" style="padding:4px 12px">No model matches.</p>`;
+}
+
+// Model figures: generators may export figures(values) -> [{ title, inputs, caption, series, ...chart opts }].
+// Each figure lists the input keys it depends on, so editing an input highlights its figures.
+function renderFigures(figsEl, g, values){
+  let figs = [];
+  try { figs = typeof g.figures === "function" ? (g.figures(values) || []) : []; }
+  catch(e){ console.error(e); figs = []; }
+  figsEl.hidden = !figs.length;
+  figsEl.innerHTML = "";
+  figs.forEach(f => {
+    const card = document.createElement("figure");
+    card.className = "figcard";
+    card.dataset.inputs = (f.inputs || []).join(" ");
+    card.innerHTML = `<div class="fighead"><span>${escapeHtml(f.title)}</span>` +
+      `${f.inputs?.length ? `<span class="by">${escapeHtml(f.inputs.join(", "))}</span>` : ""}</div>` +
+      `<div class="figbody"></div>${f.caption ? `<figcaption>${escapeHtml(f.caption)}</figcaption>` : ""}`;
+    figsEl.appendChild(card);
+    renderLineChart(card.querySelector(".figbody"), f.series, { height: 220, ...f });
+  });
+}
+
+function markHot(formEl, figsEl, key){
+  formEl.querySelectorAll(".inputbox").forEach(b => b.classList.toggle("hot", !!key && b.dataset.key === key));
+  figsEl.querySelectorAll(".figcard").forEach(c =>
+    c.classList.toggle("hot", !!key && c.dataset.inputs.split(" ").includes(key)));
+}
+
 function downloadText(filename, text){
   const blob = new Blob([text], { type:"application/octet-stream" });
   const url = URL.createObjectURL(blob);
@@ -166,6 +211,11 @@ function downloadText(filename, text){
   const nameEl = getEl("outName");
   const statusEl = getEl("outStatus");
   const unitSel = getEl("unitSel");
+  const treeEl = getEl("kwTree");
+  const filterEl = getEl("kwFilter");
+  const figsEl = getEl("figs");
+  let hotKey = null;
+  let lastValues = null;
 
   UNIT_SYSTEMS.forEach(u => {
     const opt = document.createElement("option");
@@ -241,6 +291,10 @@ function downloadText(filename, text){
       lastName = `${cur.id}_${sys.id.replace(/[^a-z0-9]+/gi, "_")}.k`;
     }
 
+    lastValues = values;
+    renderFigures(figsEl, g, values);
+    markHot(formEl, figsEl, hotKey);
+
     lastText = tidyDeck(lastText);
     outEl.innerHTML = highlight(lastText);
     nameEl.textContent = lastName;
@@ -251,6 +305,8 @@ function downloadText(filename, text){
     cur = materials.find(m => m.id === sel.value) || materials[0];
     renderForm(formEl, cur.inputs, buildDefaultValues(cur.inputs));
     getEl("btnDetails").href = `./details.html?id=${encodeURIComponent(cur.id)}`;
+    setText("modelTitle", `*MAT_${cur.mat} · ${cur.name}`);
+    renderTree(treeEl, materials, cur.id, filterEl.value);
 
     syncURL();
 
@@ -269,6 +325,25 @@ function downloadText(filename, text){
   on(formEl, "input", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
   on(formEl, "change", ()=>{ clearTimeout(t); t = setTimeout(generate, 120); });
   on(sel, "change", syncUI);
+  on(treeEl, "click", e => {
+    const a = e.target.closest("a[data-id]");
+    if (!a) return;
+    e.preventDefault();
+    sel.value = a.dataset.id;
+    syncUI();
+  });
+  on(filterEl, "input", () => renderTree(treeEl, materials, cur.id, filterEl.value));
+  on(formEl, "focusin", e => {
+    const b = e.target.closest(".inputbox");
+    hotKey = b ? b.dataset.key : null;
+    markHot(formEl, figsEl, hotKey);
+  });
+  on(formEl, "focusout", () => { hotKey = null; markHot(formEl, figsEl, null); });
+  let rt = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { if (lastValues) { renderFigures(figsEl, getGenerator(cur.generator), lastValues); markHot(formEl, figsEl, hotKey); } }, 200);
+  });
   on(unitSel, "change", ()=>{
     try { localStorage.setItem("lsdynamat.units", unitSel.value); } catch {}
     syncURL();

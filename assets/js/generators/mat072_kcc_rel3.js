@@ -65,7 +65,8 @@ export const FIELDS = [
   { key: "pr", label: "Poisson ratio (PR)", unit: "-", default: DEFAULTS.pr, min: 0.0, max: 0.49, hint: "Python uses 0.16" },
 ];
 
-export function generate(input = {}) {
+// Parameters of the card (also used by figures()).
+function compute(input = {}) {
   const inp = { ...DEFAULTS, ...normalizeInput(input) };
 
   const mid = mustIntPositive("mid", inp.mid);
@@ -235,6 +236,12 @@ export function generate(input = {}) {
   const lamPeak = lambda_default[4];
   const lambda_out = lambda_default.map((v, i) => (i < 5 || v >= 1.0) ? v : lamPeak + kLambda * (v - lamPeak));
 
+  return { inp, mid, fc_mpa, elm_size_mm, omega, ro, pr, difModel, rateCap, gfIn, MPA, INCH, fc_psi, mesh_size_in, lcid_dif, eosid, lcrate, phr, agg_size, W, ftm, Ec, fc_old, ft, a0m, a0y, a1f, r, a0mn_psi, a1mn, a2mn_psiInv, a0yn_psi, a1yn, a2yn_psiInv, a1fn, a2fn_psiInv, b1, b2, b3, lambda_default, eta_default, fco, alpha_DIF, gamma, delta, beta, difC, difT, esc, est, tensPts, compPts, curve, ev, Pv_default, Kun_default, sEos, Pv, Kun, E_mpa, fta, a0mn, a2mn, a0yn, a2yn, a2fn, W_conv, gfTarget, g0, hEff, kLambda, lamPeak, lambda_out };
+}
+
+export function generate(input = {}) {
+  const { inp, mid, fc_mpa, elm_size_mm, omega, ro, pr, difModel, rateCap, gfIn, MPA, INCH, fc_psi, mesh_size_in, lcid_dif, eosid, lcrate, phr, agg_size, W, ftm, Ec, fc_old, ft, a0m, a0y, a1f, r, a0mn_psi, a1mn, a2mn_psiInv, a0yn_psi, a1yn, a2yn_psiInv, a1fn, a2fn_psiInv, b1, b2, b3, lambda_default, eta_default, fco, alpha_DIF, gamma, delta, beta, difC, difT, esc, est, tensPts, compPts, curve, ev, Pv_default, Kun_default, sEos, Pv, Kun, E_mpa, fta, a0mn, a2mn, a0yn, a2yn, a2fn, W_conv, gfTarget, g0, hEff, kLambda, lamPeak, lambda_out } = compute(input);
+
   // --- Title exactly like you did for CSCM style
   const title = `KCC Concrete, fc=${fc_mpa.toFixed(1)}MPa, element size=${elm_size_mm.toFixed(0)}mm`;
 
@@ -402,4 +409,67 @@ function fitW(s, v, w) {
   if (!Number.isFinite(n)) return s;
   if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
   return s;
+}
+
+// ----------------------- figures (generator page) -----------------------
+// Same parameters as the card (compute()). Surfaces: Malvar et al. 1997 and Wu & Crawford 2015
+// Eq. 43-44 (max, yield, residual; linear in p below f_c/3 through 3 f_t at p = 0 and zero at p = -f_t);
+// damage function: the lambda-eta pairs written to the card; EOS: the tabulated compaction written to the card;
+// DIF: the load curve LCRATE (MC90 / fib MC2010 compression, Malvar & Ross 1998 or fib tension), held above the cap.
+const logTick = v => Number.isInteger(v) ? `1e${v}` : Math.pow(10, v).toExponential(1);
+
+export function figures(input = {}) {
+  let c;
+  try { c = compute(input); } catch { return []; }
+  const { fc_mpa: fc, fta, a0mn, a1mn, a2mn, a0yn, a1yn, a2yn, a1fn, a2fn, lambda_out, eta_default, ev, Pv, difModel, rateCap, difC, difT } = c;
+  const maxS = p => p >= fc / 3 ? a0mn + p / (a1mn + a2mn * p) : p <= 0 ? 3 * (p + fta)
+    : 1.5 * (p + fta) / (0.5 + (1.5 * fta / fc) * p / (fc / 3));
+  let lo = 0, hi = fc;                                      // yield point (fyc/3, fyc): 3p = a0y + p/(a1y + a2y p)
+  for (let k = 0; k < 80; k++) { const m = (lo + hi) / 2; (3 * m < a0yn + m / (a1yn + a2yn * m) ? lo = m : hi = m); }
+  const fyc = 3 * (lo + hi) / 2;
+  const yldS = p => p >= fyc / 3 ? a0yn + p / (a1yn + a2yn * p) : p >= 0 ? 1.35 * fta + 3 * p * (1 - 1.35 * fta / fyc) : 1.35 * (p + fta);
+  const resS = p => Math.min(p / (a1fn + a2fn * p), maxS(p));
+  const P = (a, b, f) => { const o = []; for (let i = 0; i <= 160; i++) { const p = a + (b - a) * i / 160; o.push([p, Math.max(0, f(p))]); } return o; };
+  const out = [{
+    title: "Strength surfaces (compressive meridian)", inputs: ["fc"],
+    series: [
+      { label: "maximum", slot: 1, points: P(-fta, 3 * fc, maxS) },
+      { label: "yield", slot: 2, points: P(-fta, 3 * fc, yldS) },
+      { label: "residual", slot: 3, points: P(0, 3 * fc, resS) },
+    ],
+    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 9 }, { x: fyc / 3, y: fyc, label: `yield ${(fyc / fc).toFixed(2)} f_c`, slot: 9 },
+      { x: -fta, y: 0, label: "-f_t", slot: 9 }],
+    xMin: -fta, xLabel: "pressure (MPa)", yLabel: "principal stress difference (MPa)",
+    caption: "Δσ = a0 + p / (a1 + a2 p) above f_c/3; damage moves the surface from yield to maximum and then towards residual.",
+  }];
+  const lmax = lambda_out[9] * 1.25;
+  const le = lambda_out.map((l, i) => [l, eta_default[i]]).filter(p => p[0] <= lmax);
+  le.push([lmax, 0]);
+  out.push({
+    title: "Damage function η(λ)", inputs: ["fc", "elm_size", "gf"],
+    series: [{ label: "η", slot: 4, points: le, legend: false }],
+    marks: [{ x: lambda_out[4], y: 1, label: "peak (λm)", slot: 9 }], yMin: 0, yMax: 1.1,
+    xTick: v => v.toExponential(0), xLabel: "modified effective plastic strain λ (–)", yLabel: "η (–)",
+    caption: "Points written to the card. The softening branch is stretched with the element size so that the card dissipates G_F.",
+  });
+  out.push({
+    title: "Equation of state (compaction)", inputs: ["fc"],
+    series: [{ label: "pressure", slot: 2, points: ev.map((e, i) => [-e, Pv[i]]), legend: false }],
+    xLabel: "volumetric strain, compression (–)", yLabel: "pressure (MPa)",
+    caption: "Tabulated compaction written with the card; pressures scale with √(f_c / 45.4 MPa).",
+  });
+  if (difModel !== 0) {
+    const C = [], T = [];
+    for (let i = 0; i <= 80; i++) {
+      const lg = -6 + 9 * i / 80, r = 10 ** lg, rr = Math.min(r, rateCap);
+      C.push([lg, Math.max(1, difC(rr))]); T.push([lg, Math.max(1, difT(rr))]);
+    }
+    out.push({
+      title: "Strain-rate enhancement (LCRATE)", inputs: ["dif_model", "rate_cap", "fc"],
+      series: [{ label: "compression", slot: 2, points: C }, { label: "tension", slot: 4, points: T }],
+      xMin: -6, xMax: 3, yMin: 1, xTick: logTick, xLabel: "strain rate (1/s)", yLabel: "DIF",
+      caption: `${difModel === 2 ? "fib Model Code 2010" : "CEB-FIP MC90 compression, Malvar & Ross tension"}; constant above ${rateCap} /s.`,
+    });
+  }
+  return out;
 }

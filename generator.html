@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,11 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" />
-  <link rel="stylesheet" href="./assets/css/styles.css?v=20261022b" />
+  <link rel="stylesheet" href="./assets/css/styles.css?v=20261025h" />
 </head>
-<body>
+<body class="pp gen">
   <header class="topbar">
-    <div class="wrap topbar-row">
+    <div class="wrap wide topbar-row">
       <a class="logo" href="./index.html">LS-DYNA <span>Material Hub</span></a>
       <nav class="nav">
         <a href="./library.html">Library</a>
@@ -23,57 +23,67 @@
     </div>
   </header>
 
-  <main class="wrap">
+  <main class="wrap wide">
     <div class="pagehead">
       <div>
-        <h1>Keyword generator</h1>
-        <p class="lead">Pick a model and edit the inputs. The keyword card updates as you type.</p>
+        <h1>Keyword generator <span class="pagesub" id="modelTitle"></span></h1>
+        <p class="lead">Pick a model and edit the inputs. The keyword card and the model figures update as you type.</p>
       </div>
     </div>
 
-    <div class="genbar">
-      <div class="field">
-        <label for="modelSel">Model</label>
-        <select id="modelSel"></select>
-      </div>
-      <div class="field units">
-        <label for="unitSel">Output units</label>
-        <select id="unitSel"></select>
-      </div>
-      <a class="btn" id="btnDetails" href="./details.html">Theory notes</a>
-      <button class="btn" id="btnResetDefaults">Reset to defaults</button>
-    </div>
+    <div class="gen3">
+      <aside class="kwtree" aria-label="Material models">
+        <div class="boxhead">Keywords</div>
+        <input class="kwfilter" id="kwFilter" type="search" placeholder="Filter models" aria-label="Filter models" />
+        <nav id="kwTree"></nav>
+      </aside>
 
-    <div class="layout2">
-      <section>
-        <h2 class="h2">Inputs</h2>
-        <div id="form" class="formgrid"></div>
-        <p class="small" style="margin-top:14px;">
-          Pick the unit of each input from its list (it is remembered for next time); the generator converts everything to mm, ms, g, N and MPa, and the card is then written in the output units selected above.
-          Defaults are typical values to start from. Calibrate against your own material and test data.
-        </p>
-      </section>
-
-      <section class="outpanel">
-        <div class="outhead">
-          <div><span class="fname" id="outName">—</span><span class="status" id="outStatus"></span></div>
-          <div class="row gap">
-            <button class="btn sm" id="btnCopy">Copy</button>
-            <button class="btn sm primary" id="btnDownload">Download .k</button>
+      <section class="gencenter">
+        <div class="genbar narrow-only">
+          <div class="field">
+            <label for="modelSel">Model</label>
+            <select id="modelSel"></select>
           </div>
         </div>
+        <div class="inbox">
+          <div class="boxhead row-between">
+            <span>Inputs</span>
+            <span class="row gap">
+              <a class="btn sm" id="btnDetails" href="./details.html">Theory notes</a>
+              <button class="btn sm" id="btnResetDefaults">Reset</button>
+            </span>
+          </div>
+          <div id="form" class="formgrid"></div>
+          <p class="small inbox-note">
+            Pick the unit of each input from its list (it is remembered for next time); the generator converts everything to mm, ms, g, N and MPa, and the card is then written in the output units.
+            Defaults are typical values to start from. Calibrate against your own material and test data.
+          </p>
+        </div>
+        <div id="figs" class="figgrid" aria-live="polite"></div>
+      </section>
+
+      <section class="outpanel viewport">
+        <div class="vphead">
+          <span class="fname" id="outName">—</span>
+          <span class="row gap">
+            <select id="unitSel" class="vpsel" aria-label="Output units"></select>
+            <button class="btn sm ghost" id="btnCopy">Copy</button>
+            <button class="btn sm hot" id="btnDownload">Download .k</button>
+          </span>
+        </div>
         <pre class="preview" id="out"></pre>
+        <div class="vpstatus"><span class="status" id="outStatus"></span></div>
       </section>
     </div>
   </main>
 
   <footer class="footer">
-    <div class="wrap">
+    <div class="wrap wide">
       <div>© <span id="year"></span> LS-DYNA Material Hub · Independent project, not affiliated with Ansys/LST. Check generated cards against the Keyword User's Manual.</div>
       <div><a href="https://github.com/lsdynamat/lsdynamat.github.io">Source</a> · <a href="./contact.html">Report an issue</a></div>
     </div>
   </footer>
 
-  <script type="module" src="./assets/js/pages/generator.js?v=20261022b"></script>
+  <script type="module" src="./assets/js/pages/generator.js?v=20261025x"></script>
 </body>
 </html>

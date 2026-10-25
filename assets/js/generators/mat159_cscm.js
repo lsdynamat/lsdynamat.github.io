@@ -376,3 +376,76 @@ function fitW(s, v, w) {
   if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
   return s;
 }
+
+// ----------------------- figures (generator page) -----------------------
+// Same parameters as the card. Equations from Murray 2007 (FHWA-HRT-05-062): shear surface
+// Ff = alpha - lamda exp(-beta J1) + theta J1, Rubin factors Q1 (TOR), Q2 (TXE), equal to 0.5774 and 0.5
+// for J1 < 0; cap Fc = 1 - ((J1 - L)/(X - L))^2 for J1 > L, X = L + R Ff(L); hardening
+// eps_v^p = W (1 - exp(-D1 (X - X0) - D2 (X - X0)^2)); rate eta = eta0 / rate^n, overstress capped.
+const logTick = v => Number.isInteger(v) ? `1e${v}` : Math.pow(10, v).toExponential(1);
+
+export function figures(input = {}) {
+  const inp = { ...DEFAULTS, ...normalizeInput(input) };
+  const fc = Number(inp.fc), pr = Number(inp.pr);
+  if (!(fc > 0) || !(pr >= 0 && pr < 0.5)) return [];
+  const { G, K } = calculateModulus(fc, pr);
+  const ab = calculateAlphaBeta(fc), rx = calculateRXd(fc), add = calculateAdditionalParameters(fc);
+  const W = 0.065, D1 = 0.000611, D2 = 0.000002;
+  const Ff = J1 => ab.alpha - ab.lamda * Math.exp(-ab.beta * J1) + ab.theta * J1;
+  const Q1 = J1 => J1 < 0 ? 0.5774 : ab.alpha1 - ab.lamda1 * Math.exp(-ab.beta1 * J1) + ab.theta1 * J1;
+  const Q2 = J1 => J1 < 0 ? 0.5 : ab.alpha2 - ab.lamda2 * Math.exp(-ab.beta2 * J1) + ab.theta2 * J1;
+  // initial cap: L0 with L0 + R Ff(L0) = X0 (bisection)
+  let lo = 0, hi = rx.XD;
+  for (let k = 0; k < 80; k++) { const m = (lo + hi) / 2; (m + rx.R * Ff(m) < rx.XD ? lo = m : hi = m); }
+  const L0 = (lo + hi) / 2;
+  const Fc = J1 => J1 <= L0 ? 1 : Math.max(0, 1 - ((J1 - L0) / (rx.XD - L0)) ** 2);
+  // uniaxial tension on the TXE meridian: sigma = sqrt3 Q2 Ff at J1 = -sigma
+  let a = 0, b = fc;
+  for (let k = 0; k < 80; k++) { const m = (a + b) / 2; (Math.sqrt(3) * 0.5 * Ff(-m) > m ? a = m : b = m); }
+  const ft = (a + b) / 2;
+  let jt = -fc, jh = 0;                                  // tensile end of the shear surface: Ff = 0
+  for (let k = 0; k < 80; k++) { const m = (jt + jh) / 2; (Ff(m) > 0 ? jh = m : jt = m); }
+  const J1min = Math.max(jh, -3 * ft * 1.5);
+  const S3 = Math.sqrt(3), pts = (f, J1max) => {
+    const o = []; for (let i = 0; i <= 160; i++) { const J1 = J1min + (J1max - J1min) * i / 160; o.push([J1 / 3, Math.max(0, f(J1))]); } return o; };
+  const Jtop = rx.XD * 1.6;
+  const out = [{
+    title: "Shear surface and initial cap", inputs: ["fc"],
+    series: [
+      { label: "compressive meridian (TXC)", slot: 1, points: pts(J => S3 * Ff(J), Jtop) },
+      { label: "torsion (TOR)", slot: 5, points: pts(J => S3 * Q1(J) * Ff(J), Jtop), dash: true },
+      { label: "tensile meridian (TXE)", slot: 4, points: pts(J => S3 * Q2(J) * Ff(J), Jtop), dash: true },
+      { label: "TXC with initial cap", slot: 2, points: pts(J => S3 * Ff(J) * Math.sqrt(Fc(J)), rx.XD) },
+    ],
+    marks: [{ x: fc / 3, y: fc, label: "f_c", slot: 9 }, { x: -ft / 3, y: ft, label: `f_t ${ft.toFixed(2)}`, slot: 9 }],
+    xMin: J1min / 3, xLabel: "pressure J1/3 (MPa)", yLabel: "√(3 J2) (MPa)",
+    caption: `Cap starts at J1 = L0 = ${L0.toFixed(1)} MPa and meets the J1 axis at X0 = ${rx.XD.toFixed(1)} MPa (R = ${rx.R.toFixed(3)}).`,
+  }];
+  const hyd = [[0, 0]];
+  for (let i = 0; i <= 60; i++) {
+    const X = rx.XD * (1 + 40 * (i / 60) ** 2), dX = X - rx.XD;
+    hyd.push([X / (3 * K) + W * (1 - Math.exp(-D1 * dX - D2 * dX * dX)), X / 3]);
+  }
+  out.push({
+    title: "Hydrostatic compression (cap hardening)", inputs: ["fc", "pr"],
+    series: [{ label: "pressure", slot: 2, points: hyd, legend: false }],
+    marks: [{ x: rx.XD / (3 * K), y: rx.XD / 3, label: "X0/3", slot: 4 }],
+    xLabel: "volumetric strain (–)", yLabel: "pressure (MPa)",
+    caption: `Elastic with K = ${K.toFixed(0)} MPa up to X0/3, then plastic compaction towards W = ${W}.`,
+  });
+  if (Number(inp.irate) === 1) {
+    const E = 9 * K * G / (3 * K + G), C = [], T = [];
+    for (let i = 0; i <= 70; i++) {
+      const lg = -4 + 7 * i / 70, r = 10 ** lg / 1000;          // 1/s -> 1/ms (card units)
+      C.push([lg, 1 + Math.min(E * r * add.eta0c / r ** add.nc, add.overc) / fc]);
+      T.push([lg, 1 + Math.min(E * r * add.eta0t / r ** add.nt, add.overt) / ft]);
+    }
+    out.push({
+      title: "Strain-rate enhancement", inputs: ["fc", "irate"],
+      series: [{ label: "compression", slot: 2, points: C }, { label: "tension", slot: 4, points: T }],
+      xMin: -4, xMax: 3, yMin: 1, xTick: logTick, xLabel: "strain rate (1/s)", yLabel: "DIF",
+      caption: `1 + E rate η / strength, η = η0 / rate^n (n = ${add.nc} / ${add.nt}), overstress capped at ${add.overc.toFixed(1)} MPa.`,
+    });
+  }
+  return out;
+}
