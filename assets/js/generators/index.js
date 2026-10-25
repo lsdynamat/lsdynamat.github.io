@@ -8,6 +8,7 @@ import * as mat072 from "./mat072_kcc_rel3.js?v=20261022b";
 import * as mat084 from "./mat084_winfrith.js?v=20261022b";
 import * as mat159 from "./mat159_cscm.js?v=20261022b";
 import * as mat172 from "./mat172_concrete_ec2.js?v=20261022b";
+import * as mat272 from "./mat272_rht.js?v=20261022b";
 import * as mat273 from "./mat273_cdp.js?v=20261022b";
 
 export const GENERATORS = {
@@ -19,6 +20,7 @@ export const GENERATORS = {
   mat084_winfrith: mat084,
   mat159_cscm: mat159,
   mat172_concrete_ec2: mat172,
+  mat272_rht: mat272,
   mat273_cdp: mat273,
 };
 

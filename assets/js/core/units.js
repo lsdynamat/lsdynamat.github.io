@@ -61,6 +61,8 @@ export function fitField(v, w) {
   return expForm(1).padStart(w);
 }
 
+const RHT_ONEMPA = { "m-s-kg": -1, "mm-s-t": -2, "mm-ms-kg": -3, "in-s-lbf": -4, "mm-ms-g": -5, "cm-us-g": -6 };
+
 function isNumeric(s) {
   return s !== "" && Number.isFinite(Number(s));
 }
@@ -81,6 +83,8 @@ function convertRow(line, row, sys) {
     // keep one blank column in front of every converted value so adjacent fields stay readable
     const fit = (x) => " " + fitField(x, w - 1);
     if (d === "CONM") return fit(sys.conm);
+    // *MAT_RHT ONEMPA < 0: code of the unit system the parameters are generated in (manual, *MAT_RHT)
+    if (d === "ONEMPA") return Number(txt) < 0 ? fit(RHT_ONEMPA[sys.id] ?? Number(txt)) : chunk;
     if (d === "CONL") return sys.conm > 0 ? fit(sys.conl) : chunk;
     if (d === "CONT") return sys.conm > 0 ? fit(sys.cont) : chunk;
     const exps = Array.isArray(d) ? d : DIMS[d];
