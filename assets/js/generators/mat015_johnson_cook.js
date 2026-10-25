@@ -194,3 +194,39 @@ function fitW(s, v, w) {
   if (s.length > w || (s.length === w && s[0] !== " ")) return " " + fitField(n, w - 1);
   return s;
 }
+
+// ----------------------- figures (generator page) -----------------------
+// Johnson-Cook flow stress (A + B eps_p^n)(1 + C ln(rate/EPS0))(1 - T*^M) (LS-DYNA Keyword manual,
+// *MAT_JOHNSON_COOK), drawn as uniaxial stress-strain at room temperature for three strain rates,
+// and the thermal softening factor 1 - T*^M.
+export function figures(input = {}) {
+  const inp = { ...DEFAULTS, ...input };
+  const E = Number(inp.e), A = Number(inp.a), B = Number(inp.b), n = Number(inp.n), C = Number(inp.c), m = Number(inp.m);
+  const tr = Number(inp.troom), tm = Number(inp.tmelt), e0 = Number(inp.eps0);
+  if (!(E > 0) || !(A >= 0) || !(B >= 0) || !(n >= 0) || !(e0 > 0)) return [];
+  const rates = [e0, 1e2, 1e4].filter((r, i, a) => i === 0 || r > a[0] * 10);
+  const curve = (r, slot) => {
+    const f = 1 + C * Math.log(Math.max(1, r / e0));
+    const pts = [[0, 0], [A * f / E, A * f]];
+    for (let i = 1; i <= 60; i++) { const ep = 0.3 * (i / 60) ** 1.5, s = (A + B * Math.pow(ep, n)) * f; pts.push([s / E + ep, s]); }
+    return { label: `${r === e0 ? "reference" : ""} ${r.toExponential(0)} /s`.trim(), slot, points: pts };
+  };
+  const out = [{
+    title: "Stress–strain at room temperature", inputs: ["e", "a", "b", "n", "c", "eps0"],
+    series: rates.map((r, i) => curve(r, [3, 1, 4][i])),
+    marks: [{ x: A / E, y: A, label: "A", slot: 6 }],
+    xLabel: "strain (–)", yLabel: "true stress (MPa)",
+    caption: "(A + B ε_p^n)(1 + C ln(rate / EPS0)), elastic slope E, plastic strain to 0.3.",
+  }];
+  if (tm > tr && m > 0) {
+    const T = [];
+    for (let i = 0; i <= 50; i++) { const t = tr + (tm - tr) * i / 50; T.push([t, 1 - Math.pow((t - tr) / (tm - tr), m)]); }
+    out.push({
+      title: "Thermal softening", inputs: ["m", "troom", "tmelt"],
+      series: [{ label: "1 − T*^M", slot: 8, points: T, legend: false }], xMin: tr, yMin: 0, yMax: 1.05,
+      xLabel: "temperature", yLabel: "flow stress factor (–)",
+      caption: "T* = (T − TROOM) / (TMELT − TROOM), in the temperature unit of the inputs.",
+    });
+  }
+  return out;
+}
