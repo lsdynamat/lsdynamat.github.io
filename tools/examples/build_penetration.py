@@ -25,6 +25,9 @@ MODELS = ["KCC", "CSCM", "WIN", "RHT"]
 H = {"HAN92": 2.54, "FREW98": 2.03, "FOR96": 3.05}        # element size on the path = projectile radius / 5
 GROW = 1.12                                                # outward growth ratio of the in-plane element size
 HSCALE = float(os.environ.get("PEN_HSCALE", 1.0))  # mesh study: path element size = HSCALE x H (case tag -H<x>)
+# PEN_EPSP = x > 0: erode only when MXEPS AND the effective plastic strain x are both exceeded (EFFEPS = -x, NCS = 2;
+# Keyword Manual R13 *MAT_ADD_EROSION); a damage-type second condition (case tag -P<x>)
+EPSP = float(os.environ.get("PEN_EPSP", 0.0))
 SFS = float(os.environ.get("PEN_SFS", 100.0))  # contact stiffness scale SFS = SFM. With the default 1 the concrete nodes slipped past the nose;
                                                # HAN92 1-0054 V_r converged from SFS 60 to 100 (KCC 374/374, WIN 512/507 m/s); fixed at 100 (user, 2026-10-23)
 NQ, TIP = 3, 0.3     # projectile cross-section divisions per quarter; nose truncated where r = TIP x radius.
@@ -200,6 +203,8 @@ def build(s, mxeps, model, out):
         tag += f"-S{SFS:g}"
     if HSCALE != 1.0:
         tag += f"-H{HSCALE:g}".replace(".", "p")
+    if EPSP > 0:
+        tag += f"-P{EPSP:g}".replace(".", "p")
     case = f"PEN-{s['series']}-{s['shot']}-{model}{tag}"
     D = ["*KEYWORD", "*TITLE",
          f"{case}: {s['series']} shot {s['shot']}, Vs = {vs:g} m/s, {model}, MXEPS = {mxeps:g}",
@@ -219,7 +224,7 @@ def build(s, mxeps, model, out):
          "*SECTION_SOLID", c(1, 1),
          "*HOURGLASS", c(1, 6, 0.1),
          card(s["series"], model, float(s["rho_kgm3"])),
-         "*MAT_ADD_EROSION", c(1, 0, 0.0, 0.0, 0.0, 0.0, 1.0, 1), c(0.0, 0.0, 0.0, mxeps, 0.0, 0.0, 0.0, 0.0),
+         "*MAT_ADD_EROSION", c(1, 0, 0.0, 0.0, -EPSP if EPSP > 0 else 0.0, 0.0, 1.0, 2 if EPSP > 0 else 1), c(0.0, 0.0, 0.0, mxeps, 0.0, 0.0, 0.0, 0.0),
          "*PART", "projectile", c(2, 2, 2),
          "*SECTION_SOLID", c(2, 1),
          "*MAT_RIGID", c(2, ro_p, 210000.0, 0.3, 0.0, 0.0, 0.0, 0.0), c(1.0, 4, 7), c(0.0),

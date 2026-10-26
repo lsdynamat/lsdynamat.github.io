@@ -936,6 +936,92 @@
         "AGGSZ is not written by default: on the plain-concrete Hoover beams it adds shear transfer that spreads cracking to the neighbouring columns of elements and raises the post-peak energy by about 30 %. Enter d_max for reinforced members in shear.",
         "The panels check strength only (one element, no localisation). The model cracks at v ≈ f_ctm, 1.1–2.3 MPa: 11 and 15 % above the test for PV4 and PV6 (f_c 26.6 and 29.8 MPa), 17–40 % below it for the ten panels with f_c ≤ 21.7 MPa (PV10: 1.11 against 1.86 MPa). Below f_c = 20 MPa, f_ck = f_cm − 8 MPa falls under C12 and the EN 1992-1-1 formula for f_ctm is extrapolated."
       ]
+    },
+    {
+      "id": "pen-han92",
+      "title": "Open-data benchmark 5 — perforation of a 178 mm slab by an ogive-nose projectile (Hanchak et al. 1992)",
+      "sketch": "./assets/examples/sketch-pen-slab.svg",
+      "setup": [
+        "Hanchak et al. (1992), 48 MPa concrete: 610 × 610 × 178 mm slabs, 2440 kg/m³, d_max 9.5 mm, three rebar mats. Projectile: 0.50 kg steel, Ø 25.4 mm, 3.0 CRH ogive nose. Eight shots, V_s 301–1058 m/s, residual velocity V_r measured (Table 2). Shot 1-0058 struck the rebar; the authors saw no effect on V_r, and the rebar is not modelled.",
+        "Quarter model, rigid projectile with axial motion only, 5 hexahedra over the projectile radius along the path (2.54 mm), graded outward; frictionless *CONTACT_ERODING_SURFACE_TO_SURFACE, SFS = SFM = 100. Concrete cards are generator output for f_c = 48 MPa with the measured density; each model's own erosion is switched off.",
+        "Erosion: one criterion for all models, *MAT_ADD_EROSION on the maximum principal strain MXEPS, plus deletion of any element whose time step falls below 1 % of the initial one (*CONTROL_TERMINATION DTMIN = 0.01, *CONTROL_TIMESTEP ERODE = 1). MXEPS is calibrated per model on shot 1-0054 (V_s 749, V_r 615 m/s) and the other seven shots are predictions.",
+        "Test data: Hanchak, S. J., Forrestal, M. J., Young, E. R., Ehrgott, J. Q. (1992). Perforation of concrete slabs with 48 MPa (7 ksi) and 140 MPa (20 ksi) unconfined compressive strengths. International Journal of Impact Engineering 12(1), 1–7, doi:10.1016/0734-743X(92)90282-X (also in tools/examples/data/penetration_tests.csv). Builder: tools/examples/build_penetration.py; the deck in each row is shot 1-0054."
+      ],
+      "chart": {
+        "x": "vs_ms",
+        "y": "vr_ms",
+        "xLabel": "striking velocity V_s (m/s)",
+        "yLabel": "residual velocity V_r (m/s)",
+        "xMin": 250,
+        "xMax": 1100,
+        "yMax": 1000
+      },
+      "summary": [
+        {
+          "key": "mxeps",
+          "label": "MXEPS (calibrated)",
+          "digits": 2
+        },
+        {
+          "key": "mae_all",
+          "label": "Mean |ΔV_r|, 7 shots (m/s)",
+          "digits": 0
+        },
+        {
+          "key": "mae_low",
+          "label": "V_s < 500 m/s, 4 shots",
+          "digits": 0
+        },
+        {
+          "key": "mae_high",
+          "label": "V_s ≥ 500 m/s, 3 shots",
+          "digits": 0
+        },
+        {
+          "key": "vr_301",
+          "label": "V_r at V_s 301 (test 0)",
+          "digits": 0
+        }
+      ],
+      "runs": [
+        {
+          "case": "PEN-HAN92-TEST",
+          "label": "test (Hanchak et al. 1992)",
+          "slot": 0,
+          "test": true
+        },
+        {
+          "case": "PEN-HAN92-KCC",
+          "model": "mat072_kcc_rel3",
+          "label": "KCC",
+          "slot": 5
+        },
+        {
+          "case": "PEN-HAN92-RHT",
+          "model": "mat272_rht",
+          "label": "RHT",
+          "slot": 1
+        },
+        {
+          "case": "PEN-HAN92-WIN",
+          "model": "mat084_winfrith",
+          "label": "Winfrith",
+          "slot": 2
+        },
+        {
+          "case": "PEN-HAN92-CSCM",
+          "model": "mat159_cscm",
+          "label": "CSCM",
+          "slot": 3
+        }
+      ],
+      "notes": [
+        "Above 600 m/s the calibrated models predict V_r within 8 % (KCC 896, RHT 923, Winfrith 995, CSCM 981 m/s against 947 m/s at V_s 1058), except Winfrith at 606 m/s (341 against 449 m/s, −24 %).",
+        "Near the ballistic limit KCC, RHT and CSCM are too weak: at V_s 301 m/s the test projectile stopped, the models exit at 101–168 m/s, and at 360–434 m/s V_r is 55–160 m/s above the test. Winfrith is the opposite: it stops the projectile at 301 and 360 m/s but is too strong up to 606 m/s (V_r 18 against 136 m/s at 381 m/s).",
+        "One MXEPS cannot fit the whole V_s–V_r curve: a larger MXEPS makes the slab stronger at every velocity, so moving the low-velocity points onto the test moves the calibration shot off it. The same trend (models too weak near the ballistic limit) is reported by Kwak & Gang (2015, doi:10.1016/j.ijimpeng.2015.07.008) and Islam et al. (2011, doi:10.12989/cac.2011.8.1.111).",
+        "Mesh: on shot 1-0068 (V_s 301 m/s, MXEPS 0.5) refining the path elements from 5.1 to 2.54 mm raised V_r from 9 to 124 m/s with RHT; results are not mesh converged, and the calibrated MXEPS belongs to the 2.54 mm mesh.",
+        "Use: a calibrated eroding Lagrangian model is a reasonable estimate of V_r well above the ballistic limit (here V_s ≥ 600 m/s, about twice V_bl); it should not be used to predict the ballistic limit itself."
+      ]
     }
   ]
 }

@@ -1,0 +1,60 @@
+{
+ "case": "PEN-HAN92-WIN",
+ "mxeps": 0.7,
+ "calibration_shot": "1-0054",
+ "n_predicted": 7,
+ "mae_all": 70.17142857142856,
+ "mae_low": 78.075,
+ "mae_high": 59.633333333333326,
+ "vr_301": 0.0,
+ "per_shot": {
+  "1-0068": {
+   "vs": 301.0,
+   "vr_test": 0.0,
+   "vr_model": 0.0,
+   "energy_ratio": 1.0
+  },
+  "1-0069": {
+   "vs": 360.0,
+   "vr_test": 67.0,
+   "vr_model": 0.0,
+   "energy_ratio": 1.0
+  },
+  "1-0063": {
+   "vs": 381.0,
+   "vr_test": 136.0,
+   "vr_model": 18.0,
+   "energy_ratio": 1.0
+  },
+  "1-0056": {
+   "vs": 434.0,
+   "vr_test": 214.0,
+   "vr_model": 86.7,
+   "energy_ratio": 1.0
+  },
+  "1-0064": {
+   "vs": 606.0,
+   "vr_test": 449.0,
+   "vr_model": 340.9,
+   "energy_ratio": 1.0
+  },
+  "1-0058": {
+   "vs": 746.0,
+   "vr_test": 605.0,
+   "vr_model": 627.9,
+   "energy_ratio": 1.0
+  },
+  "1-0054": {
+   "vs": 749.0,
+   "vr_test": 615.0,
+   "vr_model": 617.1,
+   "energy_ratio": 1.0
+  },
+  "1-0053": {
+   "vs": 1058.0,
+   "vr_test": 947.0,
+   "vr_model": 994.9,
+   "energy_ratio": 1.0
+  }
+ }
+}

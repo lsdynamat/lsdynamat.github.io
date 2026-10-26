@@ -67,7 +67,7 @@ async function renderExample(ex, models, host) {
       scatter: !!r.scatter, names: r.names,
       points: parseCsv(r.csv).map(o => [o[ex.chart.x] * (ex.chart.xScale || 1), o[ex.chart.y] * ys]),
     })), { xLabel: ex.chart.xLabel, yLabel: ex.chart.yLabel, refLines: ex.chart.ref || [], height: 340,
-      xMax: ex.chart.xMax, yMax: ex.chart.yMax });
+      xMin: ex.chart.xMin, xMax: ex.chart.xMax, yMax: ex.chart.yMax });
   } else {
     chartHost.innerHTML = `<p class="small">Results are not available yet.</p>`;
   }

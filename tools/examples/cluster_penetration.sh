@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build the penetration decks ON the INSA Rennes cluster (DOP decks are 50-300 MB) and submit one LS-DYNA R13 MPP job per case.
 # Never uses the foton partition. Jobs live in ~/lsdyna_jobs/lsdynamat/pen/<case>/; job names start with hub_.
-# PEN_SFS=<x> sets the contact stiffness scale, PEN_HSCALE=<x> the mesh size scale (see build_penetration.py); PEN_PART=<partition> (default: every CPU partition except foton, which must never be used).
+# PEN_SFS=<x> sets the contact stiffness scale, PEN_HSCALE=<x> the mesh size scale, PEN_EPSP=<x> a second (plastic strain) erosion condition (see build_penetration.py); PEN_PART=<partition> (default: every CPU partition except foton, which must never be used).
 # usage: bash cluster_penetration.sh <MXEPS[,MXEPS..]> <series|model|shot> ...   (same selectors as build_penetration.py)
 set -e
 H=vanhatra@cluster-recherche-tete.insa-rennes.fr
@@ -11,7 +11,7 @@ ssh -o BatchMode=yes $H "mkdir -p ~/$R/tools/data ~/$R/tools/materials/pen" 2>/d
 scp -q -o BatchMode=yes "$HERE/build_penetration.py" "$HERE/post_penetration.py" $H:$R/tools/
 scp -q -o BatchMode=yes "$HERE/data/penetration_tests.csv" $H:$R/tools/data/
 scp -q -o BatchMode=yes "$HERE"/materials/pen/*.k $H:$R/tools/materials/pen/
-ssh -o BatchMode=yes $H "cd ~/$R && PEN_SFS=${PEN_SFS:-100} PEN_HSCALE=${PEN_HSCALE:-1} python3 tools/build_penetration.py ~/$R $* > built.txt && cat built.txt" 2>/dev/null
+ssh -o BatchMode=yes $H "cd ~/$R && PEN_SFS=${PEN_SFS:-100} PEN_HSCALE=${PEN_HSCALE:-1} PEN_EPSP=${PEN_EPSP:-0} python3 tools/build_penetration.py ~/$R $* > built.txt && cat built.txt" 2>/dev/null
 ssh -o BatchMode=yes $H "cd ~/$R && for c in \$(cut -d: -f1 built.txt); do
   case \$c in PEN-HAN92-*) N=8; MEM=16G;; *) N=24; MEM=60G;; esac
   cd ~/$R/\$c && rm -f slurm_*.out slurm_*.err && cat > job.sh <<EOF
