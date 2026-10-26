@@ -44,6 +44,12 @@
    "vr_model": 612.7,
    "energy_ratio": 1.0
   },
+  "1-0054": {
+   "vs": 749.0,
+   "vr_test": 615.0,
+   "vr_model": 615.0,
+   "energy_ratio": 1.0
+  },
   "1-0053": {
    "vs": 1058.0,
    "vr_test": 947.0,
